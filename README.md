@@ -57,24 +57,6 @@ Accumulate-PPTs/
 - CSS Variables 主题管理
 - Google Fonts 字体加载
 
-## 本地预览
-
-```bash
-# 克隆仓库
-git clone <repository-url>
-cd Accumulate-PPTs
-
-# 直接用浏览器打开HTML文件
-# 或使用本地服务器预览
-npx serve output/
-```
-
-## 注意事项
-
-1. 由于使用了 `file://` 协议，Google Fonts 可能无法正常加载，建议使用系统字体作为 fallback
-2. 翻页动画依赖CSS `!important` 优先级，确保样式正确覆盖
-3. 推荐在Chrome、Edge等现代浏览器中查看以获得最佳效果
-
 ## 许可证
 
 本项目为个人学习作品，仅供学习交流使用。
