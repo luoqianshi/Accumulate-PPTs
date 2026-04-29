@@ -56,6 +56,8 @@ HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。
 | YOLO-Master Presentation | `paper-slides/YOLO-Master_Presentation.html` | Paper Reading | YOLO-Master 论文演示，聚焦基于 MoE 加速的专业化 Transformer 实时目标检测方法。 |
 | YOLOv12 论文精读 | `paper-slides/YOLOv12.html` | Paper Reading | YOLOv12 论文精读演示，聚焦以注意力为中心的实时目标检测器、Area Attention 与 R-ELAN 等核心设计。 |
 | RT-DETR: DETRs Beat YOLOs on Real-time Object Detection | `paper-slides/RT-DETR.html` | Paper Reading | RT-DETR 论文演示，聚焦 DETR 类实时目标检测器、高效混合编码器与不确定性感知选择。 |
+| YOLOv13 论文精读 | `paper-slides/YOLOv13.html` | Paper Reading | YOLOv13论文精读演示，聚焦超图自适应关联增强（HyperACE）、全管线聚合-分发范式（FullPAD）与DS轻量化模块。 |
+| YOLO26 论文解读 | `paper-slides/YOLO26.html` | Paper Reading | YOLO26论文精读演示，聚焦移除DFL、NMS-free端到端推理、ProgLoss+STAL训练优化与MuSGD优化器。 |
 
 ## 核心技术特点
 
