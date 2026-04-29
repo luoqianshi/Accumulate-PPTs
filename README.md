@@ -14,6 +14,7 @@ Accumulate-PPTs/
 ├── slides-manifest.json  # paper-slides 演示文稿清单
 ├── paper-slides/         # 论文精读、答辩与研究汇报类 HTML PPT 成品
 │   ├── maize_tassels_presentation.html
+│   ├── RT-DETR.html
 │   ├── SAHI.html
 │   ├── sugarcane_thesis_presentation.html
 │   ├── YOLO-Master_Presentation.html
@@ -54,6 +55,7 @@ HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。
 | 低空航拍可见光图像快速检测甘蔗幼苗群体数量 | `paper-slides/sugarcane_thesis_presentation.html` | Thesis Defense | 面向低空航拍 RGB 图像的甘蔗幼苗群体数量检测学位论文答辩。 |
 | YOLO-Master Presentation | `paper-slides/YOLO-Master_Presentation.html` | Paper Reading | YOLO-Master 论文演示，聚焦基于 MoE 加速的专业化 Transformer 实时目标检测方法。 |
 | YOLOv12 论文精读 | `paper-slides/YOLOv12.html` | Paper Reading | YOLOv12 论文精读演示，聚焦以注意力为中心的实时目标检测器、Area Attention 与 R-ELAN 等核心设计。 |
+| RT-DETR: DETRs Beat YOLOs on Real-time Object Detection | `paper-slides/RT-DETR.html` | Paper Reading | RT-DETR 论文演示，聚焦 DETR 类实时目标检测器、高效混合编码器与不确定性感知选择。 |
 
 ## 核心技术特点
 
@@ -95,4 +97,4 @@ HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。
 
 ---
 
-*Last Updated: 2026-04-30 (Updated)*
+*Last Updated: 2026-04-30*

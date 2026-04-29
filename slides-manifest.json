@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T02:04:00+08:00",
+  "generatedAt": "2026-04-30T02:47:00+08:00",
   "slides": [
     {
       "title": "Maize Tassels Detection: A Benchmark of the State of the Art",
@@ -33,6 +33,13 @@
       "title": "YOLOv12 论文精读",
       "file": "paper-slides/YOLOv12.html",
       "description": "YOLOv12 论文精读演示，聚焦以注意力为中心的实时目标检测器、Area Attention 与 R-ELAN 等核心设计。",
+      "kind": "Paper Reading",
+      "accent": "rgba(57,102,162,.18)"
+    },
+    {
+      "title": "RT-DETR: DETRs Beat YOLOs on Real-time Object Detection",
+      "file": "paper-slides/RT-DETR.html",
+      "description": "RT-DETR 论文演示，聚焦 DETR 类实时目标检测器、高效混合编码器与不确定性感知选择。",
       "kind": "Paper Reading",
       "accent": "rgba(57,102,162,.18)"
     }
