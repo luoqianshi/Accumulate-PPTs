@@ -1,25 +1,25 @@
 {
-  "generatedAt": "2026-04-29T23:24:00+08:00",
+  "generatedAt": "2026-04-30T00:12:00+08:00",
   "slides": [
     {
       "title": "Maize Tassels Detection: A Benchmark of the State of the Art",
       "file": "paper-slides/maize_tassels_presentation.html",
-      "description": "玉米雄穗检测研究演示，聚焦遥感/视觉检测方法与基准对比。",
+      "description": "玉米雄穗检测研究演示，聚焦目标检测、密度回归与植物表型分析基准。",
       "kind": "Research PPT",
       "accent": "rgba(93,112,82,.2)"
     },
     {
       "title": "SAHI - 切片辅助超推理与微调小目标检测",
       "file": "paper-slides/SAHI.html",
-      "description": "SAHI 切片辅助超推理与微调小目标检测主题演示。",
-      "kind": "HTML PPT",
+      "description": "IEEE ICIP 2022 SAHI 论文演示，聚焦切片推理、小目标检测与微调流程。",
+      "kind": "Paper Reading",
       "accent": "rgba(193,140,93,.22)"
     },
     {
       "title": "低空航拍可见光图像快速检测甘蔗幼苗群体数量",
       "file": "paper-slides/sugarcane_thesis_presentation.html",
-      "description": "面向低空航拍可见光图像的甘蔗幼苗群体数量检测论文汇报。",
-      "kind": "Thesis PPT",
+      "description": "面向低空航拍 RGB 图像的甘蔗幼苗群体数量检测学位论文答辩。",
+      "kind": "Thesis Defense",
       "accent": "rgba(93,112,82,.2)"
     },
     {
@@ -38,5 +38,3 @@
     }
   ]
 }
-
-
