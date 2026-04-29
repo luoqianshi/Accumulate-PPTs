@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-04-29T23:03:00+08:00",
+  "slides": [
+    {
+      "title": "Maize Tassels Detection: A Benchmark of the State of the Art",
+      "file": "paper-slides/maize_tassels_presentation.html",
+      "description": "玉米雄穗检测研究演示，聚焦遥感/视觉检测方法与基准对比。",
+      "kind": "Research PPT",
+      "accent": "rgba(93,112,82,.2)"
+    },
+    {
+      "title": "SAHI - 切片辅助超推理与微调小目标检测",
+      "file": "paper-slides/SAHI.html",
+      "description": "SAHI 切片辅助超推理与微调小目标检测主题演示。",
+      "kind": "HTML PPT",
+      "accent": "rgba(193,140,93,.22)"
+    },
+    {
+      "title": "低空航拍可见光图像快速检测甘蔗幼苗群体数量",
+      "file": "paper-slides/sugarcane_thesis_presentation.html",
+      "description": "面向低空航拍可见光图像的甘蔗幼苗群体数量检测论文汇报。",
+      "kind": "Thesis PPT",
+      "accent": "rgba(93,112,82,.2)"
+    }
+  ]
+}

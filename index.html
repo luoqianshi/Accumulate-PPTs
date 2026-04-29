@@ -284,6 +284,7 @@
 
     const PAGE_SIZE = 10;
     const slideDirectory = 'paper-slides/';
+    const manifestUrl = 'slides-manifest.json';
     let decks = [];
     let loaded = 0;
 
@@ -307,38 +308,65 @@
       return decodeURIComponent(file.split('/').pop().replace(/\.html$/i, '').replace(/[-_]+/g, ' ')).replace(/\b\w/g, char => char.toUpperCase());
     }
 
-    function deckFromPath(file, index) {
-      const existing = embeddedDecks.find(deck => deck.file === file);
-      return existing || {
-        title: titleFromFile(file),
-        file,
-        description: '从 paper-slides 目录发现的 HTML 格式 PPT，可直接嵌入放映或打开原页。',
-        kind: 'HTML PPT',
-        accent: index % 2 === 0 ? 'rgba(93,112,82,.2)' : 'rgba(193,140,93,.22)'
+    function normalizeFilePath(file) {
+      const normalized = file.replace(/^\.\//, '').replace(/^\//, '');
+      return normalized.startsWith(slideDirectory) ? normalized : `${slideDirectory}${normalized}`;
+    }
+
+    function deckFromPath(file, index, metadata = {}) {
+      const normalizedFile = normalizeFilePath(file);
+      const existing = embeddedDecks.find(deck => deck.file === normalizedFile);
+      return {
+        title: metadata.title || existing?.title || titleFromFile(normalizedFile),
+        file: normalizedFile,
+        description: metadata.description || existing?.description || '从 paper-slides 目录发现的 HTML 格式 PPT，可直接嵌入放映或打开原页。',
+        kind: metadata.kind || existing?.kind || 'HTML PPT',
+        accent: metadata.accent || existing?.accent || (index % 2 === 0 ? 'rgba(93,112,82,.2)' : 'rgba(193,140,93,.22)')
       };
+    }
+
+    async function fetchManifestDecks() {
+      const response = await fetch(`${manifestUrl}?v=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Manifest unavailable');
+      const data = await response.json();
+      const slides = Array.isArray(data) ? data : data.slides;
+      if (!Array.isArray(slides) || slides.length === 0) throw new Error('Manifest is empty');
+      return slides
+        .filter(slide => slide && slide.file)
+        .map((slide, index) => deckFromPath(slide.file, index, slide));
+    }
+
+    async function fetchDirectoryDecks() {
+      const response = await fetch(slideDirectory, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Directory listing unavailable');
+      const html = await response.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const directoryUrl = new URL(slideDirectory, location.href);
+      const files = [...doc.querySelectorAll('a')]
+        .map(link => link.getAttribute('href'))
+        .filter(Boolean)
+        .map(href => new URL(href, directoryUrl).pathname)
+        .map(path => path.split('/').pop())
+        .filter(name => /\.html$/i.test(name))
+        .filter((name, index, arr) => arr.indexOf(name) === index)
+        .sort((a, b) => a.localeCompare(b, 'zh-CN'))
+        .map(name => `${slideDirectory}${name}`);
+      if (!files.length) throw new Error('No HTML slides found');
+      return files.map(deckFromPath);
     }
 
     async function discoverDecks() {
       try {
-        const response = await fetch(slideDirectory, { cache: 'no-store' });
-        if (!response.ok) throw new Error('Directory listing unavailable');
-        const html = await response.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const directoryUrl = new URL(slideDirectory, location.href);
-        const files = [...doc.querySelectorAll('a')]
-          .map(link => link.getAttribute('href'))
-          .filter(Boolean)
-          .map(href => new URL(href, directoryUrl).pathname)
-          .map(path => path.split('/').pop())
-          .filter(name => /\.html$/i.test(name))
-          .filter((name, index, arr) => arr.indexOf(name) === index)
-          .sort((a, b) => a.localeCompare(b, 'zh-CN'))
-          .map(name => `${slideDirectory}${name}`);
-        return files.length ? files.map(deckFromPath) : embeddedDecks;
+        return await fetchManifestDecks();
       } catch {
-        return embeddedDecks;
+        try {
+          return await fetchDirectoryDecks();
+        } catch {
+          return embeddedDecks;
+        }
       }
     }
+
 
     async function initGallery() {
       decks = await discoverDecks();
