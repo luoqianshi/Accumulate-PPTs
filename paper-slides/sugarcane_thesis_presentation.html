@@ -664,25 +664,25 @@ code{background:var(--card-bg);border:1px solid var(--card-border);border-radius
 </div>
 
 <!-- SLIDE 31: Ch4 Algorithm Comparison -->
-<div class="slide" id="slide-31">
-<div class="section-header"><div class="chapter-label">CHAPTER 4 &mdash; SGN-D模型</div><h2>与其他算法对比</h2><div class="divider"></div></div>
-<div class="card mb-3"><h3 class="text-center mb-2">不同目标检测算法性能对比</h3>
+<div class="slide" id="slide-31" style="justify-content:flex-start;padding-top:4vh;">
+<div class="section-header" style="margin-bottom:2vh;"><div class="chapter-label">CHAPTER 4 &mdash; SGN-D模型</div><h2>与其他算法对比</h2><div class="divider"></div></div>
+<div class="card mb-2" style="padding:clamp(12px,1.5vw,20px);"><h3 class="text-center mb-1" style="font-size:clamp(14px,1.6vw,20px);">不同目标检测算法性能对比</h3>
 <div class="table-wrapper"><table class="text-center-table"><thead><tr><th>算法</th><th>检测框架</th><th>骨干网络</th><th>AP (%)</th><th>速度 (fps)</th></tr></thead>
 <tbody><tr><td>YOLO v2</td><td>单阶段</td><td>DarkNet-19</td><td>79.75</td><td>~40</td></tr>
 <tr><td>YOLO v3</td><td>单阶段</td><td>DarkNet-53</td><td>82.46</td><td>~30</td></tr>
 <tr><td>SSD</td><td>单阶段</td><td>VGG16</td><td>77.50</td><td>~35</td></tr>
 <tr><td>Faster R-CNN</td><td>两阶段</td><td>VGG16</td><td>84.98</td><td>~7</td></tr>
 <tr style="background:var(--accent-light);"><td class="fw-700" style="color:var(--title);">SGN-D (Ours)</td><td>两阶段</td><td>ResNet50</td><td class="fw-700" style="color:#c62828;">93.67</td><td>~6</td></tr></tbody></table></div></div>
-<div class="two-col gap-3">
-<div><h3 class="mb-2">AP对比可视化</h3>
-<div class="compare-bar"><span class="compare-label">SSD</span><div class="compare-track"><div class="compare-fill fill-blue" style="width:77.50%;">77.50%</div></div></div>
-<div class="compare-bar"><span class="compare-label">YOLO v2</span><div class="compare-track"><div class="compare-fill fill-blue" style="width:79.75%;">79.75%</div></div></div>
-<div class="compare-bar"><span class="compare-label">YOLO v3</span><div class="compare-track"><div class="compare-fill fill-blue" style="width:82.46%;">82.46%</div></div></div>
-<div class="compare-bar"><span class="compare-label">Faster R-CNN</span><div class="compare-track"><div class="compare-fill fill-green" style="width:84.98%;">84.98%</div></div></div>
-<div class="compare-bar"><span class="compare-label">SGN-D</span><div class="compare-track"><div class="compare-fill fill-highlight" style="width:93.67%;">93.67%</div></div></div></div>
+<div class="two-col gap-2">
+<div><h3 class="mb-1" style="font-size:clamp(14px,1.6vw,20px);">AP对比可视化</h3>
+<div class="compare-bar" style="margin-bottom:8px;"><span class="compare-label">SSD</span><div class="compare-track"><div class="compare-fill fill-blue" style="width:77.50%;">77.50%</div></div></div>
+<div class="compare-bar" style="margin-bottom:8px;"><span class="compare-label">YOLO v2</span><div class="compare-track"><div class="compare-fill fill-blue" style="width:79.75%;">79.75%</div></div></div>
+<div class="compare-bar" style="margin-bottom:8px;"><span class="compare-label">YOLO v3</span><div class="compare-track"><div class="compare-fill fill-blue" style="width:82.46%;">82.46%</div></div></div>
+<div class="compare-bar" style="margin-bottom:8px;"><span class="compare-label">Faster R-CNN</span><div class="compare-track"><div class="compare-fill fill-green" style="width:84.98%;">84.98%</div></div></div>
+<div class="compare-bar" style="margin-bottom:8px;"><span class="compare-label">SGN-D</span><div class="compare-track"><div class="compare-fill fill-highlight" style="width:93.67%;">93.67%</div></div></div></div>
 <div>
-<div class="result-highlight"><div class="big-number">93.67%</div><div class="big-label">SGN-D AP &mdash; 最优结果</div></div>
-<div class="highlight-bar mt-2"><p><strong>对比分析：</strong></p><ul class="bullet-list"><li>SGN-D比Faster R-CNN提升<strong>+8.69%</strong></li><li>SGN-D比YOLO v3提升<strong>+11.21%</strong></li><li>两阶段检测器精度整体优于单阶段</li><li>SGN-D在精度上显著领先</li></ul></div>
+<div class="result-highlight" style="padding:clamp(12px,1.5vw,20px);"><div class="big-number" style="font-size:clamp(24px,3vw,44px);">93.67%</div><div class="big-label" style="font-size:clamp(12px,1.2vw,16px);">SGN-D AP &mdash; 最优结果</div></div>
+<div class="highlight-bar mt-1" style="padding:clamp(10px,1.2vw,16px);"><p style="margin-bottom:6px;"><strong>对比分析：</strong></p><ul class="bullet-list" style="margin-bottom:0;"><li>SGN-D比Faster R-CNN提升<strong>+8.69%</strong></li><li>SGN-D比YOLO v3提升<strong>+11.21%</strong></li><li>两阶段检测器精度整体优于单阶段</li><li>SGN-D在精度上显著领先</li></ul></div>
 </div>
 </div>
 </div>

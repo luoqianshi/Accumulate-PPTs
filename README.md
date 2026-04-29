@@ -95,4 +95,4 @@ HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。
 
 ---
 
-*Last Updated: 2026-04-30*
+*Last Updated: 2026-04-30 (Updated)*
