@@ -57,6 +57,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .card-grid.cols-2{grid-template-columns:repeat(2,1fr)}
 .card-grid.cols-3{grid-template-columns:repeat(3,1fr)}
 .card-grid.cols-4{grid-template-columns:repeat(4,1fr)}
+.card-grid.cols-5{grid-template-columns:repeat(5,1fr)}
 
 /* ── Highlight Bar ── */
 .highlight-bar{border-left:3px solid var(--secondary);padding:.5em 1em;
@@ -162,10 +163,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .arch-block.moe{background:#f59e0b;color:#fff;border:2px dashed #d97706}
 .arch-arrow{font-size:1.2rem;color:var(--muted);font-weight:700}
 
+/* ── Slide 8 Layout Fix ── */
+.card-grid.cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(.4em, .8vw, .7em);
+}
+.card-grid.cols-5 .metric {
+  padding: clamp(.4em, .8vw, .7em);
+}
+.card-grid.cols-5 .metric .value {
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+}
+
 /* ── Responsive tweaks ── */
 @media(max-width:768px){
   .slide{padding:3vh 5vw}
-  .card-grid.cols-3,.card-grid.cols-4{grid-template-columns:repeat(2,1fr)}
+  .card-grid.cols-3,.card-grid.cols-4,.card-grid.cols-5{grid-template-columns:repeat(2,1fr)}
   .dots{display:none}
   .compare-row{grid-template-columns:1fr;gap:.5em}
   .compare-vs{display:none}
@@ -401,7 +414,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="slide" data-index="7">
     <div class="glow glow-yellow" style="width:350px;height:350px;bottom:-80px;right:-60px"></div>
     <h2 class="anim">实验结果：5 个基准全面领先</h2>
-    <div class="card-grid cols-5 anim" style="margin-top:1em">
+    <div class="card-grid cols-5 anim" style="margin-top:0.6em">
       <div class="metric">
         <span class="value">42.4%</span>
         <span class="label">MS COCO mAP</span>
@@ -428,20 +441,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <span class="delta">+0.7%</span>
       </div>
     </div>
-    <div class="card-grid cols-3 anim" style="margin-top:1.2em">
+    <div class="card-grid cols-3 anim" style="margin-top:0.8em">
       <div class="card" style="text-align:center">
         <h3>推理速度</h3>
-        <p style="font-size:clamp(1.2rem,2vw,1.8rem);font-weight:800;color:var(--title)">1.62 ms</p>
+        <p style="font-size:clamp(1rem,1.8vw,1.5rem);font-weight:800;color:var(--title)">1.62 ms</p>
         <p class="sub">比 YOLOv13-N 快 17.8%</p>
       </div>
       <div class="card" style="text-align:center">
         <h3>ImageNet 分类</h3>
-        <p style="font-size:clamp(1.2rem,2vw,1.8rem);font-weight:800;color:var(--title)">76.6%</p>
+        <p style="font-size:clamp(1rem,1.8vw,1.5rem);font-weight:800;color:var(--title)">76.6%</p>
         <p class="sub">Top-1 准确率</p>
       </div>
       <div class="card" style="text-align:center">
         <h3>语义分割</h3>
-        <p style="font-size:clamp(1.2rem,2vw,1.8rem);font-weight:800;color:var(--title)">35.6%</p>
+        <p style="font-size:clamp(1rem,1.8vw,1.5rem);font-weight:800;color:var(--title)">35.6%</p>
         <p class="sub">mAP</p>
       </div>
     </div>
