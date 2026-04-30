@@ -7,7 +7,7 @@
   <meta name="description" content="HTML 格式 PPT 导航与 iframe 全屏放映页面" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..800,80,1&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..800,80,1&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     tailwind = {
       config: {
@@ -25,13 +25,8 @@
               grass: '#78786C'
             },
             fontFamily: {
-              display: ['Fraunces', 'serif'],
+              display: ['Fraunces', 'Georgia', 'serif'],
               body: ['Nunito', 'system-ui', 'sans-serif']
-            },
-            boxShadow: {
-              soft: '0 4px 20px -2px rgba(93,112,82,.15)',
-              float: '0 20px 55px -22px rgba(193,140,93,.36)',
-              moss: '0 22px 65px -26px rgba(93,112,82,.35)'
             }
           }
         }
@@ -42,27 +37,42 @@
   <style>
     :root { color-scheme: light; }
     html { scroll-behavior: smooth; }
-    body { min-height: 100vh; overflow-x: hidden; background: #FDFCF8; color: #2C2C24; }
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: #FDFCF8;
+      color: #2C2C24;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Subtle paper grain texture */
     body::before {
       content: "";
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 60;
-      opacity: .035;
+      opacity: .025;
       mix-blend-mode: multiply;
       background-image:
-        radial-gradient(circle at 18% 32%, rgba(44,44,36,.8) 0 1px, transparent 1.6px),
-        radial-gradient(circle at 76% 14%, rgba(93,112,82,.65) 0 1px, transparent 1.7px),
-        radial-gradient(circle at 42% 78%, rgba(193,140,93,.72) 0 1px, transparent 1.8px);
-      background-size: 38px 38px, 54px 54px, 72px 72px;
+        radial-gradient(circle at 20% 30%, rgba(44,44,36,.7) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 70% 20%, rgba(93,112,82,.55) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 45% 75%, rgba(193,140,93,.6) 0 1px, transparent 1.7px);
+      background-size: 40px 40px, 56px 56px, 76px 76px;
     }
+
+    /* Organic blob shapes */
     .blob-a { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
     .blob-b { border-radius: 36% 64% 68% 32% / 46% 38% 62% 54%; }
     .blob-c { border-radius: 48% 52% 36% 64% / 58% 44% 56% 42%; }
-    .organic-card:nth-child(3n+1) { border-radius: 3.5rem 2rem 4.5rem 2.5rem; }
-    .organic-card:nth-child(3n+2) { border-radius: 2rem 4.25rem 2.35rem 4rem; }
-    .organic-card:nth-child(3n+3) { border-radius: 4rem 2.2rem 3.25rem 2rem; }
+
+    /* Card organic radii */
+    .organic-card:nth-child(3n+1) { border-radius: 2rem 1.25rem 2.75rem 1.5rem; }
+    .organic-card:nth-child(3n+2) { border-radius: 1.25rem 2.5rem 1.5rem 2.25rem; }
+    .organic-card:nth-child(3n+3) { border-radius: 2.5rem 1.5rem 2rem 1.25rem; }
+
+    /* Cinema intro */
     .cinema-intro {
       position: fixed;
       inset: 0;
@@ -70,54 +80,108 @@
       pointer-events: none;
       overflow: hidden;
       background:
-        radial-gradient(circle at 50% 45%, rgba(253,252,248,.06), transparent 20%),
-        linear-gradient(120deg, #172013 0%, #42503a 44%, #fdfcf8 100%);
-      animation: introFade 3.35s cubic-bezier(.16,1,.3,1) forwards;
+        radial-gradient(circle at 50% 48%, rgba(253,252,248,.04), transparent 22%),
+        linear-gradient(125deg, #1a2415 0%, #3e4d36 42%, #fdfcf8 100%);
+      animation: introFade 3.2s cubic-bezier(.22,1,.36,1) forwards;
       perspective: 1200px;
     }
     .cinema-intro::before,
     .cinema-intro::after {
       content: "";
       position: absolute;
-      inset: -18%;
+      inset: -16%;
       background:
-        radial-gradient(ellipse at 22% 45%, rgba(230,220,205,.36) 0 10%, transparent 28%),
-        radial-gradient(ellipse at 72% 34%, rgba(193,140,93,.32) 0 13%, transparent 34%),
-        radial-gradient(ellipse at 56% 76%, rgba(93,112,82,.45) 0 18%, transparent 42%);
-      filter: blur(18px);
+        radial-gradient(ellipse at 20% 42%, rgba(230,220,205,.32) 0 10%, transparent 30%),
+        radial-gradient(ellipse at 74% 36%, rgba(193,140,93,.28) 0 12%, transparent 32%),
+        radial-gradient(ellipse at 52% 78%, rgba(93,112,82,.4) 0 16%, transparent 40%);
+      filter: blur(20px);
       transform-origin: 50% 50%;
-      animation: cameraDrift 3.35s cubic-bezier(.16,1,.3,1) forwards;
+      animation: cameraDrift 3.2s cubic-bezier(.22,1,.36,1) forwards;
     }
     .cinema-intro::after {
       background:
-        linear-gradient(90deg, rgba(8,13,6,.72), transparent 20%, transparent 80%, rgba(8,13,6,.68)),
-        repeating-linear-gradient(90deg, transparent 0 78px, rgba(255,255,255,.08) 78px 80px);
+        linear-gradient(90deg, rgba(10,15,8,.68), transparent 18%, transparent 82%, rgba(10,15,8,.64)),
+        repeating-linear-gradient(90deg, transparent 0 78px, rgba(255,255,255,.06) 78px 80px);
       mix-blend-mode: soft-light;
       filter: blur(0);
-      animation: gateOpen 3.35s cubic-bezier(.16,1,.3,1) forwards;
+      animation: gateOpen 3.2s cubic-bezier(.22,1,.36,1) forwards;
     }
+
+    /* Hero stage */
     .hero-stage {
-      transform-origin: 50% 62%;
-      animation: heroReveal 1.85s .55s cubic-bezier(.16,1,.3,1) both;
+      transform-origin: 50% 60%;
+      animation: heroReveal 1.7s .5s cubic-bezier(.22,1,.36,1) both;
     }
-    .hero-copy > * { opacity: 0; transform: translateY(22px); animation: riseIn .8s cubic-bezier(.16,1,.3,1) forwards; }
-    .hero-copy > *:nth-child(1) { animation-delay: 1.15s; }
-    .hero-copy > *:nth-child(2) { animation-delay: 1.28s; }
-    .hero-copy > *:nth-child(3) { animation-delay: 1.42s; }
-    .hero-copy > *:nth-child(4) { animation-delay: 1.56s; }
-    .reveal-card { opacity: 0; transform: translateY(26px) rotate(var(--tilt, 0deg)); animation: cardIn .7s cubic-bezier(.16,1,.3,1) forwards; }
+    .hero-copy > * {
+      opacity: 0;
+      transform: translateY(28px);
+      animation: riseIn .85s cubic-bezier(.22,1,.36,1) forwards;
+    }
+    .hero-copy > *:nth-child(1) { animation-delay: 1.1s; }
+    .hero-copy > *:nth-child(2) { animation-delay: 1.24s; }
+    .hero-copy > *:nth-child(3) { animation-delay: 1.38s; }
+    .hero-copy > *:nth-child(4) { animation-delay: 1.52s; }
+
+    /* Card entrance */
+    .reveal-card {
+      opacity: 0;
+      transform: translateY(32px) rotate(var(--tilt, 0deg));
+      animation: cardIn .75s cubic-bezier(.22,1,.36,1) forwards;
+    }
+
     .scroll-sentinel { min-height: 1px; }
     .viewer-open { overflow: hidden; }
-    .viewer-shell { transform: translateY(26px) scale(.98); opacity: 0; transition: transform .45s cubic-bezier(.16,1,.3,1), opacity .35s ease; }
-    .viewer-shell.is-visible { transform: translateY(0) scale(1); opacity: 1; }
-    @keyframes introFade { 0%, 72% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
-    @keyframes cameraDrift { 0% { transform: translate3d(-11%, 8%, -180px) rotate(-7deg) scale(1.35); } 45% { transform: translate3d(5%, -3%, 90px) rotate(2deg) scale(1.08); } 100% { transform: translate3d(0, 0, 420px) rotate(0deg) scale(1.55); } }
-    @keyframes gateOpen { 0% { clip-path: inset(0 0 0 0); opacity: 1; } 62% { clip-path: inset(8% 14% 8% 14% round 34px); opacity: .88; } 100% { clip-path: inset(48% 50% 48% 50% round 999px); opacity: 0; } }
-    @keyframes heroReveal { 0% { transform: scale(1.12) translateY(32px); filter: blur(18px) saturate(.7); opacity: .15; } 100% { transform: scale(1) translateY(0); filter: blur(0) saturate(1); opacity: 1; } }
-    @keyframes riseIn { to { opacity: 1; transform: translateY(0); } }
-    @keyframes cardIn { to { opacity: 1; transform: translateY(0) rotate(var(--tilt, 0deg)); } }
+
+    .viewer-shell {
+      transform: translateY(20px) scale(.985);
+      opacity: 0;
+      transition: transform .5s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+    }
+    .viewer-shell.is-visible {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    /* Smooth scroll-linked parallax for blobs */
+    @media (prefers-reduced-motion: no-preference) {
+      .parallax-blob {
+        will-change: transform;
+        transition: transform .15s linear;
+      }
+    }
+
+    @keyframes introFade {
+      0%, 70% { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+    @keyframes cameraDrift {
+      0% { transform: translate3d(-10%, 6%, -160px) rotate(-6deg) scale(1.3); }
+      45% { transform: translate3d(4%, -2%, 80px) rotate(1.5deg) scale(1.06); }
+      100% { transform: translate3d(0, 0, 400px) rotate(0deg) scale(1.5); }
+    }
+    @keyframes gateOpen {
+      0% { clip-path: inset(0 0 0 0); opacity: 1; }
+      60% { clip-path: inset(7% 13% 7% 13% round 32px); opacity: .9; }
+      100% { clip-path: inset(48% 50% 48% 50% round 999px); opacity: 0; }
+    }
+    @keyframes heroReveal {
+      0% { transform: scale(1.1) translateY(28px); filter: blur(16px) saturate(.75); opacity: .12; }
+      100% { transform: scale(1) translateY(0); filter: blur(0) saturate(1); opacity: 1; }
+    }
+    @keyframes riseIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0) rotate(var(--tilt, 0deg)); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .001ms !important; }
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+      }
       .cinema-intro { display: none; }
       .hero-copy > *, .reveal-card { opacity: 1; transform: none; }
     }
@@ -126,60 +190,82 @@
 <body class="font-body antialiased selection:bg-clay/20 selection:text-loam">
   <div class="cinema-intro" aria-hidden="true"></div>
 
-  <header class="sticky top-4 z-40 mx-auto flex w-[min(92rem,calc(100%-2rem))] items-center justify-between rounded-full border border-timber/60 bg-white/70 px-4 py-3 shadow-soft backdrop-blur-xl sm:px-5">
-    <a href="#top" class="flex items-center gap-3 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2">
-      <span class="grid h-11 w-11 place-items-center rounded-full bg-moss text-mist shadow-soft">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19.5V5.8c0-1.1.9-2 2-2h11.5A2.5 2.5 0 0 1 20 6.3v13.2H7.2A3.2 3.2 0 0 1 4 16.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 8h8M8 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  <!-- Navigation -->
+  <header class="sticky top-5 z-40 mx-auto flex w-[min(90rem,calc(100%-2rem))] items-center justify-between rounded-full border border-timber/50 bg-white/65 px-5 py-3 shadow-[0_4px_24px_-8px_rgba(44,44,36,.1)] backdrop-blur-2xl sm:px-6">
+    <a href="#top" class="flex items-center gap-3 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/60 focus-visible:ring-offset-2">
+      <span class="grid h-10 w-10 place-items-center rounded-full bg-moss text-mist shadow-[0_2px_12px_-2px_rgba(93,112,82,.35)]">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19.5V5.8c0-1.1.9-2 2-2h11.5A2.5 2.5 0 0 1 20 6.3v13.2H7.2A3.2 3.2 0 0 1 4 16.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 8h8M8 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </span>
       <span>
-        <span class="block font-display text-lg font-bold leading-none text-loam">Accumulate PPTs</span>
-        <span class="text-xs font-semibold uppercase tracking-[.24em] text-grass">HTML Slides</span>
+        <span class="block font-display text-[17px] font-semibold leading-none text-loam tracking-[-0.01em]">Accumulate PPTs</span>
+        <span class="text-[11px] font-semibold uppercase tracking-[.2em] text-grass/80 mt-0.5 block">HTML Slides</span>
       </span>
     </a>
-    <nav class="hidden items-center gap-2 text-sm font-bold text-loam md:flex" aria-label="主导航">
-      <a class="rounded-full px-4 py-2 transition hover:bg-moss/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss" href="#gallery">PPT 画廊</a>
-      <a class="rounded-full px-4 py-2 transition hover:bg-moss/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss" href="#viewer-guide">放映说明</a>
+    <nav class="hidden items-center gap-1 text-[13px] font-semibold text-loam/80 md:flex" aria-label="主导航">
+      <a class="rounded-full px-4 py-2 transition-colors duration-300 hover:bg-moss/8 hover:text-loam focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50" href="#gallery">PPT 画廊</a>
+      <a class="rounded-full px-4 py-2 transition-colors duration-300 hover:bg-moss/8 hover:text-loam focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50" href="#viewer-guide">放映说明</a>
     </nav>
-    <a href="#gallery" class="rounded-full bg-moss px-5 py-2.5 text-sm font-extrabold text-mist shadow-soft transition hover:scale-105 hover:shadow-moss focus:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 active:scale-95">开始浏览</a>
+    <a href="#gallery" class="rounded-full bg-moss px-5 py-2.5 text-[13px] font-bold text-mist shadow-[0_2px_14px_-3px_rgba(93,112,82,.35)] transition-all duration-300 hover:shadow-[0_4px_20px_-4px_rgba(93,112,82,.45)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">开始浏览</a>
   </header>
 
   <main id="top" class="relative overflow-hidden">
-    <section class="hero-stage relative mx-auto grid min-h-[calc(100vh-6rem)] w-[min(92rem,calc(100%-2rem))] items-center gap-12 py-16 lg:grid-cols-[1.02fr_.98fr] lg:py-24">
-      <div class="absolute -left-24 top-20 h-72 w-72 bg-moss/18 blur-3xl blob-a" aria-hidden="true"></div>
-      <div class="absolute -right-20 bottom-12 h-96 w-96 bg-clay/20 blur-3xl blob-b" aria-hidden="true"></div>
-      <div class="hero-copy relative z-10 max-w-4xl">
-        <p class="inline-flex rounded-full border border-timber/70 bg-white/60 px-5 py-2 text-sm font-extrabold uppercase tracking-[.26em] text-moss shadow-soft backdrop-blur">Natural Slide Archive</p>
-        <h1 class="mt-8 font-display text-5xl font-black leading-[.94] tracking-[-.05em] text-loam sm:text-6xl lg:text-8xl">让每一份 HTML PPT，像林间手稿一样被优雅打开。</h1>
-        <p class="mt-7 max-w-2xl text-lg leading-8 text-grass sm:text-xl">一个清新自然的单页导航入口：自动汇集根目录下的 HTML 演示文稿，以卡片渐进加载，并在沉浸式 iframe 舞台中支持全屏放映。</p>
-        <div class="mt-9 flex flex-col gap-3 sm:flex-row">
-          <a href="#gallery" class="inline-flex h-14 items-center justify-center rounded-full bg-moss px-8 text-base font-extrabold text-mist shadow-soft transition hover:scale-105 hover:shadow-moss focus:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 active:scale-95">查看 PPT 卡片</a>
-          <button id="open-first" type="button" class="inline-flex h-14 cursor-pointer items-center justify-center rounded-full border-2 border-clay px-8 text-base font-extrabold text-clay transition hover:scale-105 hover:bg-clay hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2 active:scale-95">直接放映第一份</button>
+    <!-- Hero Section -->
+    <section class="hero-stage relative mx-auto grid min-h-[calc(100vh-5rem)] w-[min(90rem,calc(100%-2rem))] items-center gap-16 py-20 lg:grid-cols-[1.05fr_.95fr] lg:py-28">
+      <!-- Background ambient blobs -->
+      <div class="parallax-blob absolute -left-32 top-16 h-80 w-80 bg-moss/12 blur-[80px] blob-a" aria-hidden="true" data-speed="0.03"></div>
+      <div class="parallax-blob absolute -right-24 bottom-8 h-[28rem] w-[28rem] bg-clay/14 blur-[90px] blob-b" aria-hidden="true" data-speed="0.05"></div>
+      <div class="parallax-blob absolute left-[40%] top-[60%] h-48 w-48 bg-sand/40 blur-[60px] blob-c" aria-hidden="true" data-speed="0.02"></div>
+
+      <!-- Hero Copy -->
+      <div class="hero-copy relative z-10 max-w-3xl">
+        <p class="inline-flex items-center gap-2 rounded-full border border-timber/60 bg-white/50 px-5 py-2 text-[11px] font-bold uppercase tracking-[.22em] text-moss backdrop-blur-sm">
+          <span class="h-1.5 w-1.5 rounded-full bg-moss"></span>
+          Natural Slide Archive
+        </p>
+        <h1 class="mt-10 font-display text-[3.25rem] font-semibold leading-[1.05] tracking-[-0.03em] text-loam sm:text-[4rem] lg:text-[5.5rem]">
+          让每一份 HTML PPT，<br class="hidden sm:block" />像林间手稿一样被优雅打开。
+        </h1>
+        <p class="mt-8 max-w-xl text-lg leading-[1.7] text-grass/90 font-light sm:text-[1.125rem]">
+          一个清新自然的单页导航入口：自动汇集根目录下的 HTML 演示文稿，以卡片渐进加载，并在沉浸式 iframe 舞台中支持全屏放映。
+        </p>
+        <div class="mt-10 flex flex-col gap-4 sm:flex-row">
+          <a href="#gallery" class="inline-flex h-13 items-center justify-center rounded-full bg-moss px-8 text-[15px] font-bold text-mist shadow-[0_2px_16px_-4px_rgba(93,112,82,.4)] transition-all duration-300 hover:shadow-[0_6px_28px_-6px_rgba(93,112,82,.5)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
+            查看 PPT 卡片
+          </a>
+          <button id="open-first" type="button" class="inline-flex h-13 cursor-pointer items-center justify-center rounded-full border border-clay/70 px-8 text-[15px] font-bold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2 active:scale-[0.98]">
+            直接放映第一份
+          </button>
         </div>
       </div>
 
-      <div class="relative z-10 mx-auto w-full max-w-xl lg:max-w-none">
-        <div class="absolute -left-8 -top-8 h-28 w-28 bg-sand blob-a" aria-hidden="true"></div>
-        <div class="absolute -bottom-8 right-4 h-24 w-24 bg-moss/20 blob-c" aria-hidden="true"></div>
-        <div class="relative rotate-[-2deg] rounded-[4rem_2rem_5rem_2.5rem] border-4 border-white bg-stone/70 p-4 shadow-float backdrop-blur">
-          <div class="overflow-hidden rounded-[3rem_1.5rem_4rem_2rem] border border-timber/70 bg-[#FEFEFA] shadow-soft">
-            <div class="flex items-center gap-2 border-b border-timber/60 bg-white/55 px-5 py-4">
-              <span class="h-3 w-3 rounded-full bg-clay/80"></span>
-              <span class="h-3 w-3 rounded-full bg-sand"></span>
-              <span class="h-3 w-3 rounded-full bg-moss/70"></span>
-              <span class="ml-auto text-xs font-extrabold uppercase tracking-[.22em] text-grass">iframe stage</span>
+      <!-- Hero Visual -->
+      <div class="relative z-10 mx-auto w-full max-w-lg lg:max-w-none">
+        <div class="absolute -left-6 -top-6 h-24 w-24 bg-sand/80 blob-a" aria-hidden="true"></div>
+        <div class="absolute -bottom-6 right-8 h-20 w-20 bg-moss/18 blob-c" aria-hidden="true"></div>
+
+        <div class="relative rotate-[-1.5deg] rounded-[3rem_1.75rem_4rem_2.25rem] border-[3px] border-white/90 bg-stone/60 p-4 shadow-[0_24px_60px_-20px_rgba(193,140,93,.3)] backdrop-blur-sm transition-transform duration-700 hover:rotate-[-0.5deg]">
+          <div class="overflow-hidden rounded-[2.5rem_1.25rem_3.5rem_1.75rem] border border-timber/50 bg-[#FEFEFA] shadow-[0_2px_16px_-4px_rgba(44,44,36,.06)]">
+            <!-- Window chrome -->
+            <div class="flex items-center gap-2 border-b border-timber/40 bg-white/40 px-5 py-3.5">
+              <span class="h-2.5 w-2.5 rounded-full bg-clay/70"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-sand"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-moss/60"></span>
+              <span class="ml-auto text-[10px] font-bold uppercase tracking-[.2em] text-grass/60">iframe stage</span>
             </div>
-            <div class="relative aspect-[16/10] bg-gradient-to-br from-paper via-stone to-sand/70 p-8">
-              <div class="absolute left-8 top-8 h-24 w-24 bg-moss/20 blur-xl blob-a"></div>
-              <div class="absolute bottom-8 right-8 h-28 w-28 bg-clay/20 blur-xl blob-b"></div>
-              <div class="relative flex h-full flex-col justify-between rounded-[2rem_3rem_2rem_4rem] border border-timber/70 bg-white/65 p-7 shadow-soft backdrop-blur-sm">
+            <!-- Preview content -->
+            <div class="relative aspect-[16/10] bg-gradient-to-br from-paper via-stone/50 to-sand/50 p-7">
+              <div class="absolute left-6 top-6 h-20 w-20 bg-moss/15 blur-2xl blob-a"></div>
+              <div class="absolute bottom-6 right-6 h-24 w-24 bg-clay/15 blur-2xl blob-b"></div>
+
+              <div class="relative flex h-full flex-col justify-between rounded-[1.75rem_2.5rem_1.75rem_3.5rem] border border-timber/40 bg-white/55 p-6 shadow-[0_2px_12px_-4px_rgba(44,44,36,.06)] backdrop-blur-sm">
                 <div>
-                  <p class="text-xs font-black uppercase tracking-[.28em] text-moss">Presentation Preview</p>
-                  <h2 id="hero-preview-title" class="mt-4 font-display text-3xl font-black leading-tight text-loam">HTML Slides Gallery</h2>
+                  <p class="text-[10px] font-bold uppercase tracking-[.24em] text-moss/70">Presentation Preview</p>
+                  <h2 id="hero-preview-title" class="mt-3 font-display text-[1.75rem] font-semibold leading-tight tracking-[-0.02em] text-loam">HTML Slides Gallery</h2>
                 </div>
-                <div class="grid grid-cols-3 gap-3">
-                  <span class="h-16 rounded-[1.5rem_1rem_2rem_1rem] bg-moss/15"></span>
-                  <span class="h-16 rounded-[1rem_2rem_1rem_1.5rem] bg-clay/18"></span>
-                  <span class="h-16 rounded-[2rem_1rem_1.5rem_1rem] bg-sand"></span>
+                <div class="grid grid-cols-3 gap-2.5">
+                  <span class="h-14 rounded-[1.25rem_0.75rem_1.75rem_0.875rem] bg-moss/12"></span>
+                  <span class="h-14 rounded-[0.75rem_1.5rem_0.875rem_1.25rem] bg-clay/14"></span>
+                  <span class="h-14 rounded-[1.5rem_0.875rem_1.25rem_0.75rem] bg-sand/70"></span>
                 </div>
               </div>
             </div>
@@ -188,75 +274,102 @@
       </div>
     </section>
 
-    <section id="gallery" class="relative mx-auto w-[min(92rem,calc(100%-2rem))] py-14 sm:py-20">
-      <div class="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end">
-        <div>
-          <p class="text-sm font-extrabold uppercase tracking-[.28em] text-moss">Paper Slides</p>
-          <h2 class="mt-3 font-display text-4xl font-black tracking-[-.03em] text-loam md:text-6xl">单 HTML PPT 导航</h2>
-          <p class="mt-4 max-w-2xl text-base leading-7 text-grass">默认渲染前 10 份演示文稿。若目录中收录更多 HTML 文件，页面会在滚动接近底部时继续渐进式载入。</p>
+    <!-- Gallery Section -->
+    <section id="gallery" class="relative mx-auto w-[min(90rem,calc(100%-2rem))] py-24 sm:py-32">
+      <div class="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div class="max-w-2xl">
+          <p class="text-[11px] font-bold uppercase tracking-[.22em] text-moss/80">Paper Slides</p>
+          <h2 class="mt-4 font-display text-[2.75rem] font-semibold leading-[1.1] tracking-[-0.025em] text-loam md:text-[3.5rem]">单 HTML PPT 导航</h2>
+          <p class="mt-5 text-base leading-[1.75] text-grass/80 font-light max-w-lg">
+            默认渲染前 10 份演示文稿。若目录中收录更多 HTML 文件，页面会在滚动接近底部时继续渐进式载入。
+          </p>
         </div>
-        <div class="rounded-[2rem] border border-timber/70 bg-white/65 px-5 py-4 text-sm font-bold text-grass shadow-soft backdrop-blur">
+        <div class="rounded-[1.5rem] border border-timber/50 bg-white/50 px-6 py-3.5 text-[13px] font-semibold text-grass/70 shadow-[0_2px_12px_-4px_rgba(44,44,36,.06)] backdrop-blur-sm whitespace-nowrap">
           <span id="deck-count">0</span> 份已收录 · <span id="loaded-count">0</span> 份已显示
         </div>
       </div>
 
-      <div id="deck-grid" class="grid gap-7 sm:grid-cols-2 lg:grid-cols-3" aria-live="polite"></div>
+      <div id="deck-grid" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3" aria-live="polite"></div>
       <div id="load-sentinel" class="scroll-sentinel"></div>
-      <div class="mt-10 flex justify-center">
-        <button id="load-more" type="button" class="hidden h-12 cursor-pointer rounded-full border-2 border-clay px-7 font-extrabold text-clay transition hover:scale-105 hover:bg-clay hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2 active:scale-95">加载更多</button>
+      <div class="mt-14 flex justify-center">
+        <button id="load-more" type="button" class="hidden h-12 cursor-pointer rounded-full border border-clay/60 px-8 text-[14px] font-bold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2 active:scale-[0.98]">
+          加载更多
+        </button>
       </div>
     </section>
 
-    <section id="viewer-guide" class="mx-auto w-[min(76rem,calc(100%-2rem))] pb-24 pt-6">
-      <div class="rounded-[4rem_2rem_4.5rem_2.5rem] border border-timber/70 bg-moss p-8 text-mist shadow-moss sm:p-12">
-        <p class="text-sm font-extrabold uppercase tracking-[.28em] text-mist/70">Immersive Player</p>
-        <h2 class="mt-3 font-display text-3xl font-black tracking-[-.03em] sm:text-5xl">点击任意卡片，即可在当前页面嵌入放映。</h2>
-        <p class="mt-5 max-w-3xl text-lg leading-8 text-mist/85">放映层使用 iframe 加载目标 HTML 页面，保留原始 PPT 的交互逻辑；右上角提供新窗口打开、iframe 全屏与关闭操作，适合快速预览或进入正式演示。</p>
+    <!-- Viewer Guide Section -->
+    <section id="viewer-guide" class="mx-auto w-[min(72rem,calc(100%-2rem))] pb-28 pt-8">
+      <div class="rounded-[2.5rem_1.5rem_3rem_2rem] border border-moss/20 bg-moss p-10 text-mist shadow-[0_20px_60px_-24px_rgba(93,112,82,.4)] sm:p-14 lg:p-16 relative overflow-hidden">
+        <!-- Subtle inner glow -->
+        <div class="absolute -right-20 -top-20 h-64 w-64 bg-white/5 blur-[80px] rounded-full" aria-hidden="true"></div>
+        <div class="absolute -left-16 -bottom-16 h-48 w-48 bg-clay/10 blur-[60px] rounded-full" aria-hidden="true"></div>
+
+        <div class="relative z-10">
+          <p class="text-[11px] font-bold uppercase tracking-[.22em] text-mist/50">Immersive Player</p>
+          <h2 class="mt-4 font-display text-[2rem] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[2.75rem] lg:text-[3.25rem] max-w-3xl">
+            点击任意卡片，即可在当前页面嵌入放映。
+          </h2>
+          <p class="mt-6 max-w-2xl text-base leading-[1.75] text-mist/70 font-light">
+            放映层使用 iframe 加载目标 HTML 页面，保留原始 PPT 的交互逻辑；右上角提供新窗口打开、iframe 全屏与关闭操作，适合快速预览或进入正式演示。
+          </p>
+        </div>
       </div>
     </section>
   </main>
 
-  <section id="viewer" class="fixed inset-0 z-50 hidden bg-loam/70 p-2 backdrop-blur-md sm:p-5" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="viewer-title">
-    <div class="viewer-shell flex h-full flex-col overflow-hidden rounded-[2rem] border border-timber/60 bg-paper shadow-moss sm:rounded-[3rem]">
-      <div class="flex flex-wrap items-center gap-3 border-b border-timber/70 bg-white/75 px-4 py-3 backdrop-blur-xl sm:px-5">
+  <!-- Footer -->
+  <footer class="border-t border-timber/40 bg-stone/30 py-10">
+    <div class="mx-auto w-[min(90rem,calc(100%-2rem))] flex flex-col items-center justify-between gap-4 sm:flex-row">
+      <p class="text-[13px] text-grass/50 font-light">Accumulate PPTs · 自然风格的 HTML 幻灯片画廊</p>
+      <p class="text-[13px] text-grass/40 font-light">Built with care</p>
+    </div>
+  </footer>
+
+  <!-- Viewer Modal -->
+  <section id="viewer" class="fixed inset-0 z-50 hidden bg-loam/60 p-3 backdrop-blur-xl sm:p-6" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="viewer-title">
+    <div class="viewer-shell flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-timber/40 bg-paper shadow-[0_24px_80px_-24px_rgba(44,44,36,.25)] sm:rounded-[2rem]">
+      <!-- Viewer Header -->
+      <div class="flex flex-wrap items-center gap-3 border-b border-timber/40 bg-white/60 px-5 py-3.5 backdrop-blur-xl sm:px-6">
         <div class="min-w-0 flex-1">
-          <p class="text-xs font-black uppercase tracking-[.24em] text-moss">Now Presenting</p>
-          <h2 id="viewer-title" class="truncate font-display text-lg font-black text-loam sm:text-2xl">HTML PPT</h2>
+          <p class="text-[10px] font-bold uppercase tracking-[.2em] text-moss/60">Now Presenting</p>
+          <h2 id="viewer-title" class="truncate font-display text-lg font-semibold tracking-[-0.01em] text-loam sm:text-xl">HTML PPT</h2>
         </div>
-        <a id="viewer-open-new" href="#" target="_blank" rel="noopener" class="inline-flex h-11 items-center gap-2 rounded-full border border-timber/70 bg-white/70 px-4 text-sm font-extrabold text-loam transition hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <a id="viewer-open-new" href="#" target="_blank" rel="noopener" class="inline-flex h-10 items-center gap-2 rounded-full border border-timber/50 bg-white/60 px-4 text-[13px] font-semibold text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           新窗口
         </a>
-        <button id="viewer-fullscreen" type="button" class="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-moss px-4 text-sm font-extrabold text-mist shadow-soft transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 active:scale-95">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <button id="viewer-fullscreen" type="button" class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-moss px-4 text-[13px] font-semibold text-mist shadow-[0_2px_12px_-4px_rgba(93,112,82,.4)] transition-all duration-300 hover:shadow-[0_4px_20px_-6px_rgba(93,112,82,.5)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           全屏
         </button>
-        <button id="viewer-close" type="button" class="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-timber/70 bg-white/70 text-loam transition hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss" aria-label="关闭放映窗口">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <button id="viewer-close" type="button" class="grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-timber/50 bg-white/60 text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40" aria-label="关闭放映窗口">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
       </div>
       <iframe id="viewer-frame" title="HTML PPT iframe 放映窗口" class="h-full w-full flex-1 bg-white" allow="fullscreen; autoplay; clipboard-read; clipboard-write" allowfullscreen loading="lazy"></iframe>
     </div>
   </section>
 
+  <!-- Card Template -->
   <template id="deck-card-template">
-    <article class="organic-card reveal-card group relative overflow-hidden border border-timber/70 bg-[#FEFEFA]/90 p-6 shadow-soft backdrop-blur transition duration-500 hover:-translate-y-1 hover:rotate-1 hover:shadow-float">
-      <div class="absolute -right-10 -top-10 h-36 w-36 blur-2xl blob-a card-glow" aria-hidden="true"></div>
-      <div class="relative flex min-h-[21rem] flex-col justify-between">
+    <article class="organic-card reveal-card group relative overflow-hidden border border-timber/45 bg-[#FEFEFA]/85 p-7 shadow-[0_2px_16px_-6px_rgba(44,44,36,.06)] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_12px_40px_-12px_rgba(93,112,82,.18)]">
+      <div class="absolute -right-12 -top-12 h-40 w-40 blur-2xl blob-a card-glow opacity-60 group-hover:opacity-80 transition-opacity duration-500" aria-hidden="true"></div>
+      <div class="relative flex min-h-[19rem] flex-col justify-between">
         <div>
-          <div class="mb-5 flex items-center justify-between gap-3">
-            <span class="deck-index rounded-full bg-stone px-4 py-2 text-xs font-black uppercase tracking-[.2em] text-moss"></span>
-            <span class="deck-kind rounded-full border border-timber/70 bg-white/60 px-3 py-1 text-xs font-extrabold text-grass"></span>
+          <div class="mb-6 flex items-center justify-between gap-3">
+            <span class="deck-index rounded-full bg-stone/70 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[.18em] text-moss/80"></span>
+            <span class="deck-kind rounded-full border border-timber/50 bg-white/50 px-3 py-1 text-[11px] font-semibold text-grass/70"></span>
           </div>
-          <h3 class="deck-title font-display text-2xl font-black leading-tight tracking-[-.03em] text-loam"></h3>
-          <p class="deck-description mt-4 line-clamp-3 text-sm leading-7 text-grass"></p>
+          <h3 class="deck-title font-display text-[1.375rem] font-semibold leading-snug tracking-[-0.015em] text-loam"></h3>
+          <p class="deck-description mt-4 line-clamp-3 text-[13px] leading-[1.7] text-grass/70 font-light"></p>
         </div>
         <div class="mt-8 flex flex-wrap gap-3">
-          <button type="button" class="deck-play inline-flex h-12 cursor-pointer items-center gap-2 rounded-full bg-moss px-5 text-sm font-extrabold text-mist shadow-soft transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 active:scale-95">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z" fill="currentColor"/></svg>
+          <button type="button" class="deck-play inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-moss px-5 text-[13px] font-semibold text-mist shadow-[0_2px_12px_-4px_rgba(93,112,82,.35)] transition-all duration-300 hover:shadow-[0_4px_20px_-6px_rgba(93,112,82,.45)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z" fill="currentColor"/></svg>
             嵌入放映
           </button>
-          <a class="deck-link inline-flex h-12 items-center gap-2 rounded-full border-2 border-clay px-5 text-sm font-extrabold text-clay transition hover:bg-clay hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2" target="_blank" rel="noopener">
+          <a class="deck-link inline-flex h-11 items-center gap-2 rounded-full border border-clay/60 px-5 text-[13px] font-semibold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2" target="_blank" rel="noopener">
             打开原页
           </a>
         </div>
@@ -367,14 +480,12 @@
       }
     }
 
-
     async function initGallery() {
       decks = await discoverDecks();
       deckCount.textContent = String(decks.length);
       if (decks[0]) heroPreviewTitle.textContent = decks[0].title;
       renderNext();
     }
-
 
     function updateCounts() {
       loadedCount.textContent = String(Math.min(loaded, decks.length));
@@ -386,8 +497,8 @@
       nextDecks.forEach((deck, offset) => {
         const absoluteIndex = loaded + offset;
         const node = template.content.firstElementChild.cloneNode(true);
-        node.style.setProperty('--tilt', `${(absoluteIndex % 3 - 1) * 0.45}deg`);
-        node.style.animationDelay = `${Math.min(offset * 90, 540)}ms`;
+        node.style.setProperty('--tilt', `${(absoluteIndex % 3 - 1) * 0.4}deg`);
+        node.style.animationDelay = `${Math.min(offset * 80, 480)}ms`;
         node.querySelector('.card-glow').style.backgroundColor = deck.accent;
         node.querySelector('.deck-index').textContent = `No. ${String(absoluteIndex + 1).padStart(2, '0')}`;
         node.querySelector('.deck-kind').textContent = deck.kind;
@@ -421,7 +532,7 @@
         viewer.setAttribute('aria-hidden', 'true');
         viewerFrame.src = 'about:blank';
         document.body.classList.remove('viewer-open');
-      }, 260);
+      }, 280);
     }
 
     async function enterFullscreen() {
@@ -450,6 +561,25 @@
         if (entries.some(entry => entry.isIntersecting) && loaded < decks.length) renderNext();
       }, { rootMargin: '480px 0px' });
       observer.observe(sentinel);
+    }
+
+    // Parallax scroll for blobs
+    if ('IntersectionObserver' in window && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+      let ticking = false;
+      const blobs = document.querySelectorAll('.parallax-blob');
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const scrollY = window.scrollY;
+            blobs.forEach(blob => {
+              const speed = parseFloat(blob.dataset.speed) || 0.03;
+              blob.style.transform = `translateY(${scrollY * speed}px)`;
+            });
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
     }
 
     initGallery();
