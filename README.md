@@ -24,7 +24,9 @@ Accumulate-PPTs/
 │   ├── YOLO-Master_assets/   # YOLO-Master 演示文稿依赖的静态资源
 │   ├── YOLOv12.html
 │   ├── YOLOv13.html
-│   └── YOLO26.html
+│   ├── YOLO26.html
+│   ├── smooth-tail_learning.html
+│   └── sugarcane-seedlings-detection.html
 ├── skills/               # 幻灯片制作技能、脚本与模板文档
 │   ├── html-paper-slides/
 │   │   ├── SKILL.md
@@ -72,6 +74,8 @@ HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。
 | RT-DETR: DETRs Beat YOLOs on Real-time Object Detection | `paper-slides/RT-DETR.html` | Paper Reading | RT-DETR 论文演示，聚焦 DETR 类实时目标检测器、高效混合编码器与不确定性感知选择。 |
 | YOLOv13 论文精读 | `paper-slides/YOLOv13.html` | Paper Reading | YOLOv13论文精读演示，聚焦超图自适应关联增强（HyperACE）、全管线聚合-分发范式（FullPAD）与DS轻量化模块。 |
 | YOLO26 论文解读 | `paper-slides/YOLO26.html` | Paper Reading | YOLO26论文精读演示，聚焦移除DFL、NMS-free端到端推理、ProgLoss+STAL训练优化与MuSGD优化器。 |
+| Boosting Long-tailed Object Detection via Step-wise Learning | `paper-slides/smooth-tail_learning.html` | Paper Reading | ICCV 2023 长尾目标检测论文演示，聚焦平滑尾部数据构建、逐步学习框架与知识迁移策略。 |
+| 甘蔗幼苗识别与计数 - Improved Faster R-CNN | `paper-slides/sugarcane-seedlings-detection.html` | Research PPT | 基于改进 Faster R-CNN 的甘蔗幼苗自动检测与计数方法（SGN-D），聚焦田间无人机航拍图像中的小目标检测与计数。 |
 
 ## 核心技术特点
 
