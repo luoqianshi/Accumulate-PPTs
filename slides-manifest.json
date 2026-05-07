@@ -56,6 +56,20 @@
       "description": "YOLO26论文精读演示，聚焦移除DFL、NMS-free端到端推理、ProgLoss+STAL训练优化与MuSGD优化器。",
       "kind": "Paper Reading",
       "accent": "rgba(57,102,162,.18)"
+    },
+    {
+      "title": "Boosting Long-tailed Object Detection via Step-wise Learning",
+      "file": "paper-slides/smooth-tail_learning.html",
+      "description": "ICCV 2023 长尾目标检测论文演示，聚焦平滑尾部数据构建、逐步学习框架与知识迁移策略。",
+      "kind": "Paper Reading",
+      "accent": "rgba(57,102,162,.18)"
+    },
+    {
+      "title": "甘蔗幼苗识别与计数 - Improved Faster R-CNN",
+      "file": "paper-slides/sugarcane-seedlings-detection.html",
+      "description": "基于改进 Faster R-CNN 的甘蔗幼苗自动检测与计数方法（SGN-D），聚焦田间无人机航拍图像中的小目标检测与计数。",
+      "kind": "Research PPT",
+      "accent": "rgba(93,112,82,.2)"
     }
   ]
 }
