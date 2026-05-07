@@ -1,7 +1,5 @@
 raw/*
 ingest/*
-paper-slides/sugarcane-seedlings/
-paper-slides/sugarcane-seedlings_assets/
 
 # Agents
 .claude/
