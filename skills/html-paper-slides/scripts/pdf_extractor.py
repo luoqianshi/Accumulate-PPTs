@@ -18,13 +18,12 @@ PDF 论文图片提取器
 import os
 import sys
 import argparse
-import io
 import json
 import shutil
 from pathlib import Path
 
 import fitz  # PyMuPDF
-from PIL import Image
+
 
 
 def is_likely_figure_or_table(img_info, page_width, page_height):
@@ -70,18 +69,14 @@ def is_likely_figure_or_table(img_info, page_width, page_height):
     return True, "ok"
 
 
-def extract_embedded_images(doc, output_dir):
+def extract_embedded_images(doc):
     """
-    提取 PDF 中内嵌的图像对象，过滤后保存。
-    利用页面上图片的 bbox 信息辅助判断。
+    扫描 PDF 中内嵌的图像对象，过滤后仅返回元数据（不保存图片文件）。
+    利用页面上图片的 bbox 信息辅助判断，供后续裁剪去重使用。
     返回提取的图片元数据列表。
     """
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     extracted = []
     seen_xrefs = set()
-    img_counter = 1
 
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
@@ -107,8 +102,6 @@ def extract_embedded_images(doc, output_dir):
 
             try:
                 base_image = doc.extract_image(xref)
-                image_bytes = base_image["image"]
-                image_ext = base_image["ext"]
                 iw = base_image.get("width", 0)
                 ih = base_image.get("height", 0)
 
@@ -124,27 +117,13 @@ def extract_embedded_images(doc, output_dir):
                     print(f"  [过滤] 第 {page_num+1} 页 xref={xref} ({iw}x{ih}): {reason}")
                     continue
 
-                img_pil = Image.open(io.BytesIO(image_bytes))
-
-                # 保存为 PNG
-                output_path = output_dir / f"figure_{img_counter:03d}_page{page_num+1:03d}.png"
-                if img_pil.mode in ("RGBA", "P"):
-                    # 保留透明通道
-                    img_pil.save(output_path, format="PNG")
-                else:
-                    # 无透明通道的内嵌图片（如 JPEG）转为 PNG
-                    img_pil.convert("RGB").save(output_path, format="PNG")
-
                 extracted.append({
-                    "path": str(output_path),
                     "page": page_num + 1,
-                    "width": img_pil.width,
-                    "height": img_pil.height,
-                    "original_ext": image_ext,
+                    "width": iw,
+                    "height": ih,
                     "source": "embedded_image",
                     "bbox": bbox,
                 })
-                img_counter += 1
 
             except Exception as e:
                 print(f"  [警告] 提取第 {page_num+1} 页图片 xref={xref} 时出错: {e}")
@@ -341,6 +320,7 @@ def extract_figures_by_region_cropping(doc, output_dir, dpi=200,
     通过区域检测+裁剪的方式提取矢量图表。
     综合使用 drawing 检测、图片放置位置和非文本区域检测。
     包含多层过滤以排除页眉、页脚、空白区域和整页误检。
+    仅保存裁剪后的图片，不保留中间文件。
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -439,7 +419,7 @@ def extract_figures_by_region_cropping(doc, output_dir, dpi=200,
 def remove_duplicate_extractions(embedded, cropped, iou_threshold=0.6):
     """
     移除裁剪区域中与内嵌图片高度重叠的重复项。
-    返回去重后的合并列表。
+    返回去重后的裁剪列表（不合并内嵌图片，仅用于去重参考）。
     """
     # 对于每个裁剪区域，检查是否与任何内嵌图片的 bbox 有高度重叠
     # 注意：内嵌图片的 bbox 是页面坐标，裁剪区域也有 bbox
@@ -479,13 +459,14 @@ def remove_duplicate_extractions(embedded, cropped, iou_threshold=0.6):
 
             if iou > iou_threshold:
                 is_dup = True
-                print(f"  [去重] 裁剪区域 {Path(c['path']).name} 与内嵌图片 {Path(e['path']).name} 重叠 (IoU={iou:.2f})，跳过")
+                c_name = Path(c['path']).name if 'path' in c else "unknown"
+                print(f"  [去重] 裁剪区域 {c_name} 与第 {e.get('page', '?')} 页内嵌图片重叠 (IoU={iou:.2f})，跳过")
                 break
 
         if not is_dup:
             filtered_cropped.append(c)
 
-    return embedded + filtered_cropped
+    return filtered_cropped
 
 
 def render_pages_as_fallback(doc, output_dir, dpi=200):
@@ -565,20 +546,18 @@ def main():
 
     doc = fitz.open(str(pdf_path))
 
-    # 1. 提取内嵌图片
-    print("[步骤 1/4] 提取内嵌图片...")
-    embedded = extract_embedded_images(doc, output_dir / "figures")
-    print(f"[结果] 提取到 {len(embedded)} 张有效内嵌图片")
-    for img in embedded:
-        print(f"  - {Path(img['path']).name} (第 {img['page']} 页, {img['width']}x{img['height']}, {img['source']})")
+    # 1. 扫描内嵌图片（仅用于获取元数据，不保存文件）
+    print("[步骤 1/3] 扫描内嵌图片（用于去重参考）...")
+    embedded = extract_embedded_images(doc)
+    print(f"[结果] 扫描到 {len(embedded)} 张有效内嵌图片（仅作去重参考，不保存）")
 
-    # 2. 区域裁剪提取矢量图表
+    # 2. 区域裁剪提取矢量图表（仅保留裁剪图片）
     cropped = []
     if not args.no_region_crop:
-        print("\n[步骤 2/4] 检测并裁剪矢量图表区域...")
+        print("\n[步骤 2/3] 检测并裁剪矢量图表区域...")
         cropped = extract_figures_by_region_cropping(
             doc,
-            output_dir / "figures",
+            output_dir,
             dpi=args.dpi,
             max_regions_per_page=args.max_regions_per_page,
         )
@@ -586,34 +565,25 @@ def main():
         for img in cropped:
             print(f"  - {Path(img['path']).name} (第 {img['page']} 页, {img['width']}x{img['height']}, {img['source']})")
 
-    # 3. 去重
-    print("\n[步骤 3/4] 合并去重...")
+    # 3. 去重：移除与内嵌图片重叠的裁剪区域
+    print("\n[步骤 3/3] 去重...")
     all_images = remove_duplicate_extractions(embedded, cropped, iou_threshold=0.6)
-    print(f"[结果] 去重后共 {len(all_images)} 张唯一图片/图表")
+    print(f"[结果] 去重后共 {len(all_images)} 张唯一裁剪图片")
 
     # 4. 渲染页面（可选）
     rendered = []
     if args.render_pages:
-        print("\n[步骤 4/4] 渲染页面为高清图片...")
+        print("\n[可选] 渲染页面为高清图片...")
         rendered = render_pages_as_fallback(doc, output_dir / "pages", dpi=args.dpi)
         print(f"[结果] 渲染了 {len(rendered)} 页")
-
-    # 5. 汇总并复制所有图片到统一目录
-    all_figures_dir = output_dir / "all_figures"
-    all_figures_dir.mkdir(parents=True, exist_ok=True)
-    for img in all_images:
-        src = Path(img["path"])
-        if src.exists():
-            dst = all_figures_dir / src.name
-            shutil.copy2(src, dst)
 
     summary = {
         "pdf_path": str(pdf_path),
         "output_dir": str(output_dir),
         "total_pages": len(doc),
-        "embedded_images": len(embedded),
+        "embedded_images_scanned": len(embedded),
         "cropped_regions": len(cropped),
-        "unique_images": len(all_images),
+        "unique_crop_images": len(all_images),
         "rendered_pages": len(rendered),
         "images": all_images,
     }
@@ -624,9 +594,8 @@ def main():
     doc.close()
 
     print("\n" + "=" * 50)
-    print(f"[完成] 全部提取完毕! 共提取 {len(all_images)} 张唯一图片/图表。")
+    print(f"[完成] 全部提取完毕! 共保留 {len(all_images)} 张唯一裁剪图片。")
     print(f"[汇总] 结果保存在: {output_dir}")
-    print(f"[便捷] 所有图片已汇总至: {all_figures_dir}")
 
 
 if __name__ == "__main__":
