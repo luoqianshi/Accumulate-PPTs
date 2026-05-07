@@ -6,23 +6,37 @@
 
 本仓库是一个专注于 HTML 幻灯片制作的个人项目集合，支持将论文原文、阅读笔记、Markdown 内容或答辩材料整理为可直接浏览器播放的单文件 HTML 演示文稿。根目录的 `index.html` 会读取 `slides-manifest.json`，将 `paper-slides/` 中收录的论文类演示文稿渲染为导航画廊。
 
+单文件 HTML 幻灯片的底层方案参考自开源项目 [html-presentation](https://github.com/juanjuanjie/html-presentation)，在此基础上进行了主题定制、组件扩展与论文汇报场景适配。
+
 ## 项目结构
 
 ```
 Accumulate-PPTs/
 ├── index.html            # HTML Slides Gallery 导航页
 ├── slides-manifest.json  # paper-slides 演示文稿清单
+├── README.md             # 项目说明
 ├── paper-slides/         # 论文精读、答辩与研究汇报类 HTML PPT 成品
 │   ├── maize_tassels_presentation.html
 │   ├── RT-DETR.html
 │   ├── SAHI.html
 │   ├── sugarcane_thesis_presentation.html
 │   ├── YOLO-Master_Presentation.html
-│   └── YOLOv12.html
-├── html-slides/          # HTML 幻灯片模板与技能文档
-├── html-slides-xmu/      # 其他技能/模板文档
-├── raw/                  # 原始论文与素材，保留 PDF、Word、网页摘录等一手资料
-├── ingest/               # 摄取后的 Markdown 中间稿，承载论文重点提取与讲稿结构
+│   ├── YOLO-Master_assets/   # YOLO-Master 演示文稿依赖的静态资源
+│   ├── YOLOv12.html
+│   ├── YOLOv13.html
+│   └── YOLO26.html
+├── skills/               # 幻灯片制作技能、脚本与模板文档
+│   ├── html-paper-slides/
+│   │   ├── SKILL.md
+│   │   └── scripts/
+│   │       └── pdf_extractor.py   # 从论文 PDF 中提取核心配图的辅助脚本
+│   └── html-slides/
+│       ├── SKILL.md
+│       └── templates/
+│           └── presentation.html
+├── assets/               # 通用静态资源
+├── raw/                  # 原始论文与素材，保留 PDF 等一手资料
+├── ingest/               # 摄取后的 Markdown 中间稿与提取素材
 └── output/               # 通用 HTML PPT 输出区，适合草稿、课程或非论文类演示
 ```
 
@@ -80,10 +94,11 @@ HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。
 
 1. **归档原文**：将论文、补充材料、数据集说明和参考链接放入 `raw/`，保留可追溯来源。
 2. **摄取提炼**：在 `ingest/` 中整理 Markdown 重点提取稿，形成论文信息卡、方法拆解、实验结论和汇报大纲。
-3. **生成 PPT**：根据 `html-slides/SKILL.md` 或既有 `paper-slides/` 样例，将 Markdown 内容转换为单文件 HTML。
-4. **收录到画廊**：将论文类 HTML 文件放入 `paper-slides/`，并在 `slides-manifest.json` 中补充或更新标题、路径、简介、类型与主题色。
-5. **预览画廊**：在浏览器中打开 `index.html`，通过导航页进入对应演示文稿。
-6. **演示播放**：打开具体 HTML 文件后，使用键盘方向键或页面按钮翻页。
+3. **提取配图**（可选）：运行 `skills/html-paper-slides/scripts/pdf_extractor.py`，从 `raw/` 中的论文 PDF 自动提取核心配图，供后续 PPT 使用。
+4. **生成 PPT**：根据 `html-slides/SKILL.md` 或既有 `paper-slides/` 样例，将 Markdown 内容转换为单文件 HTML。
+5. **收录到画廊**：将论文类 HTML 文件放入 `paper-slides/`，并在 `slides-manifest.json` 中补充或更新标题、路径、简介、类型与主题色。
+6. **预览画廊**：在浏览器中打开 `index.html`，通过导航页进入对应演示文稿。
+7. **演示播放**：打开具体 HTML 文件后，使用键盘方向键或页面按钮翻页。
 
 ## 技术栈
 
@@ -93,10 +108,14 @@ HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。
 - CSS Variables 主题管理
 - Google Fonts 字体加载
 
+## 参考与致谢
+
+- [html-presentation](https://github.com/juanjuanjie/html-presentation)：原始 HTML 幻灯片模板与播放引擎参考仓库。
+
 ## 许可证
 
 本项目为个人学习作品，仅供学习交流使用。
 
 ---
 
-*Last Updated: 2026-04-30*
+*Last Updated: 2026-05-07*
