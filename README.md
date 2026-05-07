@@ -16,17 +16,8 @@ Accumulate-PPTs/
 ├── slides-manifest.json  # paper-slides 演示文稿清单
 ├── README.md             # 项目说明
 ├── paper-slides/         # 论文精读、答辩与研究汇报类 HTML PPT 成品
-│   ├── maize_tassels_presentation.html
-│   ├── RT-DETR.html
-│   ├── SAHI.html
-│   ├── sugarcane_thesis_presentation.html
-│   ├── YOLO-Master_Presentation.html
-│   ├── YOLO-Master_assets/   # YOLO-Master 演示文稿依赖的静态资源
-│   ├── YOLOv12.html
-│   ├── YOLOv13.html
-│   ├── YOLO26.html
-│   ├── smooth-tail_learning.html
-│   └── sugarcane-seedlings-detection.html
+│   ├── your-paper-slides.html
+│   └── your-other-slides.html
 ├── skills/               # 幻灯片制作技能、脚本与模板文档
 │   ├── html-paper-slides/
 │   │   ├── SKILL.md
@@ -62,20 +53,20 @@ HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。
 
 在进入下一阶段前建议检查：`raw/` 是否可追溯到原始来源；`ingest/` 是否已经提炼出足够支撑 8-15 页汇报的主线；HTML PPT 是否可以单文件打开、键盘翻页、视觉层级清晰；`slides-manifest.json` 是否覆盖 `paper-slides/` 下的全部 HTML 文件。
 
-## 当前收录的论文演示
+## 快速开始
 
-| 标题 | 文件 | 类型 | 内容概述 |
-| --- | --- | --- | --- |
-| Maize Tassels Detection: A Benchmark of the State of the Art | `paper-slides/maize_tassels_presentation.html` | Research PPT | 玉米雄穗检测研究演示，聚焦目标检测、密度回归与植物表型分析基准。 |
-| SAHI - 切片辅助超推理与微调小目标检测 | `paper-slides/SAHI.html` | Paper Reading | IEEE ICIP 2022 SAHI 论文演示，聚焦切片推理、小目标检测与微调流程。 |
-| 低空航拍可见光图像快速检测甘蔗幼苗群体数量 | `paper-slides/sugarcane_thesis_presentation.html` | Thesis Defense | 面向低空航拍 RGB 图像的甘蔗幼苗群体数量检测学位论文答辩。 |
-| YOLO-Master Presentation | `paper-slides/YOLO-Master_Presentation.html` | Paper Reading | YOLO-Master 论文演示，聚焦基于 MoE 加速的专业化 Transformer 实时目标检测方法。 |
-| YOLOv12 论文精读 | `paper-slides/YOLOv12.html` | Paper Reading | YOLOv12 论文精读演示，聚焦以注意力为中心的实时目标检测器、Area Attention 与 R-ELAN 等核心设计。 |
-| RT-DETR: DETRs Beat YOLOs on Real-time Object Detection | `paper-slides/RT-DETR.html` | Paper Reading | RT-DETR 论文演示，聚焦 DETR 类实时目标检测器、高效混合编码器与不确定性感知选择。 |
-| YOLOv13 论文精读 | `paper-slides/YOLOv13.html` | Paper Reading | YOLOv13论文精读演示，聚焦超图自适应关联增强（HyperACE）、全管线聚合-分发范式（FullPAD）与DS轻量化模块。 |
-| YOLO26 论文解读 | `paper-slides/YOLO26.html` | Paper Reading | YOLO26论文精读演示，聚焦移除DFL、NMS-free端到端推理、ProgLoss+STAL训练优化与MuSGD优化器。 |
-| Boosting Long-tailed Object Detection via Step-wise Learning | `paper-slides/smooth-tail_learning.html` | Paper Reading | ICCV 2023 长尾目标检测论文演示，聚焦平滑尾部数据构建、逐步学习框架与知识迁移策略。 |
-| 甘蔗幼苗识别与计数 - Improved Faster R-CNN | `paper-slides/sugarcane-seedlings-detection.html` | Research PPT | 基于改进 Faster R-CNN 的甘蔗幼苗自动检测与计数方法（SGN-D），聚焦田间无人机航拍图像中的小目标检测与计数。 |
+- 克隆当前的代码仓库
+
+```
+git clone https://github.com/luoqianshi/Accumulate-PPTs.git
+```
+- 删除`paper-slides/`目录下的所有文件，并将`slides-manifest.json`文件中的`slides`数组清空，当前是作者个人使用的数据。
+
+- 用**TRAE**、**CodeBuddy**等AI IDE打开当前的项目，然后使用以下的提示词开始制作你的第一份HTML格式的论文汇报PPT吧~
+
+```prompts
+使用html-paper-slides技能(skills\html-paper-slides\SKILL.md)，帮我为[给定你要制作的PDF格式的论文的文件路径]制作一份HTML格式的PPT，最终文件存放在paper-slides目录下。
+```
 
 ## 核心技术特点
 
