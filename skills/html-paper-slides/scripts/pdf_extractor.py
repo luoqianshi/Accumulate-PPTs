@@ -534,7 +534,7 @@ def main():
     if args.output_dir:
         output_dir = Path(args.output_dir).resolve()
     else:
-        output_dir = Path("d:/Data/New_Codes/SKILLS/Accumulate-PPTs/ingest") / pdf_path.stem
+        output_dir = Path("d:/Data/New_Codes/SKILLS/Accumulate-PPTs/paper-slides") / pdf_path.stem
 
     if args.clean and output_dir.exists():
         print(f"[信息] 清空输出目录: {output_dir}")
