@@ -70,6 +70,13 @@
       "description": "基于改进 Faster R-CNN 的甘蔗幼苗自动检测与计数方法（SGN-D），聚焦田间无人机航拍图像中的小目标检测与计数。",
       "kind": "Research PPT",
       "accent": "rgba(93,112,82,.2)"
+    },
+    {
+      "title": "Dialogue Director 论文精读",
+      "file": "paper-slides/Dialogue_Director.html",
+      "description": "Dialogue Director 论文精读演示，聚焦对话可视化新任务、免训练三智能体框架（Script Director + Cinematographer + Storyboard Maker）与电影知识整合。",
+      "kind": "Paper Reading",
+      "accent": "rgba(57,102,162,.18)"
     }
   ]
 }
