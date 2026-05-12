@@ -1,0 +1,50 @@
+{
+  "pdf_path": "D:\\Data\\New_Codes\\SKILLS\\Accumulate-PPTs\\raw\\2026 Auto-Slides An Interactive Multi-Agent System forCreating and Customizing Research Presentations.pdf",
+  "output_dir": "d:\\Data\\New_Codes\\SKILLS\\Accumulate-PPTs\\paper-slides\\2026 Auto-Slides An Interactive Multi-Agent System forCreating and Customizing Research Presentations",
+  "total_pages": 6,
+  "embedded_images_scanned": 3,
+  "cropped_regions": 3,
+  "unique_crop_images": 3,
+  "rendered_pages": 0,
+  "images": [
+    {
+      "path": "d:\\Data\\New_Codes\\SKILLS\\Accumulate-PPTs\\paper-slides\\2026 Auto-Slides An Interactive Multi-Agent System forCreating and Customizing Research Presentations\\crop_001_page001_reg1.png",
+      "page": 1,
+      "width": 1386,
+      "height": 503,
+      "source": "region_crop",
+      "bbox": [
+        56.67499923706055,
+        174.74195861816406,
+        555.3014526367188,
+        355.57501220703125
+      ]
+    },
+    {
+      "path": "d:\\Data\\New_Codes\\SKILLS\\Accumulate-PPTs\\paper-slides\\2026 Auto-Slides An Interactive Multi-Agent System forCreating and Customizing Research Presentations\\crop_002_page003_reg1.png",
+      "page": 3,
+      "width": 1428,
+      "height": 417,
+      "source": "region_crop",
+      "bbox": [
+        48.9640007019043,
+        50.541900634765625,
+        563.0350341796875,
+        200.29400634765625
+      ]
+    },
+    {
+      "path": "d:\\Data\\New_Codes\\SKILLS\\Accumulate-PPTs\\paper-slides\\2026 Auto-Slides An Interactive Multi-Agent System forCreating and Customizing Research Presentations\\crop_003_page004_reg1.png",
+      "page": 4,
+      "width": 698,
+      "height": 498,
+      "source": "region_crop",
+      "bbox": [
+        48.9640007019043,
+        50.54273986816406,
+        300.0143127441406,
+        229.39599609375
+      ]
+    }
+  ]
+}

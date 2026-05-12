@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPTAGENT 论文精读</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+::root {
+  --bg: #ffffff;
+  --text: #000000;
+  --title: #3966A2;
+  --accent: #132843;
+  --secondary: #6191D3;
+  --light-bg: #F5F8FC;
+  --card-bg: #FFFFFF;
+  --border: #E2E8F0;
+  --radius: 14px;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background: #e8e8e8;
+  color: var(--text);
+  font-family: 'Inter', 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  height: 100vh;
+  cursor: default;
+  user-select: none;
+}
+
+/* ═══════════ SLIDE ENGINE ═══════════ */
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh 7vw;
+  background: var(--bg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(30px);
+  transition: opacity 0.6s cubic-bezier(.4,0,.2,1),
+              transform 0.6s cubic-bezier(.4,0,.2,1),
+              visibility 0.6s;
+  will-change: opacity, transform;
+}
+
+.slide.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+
+.slide.exit-up {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(-30px) !important;
+}
+
+/* Progress Bar */
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--title), var(--secondary));
+  z-index: 100;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Slide Dots */
+.dots {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ccc;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+.dot.active {
+  background: var(--title);
+  transform: scale(1.6);
+}
+.dot:hover { background: #999; }
+
+/* ═══════════ TYPOGRAPHY ═══════════ */
+.slide-label {
+  font-size: clamp(11px, 1.1vw, 14px);
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--secondary);
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: clamp(28px, 3.8vw, 52px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--accent);
+  letter-spacing: -1px;
+}
+h1 .highlight { color: var(--title); }
+
+h2 {
+  font-size: clamp(24px, 3vw, 42px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--title);
+  letter-spacing: -0.5px;
+}
+
+h3 {
+  font-size: clamp(15px, 1.6vw, 22px);
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: clamp(15px, 1.5vw, 20px);
+  font-weight: 400;
+  color: #555;
+  line-height: 1.6;
+  margin-top: 14px;
+  max-width: 700px;
+}
+
+.body-text {
+  font-size: clamp(14px, 1.35vw, 18px);
+  font-weight: 400;
+  color: #444;
+  line-height: 1.7;
+}
+
+.small-text {
+  font-size: clamp(12px, 1.1vw, 15px);
+  color: #777;
+  line-height: 1.5;
+}
+
+.divider {
+  width: 48px;
+  height: 3px;
+  background: var(--title);
+  border-radius: 2px;
+  margin: 14px 0;
+}
+.divider-accent { background: var(--secondary); }
+
+/* ═══════════ COMPONENTS ═══════════ */
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(57,102,162,0.08);
+  border: 1px solid rgba(57,102,162,0.18);
+  border-radius: 100px;
+  padding: 7px 16px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--title);
+  letter-spacing: 0.06em;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  width: fit-content;
+}
+.badge .dot-blue {
+  width: 7px; height: 7px;
+  background: var(--secondary);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.badge .dot-gray {
+  width: 4px; height: 4px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Cards */
+.card-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  flex: 0;
+}
+.card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.card {
+  background: var(--light-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(16px, 2vw, 28px);
+  display: flex;
+  flex-direction: column;
+}
+.card .card-num {
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 800;
+  color: var(--title);
+  opacity: 0.2;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.card h3 { font-size: clamp(14px, 1.4vw, 20px); margin-bottom: 6px; }
+.card .body-text { font-size: clamp(12px, 1.2vw, 16px); }
+
+/* Quote Block */
+.quote-block {
+  border-left: 3px solid var(--secondary);
+  padding: 14px 22px;
+  background: rgba(97,145,211,0.06);
+  border-radius: 0 12px 12px 0;
+  margin: 14px 0;
+}
+.quote-block p {
+  font-size: clamp(14px, 1.35vw, 18px);
+  font-weight: 500;
+  color: var(--accent);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* VS / Comparison */
+.vs-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-top: 16px;
+}
+.vs-col {
+  flex: 1;
+  border-radius: 16px;
+  padding: clamp(14px, 1.6vw, 22px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.vs-col.left-col {
+  background: #f9fafb;
+  border: 1px solid var(--border);
+}
+.vs-col.right-col {
+  background: linear-gradient(135deg, rgba(57,102,162,0.08), rgba(57,102,162,0.03));
+  border: 1px solid rgba(57,102,162,0.25);
+}
+.vs-col .vs-tag {
+  display: inline-block;
+  font-size: clamp(10px, 0.85vw, 12px);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+.vs-col.left-col .vs-tag {
+  background: rgba(0,0,0,0.06);
+  color: #888;
+}
+.vs-col.right-col .vs-tag {
+  background: rgba(57,102,162,0.12);
+  color: var(--title);
+}
+.vs-col h3 { font-size: clamp(15px, 1.5vw, 20px); margin-bottom: 8px; }
+.vs-col ul { list-style: none; padding: 0; }
+.vs-col ul li {
+  font-size: clamp(12px, 1.15vw, 15px);
+  color: #555;
+  line-height: 1.6;
+  padding: 3px 0 3px 20px;
+  position: relative;
+}
+.vs-col ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.vs-col.left-col ul li::before { background: #ccc; }
+.vs-col.right-col ul li::before { background: var(--title); }
+
+/* Steps */
+.steps {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  align-items: stretch;
+}
+.step {
+  flex: 1;
+  background: var(--light-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(14px, 1.8vw, 24px) clamp(10px, 1.2vw, 20px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.step .step-num {
+  font-size: clamp(10px, 0.85vw, 13px);
+  font-weight: 700;
+  color: var(--secondary);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.step h3 { font-size: clamp(13px, 1.2vw, 17px); margin-bottom: 4px; }
+.step .small-text { font-size: clamp(11px, 0.95vw, 13px); }
+.step-arrow {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #ccc;
+}
+
+/* Highlight Bar */
+.highlight-bar {
+  background: linear-gradient(135deg, rgba(57,102,162,0.08), rgba(57,102,162,0.03));
+  border: 1px solid rgba(57,102,162,0.15);
+  border-radius: 12px;
+  padding: clamp(12px, 1.6vw, 20px) clamp(16px, 2vw, 26px);
+  margin-top: 12px;
+}
+.highlight-bar p {
+  font-size: clamp(14px, 1.3vw, 17px);
+  color: var(--text);
+  line-height: 1.6;
+}
+.highlight-bar .accent-word {
+  color: var(--title);
+  font-weight: 600;
+}
+
+/* Bullet List */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+.bullet-list li {
+  font-size: clamp(13px, 1.25vw, 17px);
+  color: #444;
+  line-height: 1.7;
+  padding: 3px 0 3px 20px;
+  position: relative;
+}
+.bullet-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--title);
+}
+.bullet-list li .em {
+  color: var(--title);
+  font-weight: 600;
+}
+
+/* IPO Flow */
+.ipo-flow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 28px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.ipo-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+}
+.ipo-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  border: 2px solid;
+}
+.ipo-circle.i { border-color: var(--title); color: var(--title); background: rgba(57,102,162,0.06); }
+.ipo-circle.p { border-color: var(--secondary); color: var(--secondary); background: rgba(97,145,211,0.06); }
+.ipo-circle.o { border-color: #2d9d5e; color: #2d9d5e; background: rgba(45,157,94,0.06); }
+.ipo-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.ipo-desc {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  max-width: 130px;
+}
+.ipo-arrow {
+  font-size: 22px;
+  color: #bbb;
+}
+
+/* Cover Meta */
+.cover-meta {
+  margin-top: 28px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.cover-tag {
+  font-size: clamp(11px, 1vw, 14px);
+  font-weight: 500;
+  color: #666;
+  background: var(--light-bg);
+  border: 1px solid var(--border);
+  padding: 5px 14px;
+  border-radius: 100px;
+}
+
+/* Figure */
+.fig-container {
+  margin-top: 16px;
+  text-align: center;
+}
+.fig-container img {
+  max-width: 100%;
+  max-height: 52vh;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.fig-caption {
+  font-size: clamp(11px, 1vw, 13px);
+  color: #888;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: clamp(11px, 1.1vw, 14px);
+}
+.data-table th {
+  background: var(--light-bg);
+  color: var(--title);
+  font-weight: 600;
+  padding: 8px 12px;
+  text-align: center;
+  border-bottom: 2px solid var(--border);
+}
+.data-table td {
+  padding: 7px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  color: #444;
+}
+.data-table tr:hover td { background: rgba(57,102,162,0.03); }
+.data-table .best { color: var(--title); font-weight: 700; }
+.data-table .second { text-decoration: underline; }
+.data-table .check { color: #2d9d5e; font-weight: 700; }
+.data-table .cross { color: #ccc; }
+
+/* End Card */
+.end-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.end-card h2 {
+  font-size: clamp(28px, 3.2vw, 46px);
+  margin-bottom: 10px;
+}
+
+/* Glow */
+.glow {
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.06;
+  pointer-events: none;
+}
+.glow-blue { background: var(--title); }
+.glow-light { background: var(--secondary); }
+
+/* Two-column layout */
+.two-col {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  align-items: flex-start;
+}
+.two-col .col-left { flex: 1; }
+.two-col .col-right { flex: 1; }
+
+/* ═══════════ ANIMATIONS ═══════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide.active .anim { animation: fadeUp 0.5s ease both; }
+.slide.active .anim:nth-child(1) { animation-delay: 0.06s; }
+.slide.active .anim:nth-child(2) { animation-delay: 0.12s; }
+.slide.active .anim:nth-child(3) { animation-delay: 0.18s; }
+.slide.active .anim:nth-child(4) { animation-delay: 0.24s; }
+.slide.active .anim:nth-child(5) { animation-delay: 0.30s; }
+.slide.active .anim:nth-child(6) { animation-delay: 0.36s; }
+.slide.active .anim:nth-child(7) { animation-delay: 0.42s; }
+.slide.active .anim:nth-child(8) { animation-delay: 0.48s; }
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 900px) {
+  .slide { padding: 4vh 5vw; }
+  .card-grid.cols-2, .card-grid.cols-3 { grid-template-columns: 1fr; }
+  .vs-row { flex-direction: column; gap: 12px; }
+  .steps { flex-direction: column; }
+  .dots { display: none; }
+  .ipo-flow { flex-direction: column; }
+  .ipo-arrow { transform: rotate(90deg); }
+  .two-col { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="dots" id="dots"></div>
+
+<div class="deck" id="deck">
+
+<!-- ═══════════ Slide 1: 封面 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue" style="top:-120px;left:-120px;"></div>
+  <div class="glow glow-light" style="bottom:-120px;right:-120px;"></div>
+  <div class="anim badge">
+    <span class="dot-blue"></span>
+    PAPER READING
+    <span class="dot-gray"></span>
+    EMNLP 2025
+  </div>
+  <div class="anim" style="font-size: clamp(1.6rem, 3.2vw, 2.8rem); font-weight: 800; line-height: 1.18; color: var(--accent);">
+    <span class="highlight" style="color:var(--title);">PPTAGENT</span>: Generating and Evaluating<br>
+    Presentations <span style="color:var(--title);">Beyond Text-to-Slides</span>
+  </div>
+  <p class="anim subtitle">基于编辑范式的演示文稿自动生成与多维评估框架</p>
+  <div class="anim cover-meta">
+    <span class="cover-tag">Hao Zheng*, Xinyan Guan*, Hao Kong, Wenkai Zhang, Jia Zheng&dagger;, Weixiang Zhou, Hongyu Lin&dagger;, Yaojie Lu&dagger;, Xianpei Han, Le Sun</span>
+  </div>
+  <div class="anim cover-meta">
+    <span class="cover-tag">ISCAS &amp; UCAS</span>
+    <span class="cover-tag">EMNLP 2025</span>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 2: 摘要 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Abstract</div>
+  <div class="anim"><h2>摘要</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim quote-block">
+    <p>Automatically generating presentations from documents is a challenging task that requires accommodating content quality, visual appeal, and structural coherence. Existing methods primarily focus on improving and evaluating the content quality in isolation, overlooking visual appeal and structural coherence, which limits their practical applicability.</p>
+  </div>
+  <div class="anim highlight-bar">
+    <p>本文提出 <span class="accent-word">PPTAGENT</span>，通过受人类工作流启发的两阶段编辑方法全面改进演示文稿生成；同时提出 <span class="accent-word">PPTEVAL</span>，从 Content、Design、Coherence 三维度评估生成质量。实验表明 PPTAGENT 在所有维度上显著优于现有方法。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 3: 引言 - 现有研究不足 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Introduction</div>
+  <div class="anim"><h2>研究背景与挑战</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim vs-row">
+    <div class="vs-col left-col">
+      <span class="vs-tag">现有方法</span>
+      <h3>Text-to-Slides 范式</h3>
+      <ul>
+        <li>将生成任务简化为摘要扩展</li>
+        <li>依赖人工定义规则或模板</li>
+        <li>生成内容文本密集、碎片化</li>
+        <li>无法吸引受众注意力</li>
+        <li>仅关注内容质量，忽视设计与连贯性</li>
+      </ul>
+    </div>
+    <div class="vs-col right-col">
+      <span class="vs-tag">核心挑战</span>
+      <h3 style="color:var(--title);">Edit-based 范式的难点</h3>
+      <ul>
+        <li>幻灯片功能多样、布局复杂，难以选择参考页</li>
+        <li>PowerPoint XML 冗余复杂，LLM 难以稳健编辑</li>
+        <li>缺乏对参考演示文稿结构和风格的理解</li>
+        <li>缺少全面的多维度评估框架</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 4: 引言 - 本文贡献 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue" style="top:40%;right:-80px;transform:translateY(-50%);"></div>
+  <div class="anim slide-label">Contributions</div>
+  <div class="anim"><h2>主要贡献</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim card-grid cols-3">
+    <div class="card">
+      <span class="card-num">01</span>
+      <h3>PPTAGENT</h3>
+      <p class="body-text">将演示文稿生成重新定义为基于编辑的过程，由参考演示文稿引导，实现两阶段生成框架</p>
+    </div>
+    <div class="card">
+      <span class="card-num">02</span>
+      <h3>PPTEVAL</h3>
+      <p class="body-text">提出三维度综合评估框架：Content、Design、Coherence，基于 MLLM-as-a-Judge 范式</p>
+    </div>
+    <div class="card">
+      <span class="card-num">03</span>
+      <h3>Zenodo10K</h3>
+      <p class="body-text">发布 10,448 份跨领域演示文稿数据集及完整代码，支持未来研究</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 5: 方法 - 整体框架 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Overview</div>
+  <div class="anim"><h2>PPTAGENT 整体框架</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim fig-container">
+    <img src="./PPAGENT_assets/crop_002_page002_reg1.png" alt="PPTAGENT Overview">
+    <div class="fig-caption">Fig. 2 — PPTAGENT 工作流程：Stage I 分析参考演示文稿；Stage II 基于大纲迭代生成新幻灯片</div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 6: 方法 - Stage I: Presentation Analysis ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Stage I</div>
+  <div class="anim"><h2>Stage I: Presentation Analysis</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>Slide Clustering</h3>
+      <ul class="bullet-list">
+        <li>结构型幻灯片：LLM 分析文本特征，标记结构角色（如 Opening）</li>
+        <li>内容型幻灯片：转为图像后层次聚类，MLLM 分析布局模式</li>
+        <li>按功能与布局将幻灯片分为不同类别</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Schema Extraction</h3>
+      <ul class="bullet-list">
+        <li>为每类幻灯片提取内容模式（Content Schema）</li>
+        <li>每个元素由 Category + Description + Data 三元组表示</li>
+        <li>为后续内容生成与编辑提供结构化指导</li>
+      </ul>
+    </div>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:14px;">
+    <p>Stage I 将参考演示文稿分解为 <span class="accent-word">功能类别 + 内容模式</span>，为 Stage II 的参考选择与幻灯片生成奠定基础。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 7: 方法 - Stage II: Outline Generation ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Stage II</div>
+  <div class="anim"><h2>Outline Generation</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim steps">
+    <div class="step">
+      <span class="step-num">STEP 01</span>
+      <h3>理解文档结构</h3>
+      <p class="small-text">LLM 分析输入文档的结构与可用图像（通过 caption）</p>
+    </div>
+    <div class="step-arrow">&rarr;</div>
+    <div class="step">
+      <span class="step-num">STEP 02</span>
+      <h3>规划幻灯片大纲</h3>
+      <p class="small-text">为每张幻灯片定义：目的、文档内容来源、参考幻灯片</p>
+    </div>
+    <div class="step-arrow">&rarr;</div>
+    <div class="step">
+      <span class="step-num">STEP 03</span>
+      <h3>保证整体连贯</h3>
+      <p class="small-text">前置规划确保内容上下文适当，提升演示文稿连贯性</p>
+    </div>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:16px;">
+    <p>大纲生成利用 Stage I 对幻灯片功能的理解，<span class="accent-word">整体规划</span>每张新幻灯片的目的、内容和参考来源，而非逐页独立生成。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 8: 方法 - Slide Generation ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Slide Generation</div>
+  <div class="anim"><h2>Slide Generation: Edit-based</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim two-col">
+    <div class="col-left">
+      <h3>编辑操作流程</h3>
+      <ul class="bullet-list">
+        <li>LLM 在内容模式指导下生成新内容</li>
+        <li>将内容通过 <span class="em">API 编辑操作</span> 迁移到参考幻灯片</li>
+        <li>保留参考幻灯片的布局和风格</li>
+        <li>迭代生成每张幻灯片</li>
+      </ul>
+      <h3 style="margin-top:14px;">核心 API</h3>
+      <ul class="bullet-list">
+        <li><span class="em">replace_span</span> — 替换文本内容</li>
+        <li><span class="em">replace_image</span> — 替换图像</li>
+        <li><span class="em">del_span / del_image</span> — 删除元素</li>
+        <li><span class="em">clone_paragraph</span> — 克隆段落</li>
+      </ul>
+    </div>
+    <div class="col-right">
+      <div class="fig-container" style="margin-top:0;">
+        <img src="./PPAGENT_assets/crop_004_page006_reg1.png" alt="Slide Generation" style="max-height:40vh;">
+        <div class="fig-caption">基于参考幻灯片的编辑操作示意</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 9: 方法 - HTML渲染与自纠错 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-light" style="top:30%;left:-80px;"></div>
+  <div class="anim slide-label">Method — Code Render & Self-Correction</div>
+  <div class="anim"><h2>HTML 渲染与自纠错机制</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>Code Render（HTML 渲染）</h3>
+      <p class="body-text">将 PowerPoint 冗余 XML 转为简洁 HTML 表示，降低 LLM 交互复杂度。移除 Code Render 后成功率从 95.0% 降至 74.6%。</p>
+    </div>
+    <div class="card">
+      <h3>Self-Correction（自纠错）</h3>
+      <p class="body-text">在 Python REPL 中执行编辑代码，捕获运行时错误并反馈给 LLM，迭代修正。GPT-4o 成功率达 97.8%，Qwen2.5 达 95.0%。</p>
+    </div>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:14px;">
+    <p><span class="accent-word">HTML 表示</span>使 LLM 更精准地理解幻灯片结构，<span class="accent-word">自纠错机制</span>将总错误从 1,296 降至 273，有效增强生成稳健性。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 10: PPTEVAL 评估框架 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">PPTEVAL</div>
+  <div class="anim"><h2>PPTEVAL: 多维度评估框架</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim ipo-flow">
+    <div class="ipo-step">
+      <div class="ipo-circle i">C</div>
+      <div class="ipo-label">Content</div>
+      <div class="ipo-desc">文本简洁、语法正确，配有相关图像</div>
+    </div>
+    <div class="ipo-arrow">&rarr;</div>
+    <div class="ipo-step">
+      <div class="ipo-circle p">D</div>
+      <div class="ipo-label">Design</div>
+      <div class="ipo-desc">配色和谐、布局合理，视觉元素增强吸引力</div>
+    </div>
+    <div class="ipo-arrow">&rarr;</div>
+    <div class="ipo-step">
+      <div class="ipo-circle o">Co</div>
+      <div class="ipo-label">Coherence</div>
+      <div class="ipo-desc">结构递进，包含必要背景信息</div>
+    </div>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:20px;">
+    <p>基于 MLLM-as-a-Judge 范式（GPT-4o），对 Content 和 Design 在<span class="accent-word">幻灯片级别</span>评估，Coherence 在<span class="accent-word">演示文稿级别</span>评估。所有维度采用 1-5 分制，提供数值评分与详细理由。</p>
+  </div>
+  <div class="anim fig-container" style="margin-top:10px;">
+    <img src="./PPAGENT_assets/crop_003_page004_reg1.png" alt="PPTEVAL" style="max-height:28vh;">
+    <div class="fig-caption">Fig. 3 — PPTEVAL 三维度评估流程示意</div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 11: 实验 - 设置 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — Settings</div>
+  <div class="anim"><h2>实验设置</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim two-col">
+    <div class="col-left">
+      <h3>模型配置</h3>
+      <ul class="bullet-list">
+        <li><span class="em">GPT-4o</span> + GPT-4o（LM + VM）</li>
+        <li><span class="em">Qwen2.5-72B</span> + Qwen2-VL-72B</li>
+        <li><span class="em">Qwen2-VL-72B</span>（LM + VM）</li>
+        <li>部署于 NVIDIA A100 GPU</li>
+        <li>每张幻灯片最多 2 次自纠错迭代</li>
+      </ul>
+      <h3 style="margin-top:14px;">数据集</h3>
+      <ul class="bullet-list">
+        <li><span class="em">Zenodo10K</span>：10,448 份跨领域 PPT</li>
+        <li>5 领域 &times; 10 文档 &times; 10 参考 = 500 任务</li>
+      </ul>
+    </div>
+    <div class="col-right">
+      <h3>基线方法</h3>
+      <ul class="bullet-list">
+        <li><span class="em">DocPres</span>：规则化多阶段生成</li>
+        <li><span class="em">KCTV</span>：模板化 LaTeX 转换</li>
+      </ul>
+      <h3 style="margin-top:14px;">评估指标</h3>
+      <ul class="bullet-list">
+        <li><span class="em">SR</span> — 成功率</li>
+        <li><span class="em">PPL</span> — 文本流畅度（越低越好）</li>
+        <li><span class="em">ROUGE-L</span> — 文本相似度</li>
+        <li><span class="em">FID</span> — 视觉相似度</li>
+        <li><span class="em">PPTEVAL</span> — 三维度评分</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 12: 实验 - 主实验结果 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — Main Results</div>
+  <div class="anim"><h2>主实验结果</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim" style="overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>LM</th>
+          <th>VM</th>
+          <th>SR(%) &uarr;</th>
+          <th>PPL &darr;</th>
+          <th>Content &uarr;</th>
+          <th>Design &uarr;</th>
+          <th>Coherence &uarr;</th>
+          <th>Avg. &uarr;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>DocPres</td>
+          <td>GPT-4o</td>
+          <td>&ndash;</td>
+          <td>&ndash;</td>
+          <td>76.42</td>
+          <td>2.98</td>
+          <td>2.33</td>
+          <td>3.24</td>
+          <td>2.85</td>
+        </tr>
+        <tr>
+          <td>DocPres</td>
+          <td>Qwen2.5</td>
+          <td>&ndash;</td>
+          <td>&ndash;</td>
+          <td class="second">100.4</td>
+          <td>2.96</td>
+          <td>2.37</td>
+          <td>3.28</td>
+          <td>2.87</td>
+        </tr>
+        <tr>
+          <td>KCTV</td>
+          <td>GPT-4o</td>
+          <td>&ndash;</td>
+          <td>80.0</td>
+          <td>68.48</td>
+          <td>2.49</td>
+          <td class="second">2.94</td>
+          <td class="second">3.57</td>
+          <td>3.00</td>
+        </tr>
+        <tr>
+          <td>KCTV</td>
+          <td>Qwen2.5</td>
+          <td>&ndash;</td>
+          <td>88.0</td>
+          <td>41.41</td>
+          <td>2.55</td>
+          <td>2.95</td>
+          <td>3.36</td>
+          <td>2.95</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:var(--title);">PPTAGENT</td>
+          <td>GPT-4o</td>
+          <td>GPT-4o</td>
+          <td class="best">97.8</td>
+          <td>721.54</td>
+          <td>3.25</td>
+          <td>3.24</td>
+          <td>4.39</td>
+          <td>3.62</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:var(--title);">PPTAGENT</td>
+          <td>Qwen2.5</td>
+          <td>Qwen2-VL</td>
+          <td>95.0</td>
+          <td>496.62</td>
+          <td class="best">3.28</td>
+          <td class="best">3.27</td>
+          <td class="best">4.48</td>
+          <td class="best">3.67</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:var(--title);">PPTAGENT</td>
+          <td>Qwen2-VL</td>
+          <td>Qwen2-VL</td>
+          <td>43.0</td>
+          <td>265.08</td>
+          <td>3.13</td>
+          <td>3.34</td>
+          <td>4.07</td>
+          <td>3.51</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:12px;">
+    <p>PPTAGENT 在 PPTEVAL 三维度上均显著领先：Design 相比 DocPres 提升 <span class="accent-word">+40.9%</span>，Coherence 相比 KCTV 提升 <span class="accent-word">+36.6%</span>，平均分最高达 3.67。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 13: 实验 - 自纠错分析 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — Self-Correction</div>
+  <div class="anim"><h2>自纠错机制分析</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim two-col">
+    <div class="col-left">
+      <h3>纠错迭代统计</h3>
+      <div class="fig-container" style="margin-top:8px;">
+        <img src="./PPAGENT_assets/crop_005_page007_reg1.png" alt="Self-Correction" style="max-height:38vh;">
+        <div class="fig-caption">Fig. 4 — 不同模型生成单张幻灯片所需迭代次数</div>
+      </div>
+    </div>
+    <div class="col-right">
+      <h3>错误类型分布与演化</h3>
+      <table class="data-table" style="font-size:clamp(10px,1vw,13px);">
+        <thead>
+          <tr>
+            <th>错误类型</th>
+            <th>Round 0</th>
+            <th>Round 1</th>
+            <th>Round 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SYNTAX</td><td>14</td><td>8</td><td>7</td></tr>
+          <tr><td style="font-weight:600;color:var(--title);">INDEX</td><td style="font-weight:700;">1166</td><td>347</td><td>244</td></tr>
+          <tr><td>INST</td><td>70</td><td>10</td><td>8</td></tr>
+          <tr><td>HALLU</td><td>34</td><td>20</td><td>12</td></tr>
+          <tr><td>FUNCTION</td><td>12</td><td>3</td><td>2</td></tr>
+        </tbody>
+      </table>
+      <div class="highlight-bar" style="margin-top:10px;">
+        <p>总错误从 1,296 降至 273。INDEX 错误占比 89.9%，两轮纠错后减少 <span class="accent-word">79%</span>。INST 和 FUNCTION 降幅超 80%。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 14: 实验 - 消融实验 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — Ablation</div>
+  <div class="anim"><h2>消融实验</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim" style="overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Setting</th>
+          <th>SR(%) &uarr;</th>
+          <th>Content &uarr;</th>
+          <th>Design &uarr;</th>
+          <th>Coherence &uarr;</th>
+          <th>Avg. &uarr;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:700;color:var(--title);">PPTAGENT (Full)</td>
+          <td class="best">95.0</td>
+          <td class="best">3.28</td>
+          <td>3.27</td>
+          <td class="best">4.48</td>
+          <td class="best">3.67</td>
+        </tr>
+        <tr>
+          <td>w/o Outline</td>
+          <td>91.0</td>
+          <td>3.24</td>
+          <td>3.30</td>
+          <td>3.36</td>
+          <td>3.30</td>
+        </tr>
+        <tr>
+          <td>w/o Schema</td>
+          <td>78.8</td>
+          <td>3.08</td>
+          <td>3.23</td>
+          <td>4.04</td>
+          <td>3.45</td>
+        </tr>
+        <tr>
+          <td>w/o Structure</td>
+          <td>92.2</td>
+          <td>3.28</td>
+          <td>3.25</td>
+          <td>3.45</td>
+          <td>3.32</td>
+        </tr>
+        <tr>
+          <td>w/o CodeRender</td>
+          <td>74.6</td>
+          <td>3.27</td>
+          <td class="best">3.34</td>
+          <td>4.38</td>
+          <td>3.66</td>
+        </tr>
+        <tr style="border-top:2px solid var(--border);">
+          <td>Controlled (same template)</td>
+          <td>100.0</td>
+          <td>3.21</td>
+          <td>3.60</td>
+          <td>4.27</td>
+          <td>3.69</td>
+        </tr>
+        <tr>
+          <td>Human</td>
+          <td>&ndash;</td>
+          <td>4.01</td>
+          <td>3.95</td>
+          <td>4.28</td>
+          <td>4.08</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:12px;">
+    <p><span class="accent-word">CodeRender</span> 对成功率影响最大（95.0% &rarr; 74.6%）；<span class="accent-word">Outline</span> 和 <span class="accent-word">Structure</span> 对连贯性至关重要（4.48 &rarr; 3.36/3.45）；<span class="accent-word">Schema</span> 显著影响成功率与内容质量。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 15: 实验 - 定性对比 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — Qualitative</div>
+  <div class="anim"><h2>定性比较</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim fig-container">
+    <img src="./PPAGENT_assets/crop_006_page008_reg1.png" alt="Qualitative comparison">
+    <div class="fig-caption">Fig. 5 — DocPres、KCTV 与 PPTAGENT 生成效果对比：PPTAGENT 使用不同参考演示文稿可产出风格多样且视觉吸引的幻灯片</div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 16: 总结与展望 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue" style="top:30%;left:10%;"></div>
+  <div class="anim slide-label">Conclusion</div>
+  <div class="anim"><h2>总结与展望</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>核心贡献</h3>
+      <ul class="bullet-list">
+        <li>提出 <span class="em">PPTAGENT</span>：基于编辑的演示文稿生成框架</li>
+        <li>两阶段设计：分析参考 PPT + 迭代编辑生成</li>
+        <li>HTML 渲染 + 自纠错机制保障稳健性</li>
+        <li>提出 <span class="em">PPTEVAL</span>：Content-Design-Coherence 三维评估</li>
+        <li>发布 <span class="em">Zenodo10K</span> 数据集，推动领域研究</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>局限与未来</h3>
+      <ul class="bullet-list">
+        <li>Qwen2-VL 作为 LM 时成功率较低（43.0%）</li>
+        <li>自纠错对 SYNTAX 和 HALLU 类错误效果有限</li>
+        <li>PPL 指标在编辑范式下适用性存疑</li>
+        <li>未来：更强的开源模型、更精细的编辑 API</li>
+        <li>未来：端到端视觉生成与布局优化</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 17: 结尾 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue" style="top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="end-card">
+    <div class="anim"><h2 style="color:var(--title);">Thank You</h2></div>
+    <div class="anim divider divider-accent" style="margin:12px auto;"></div>
+    <div class="anim subtitle" style="max-width:560px;text-align:center;margin:0 auto;">
+      PPTAGENT: Generating and Evaluating Presentations Beyond Text-to-Slides<br>
+      <span style="color:var(--title);font-weight:500;">EMNLP 2025</span>
+    </div>
+    <div class="anim cover-meta" style="margin-top:24px;">
+      <span class="cover-tag">github.com/icip-cas/PPTAgent</span>
+    </div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const progress = document.getElementById('progress');
+  const dotsWrap = document.getElementById('dots');
+
+  // Build dots
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+  }
+  const dots = dotsWrap.querySelectorAll('.dot');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total || idx === current) return;
+    const prev = slides[current];
+    const next = slides[idx];
+
+    prev.classList.remove('active');
+    prev.classList.add('exit-up');
+
+    requestAnimationFrame(() => {
+      next.classList.remove('exit-up');
+      next.classList.add('active');
+    });
+
+    setTimeout(() => {
+      prev.classList.remove('exit-up');
+    }, 700);
+
+    dots[current].classList.remove('active');
+    current = idx;
+    dots[current].classList.add('active');
+    progress.style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  slides[0].classList.add('active');
+  progress.style.width = (1 / total * 100) + '%';
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+  });
+
+  // Touch / swipe
+  let touchX = 0, touchY = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchX = e.changedTouches[0].screenX;
+    touchY = e.changedTouches[0].screenY;
+  }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].screenX - touchX;
+    const dy = e.changedTouches[0].screenY - touchY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      dx < 0 ? next() : prev();
+    }
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>

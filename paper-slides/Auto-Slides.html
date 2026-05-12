@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto-Slides 论文精读</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+::root {
+  --bg: #ffffff;
+  --text: #000000;
+  --title: #3966A2;
+  --accent: #132843;
+  --secondary: #6191D3;
+  --light-bg: #F5F8FC;
+  --card-bg: #FFFFFF;
+  --border: #E2E8F0;
+  --radius: 14px;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background: #e8e8e8;
+  color: var(--text);
+  font-family: 'Inter', 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  height: 100vh;
+  cursor: default;
+  user-select: none;
+}
+
+/* ═══════════ SLIDE ENGINE ═══════════ */
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh 7vw;
+  background: var(--bg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(30px);
+  transition: opacity 0.6s cubic-bezier(.4,0,.2,1),
+              transform 0.6s cubic-bezier(.4,0,.2,1),
+              visibility 0.6s;
+  will-change: opacity, transform;
+}
+
+.slide.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+
+.slide.exit-up {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(-30px) !important;
+}
+
+/* Progress Bar */
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--title), var(--secondary));
+  z-index: 100;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Slide Dots */
+.dots {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ccc;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+.dot.active {
+  background: var(--title);
+  transform: scale(1.6);
+}
+.dot:hover { background: #999; }
+
+/* ═══════════ TYPOGRAPHY ═══════════ */
+.slide-label {
+  font-size: clamp(11px, 1.1vw, 14px);
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--secondary);
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: clamp(28px, 3.8vw, 52px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--accent);
+  letter-spacing: -1px;
+}
+h1 .highlight { color: var(--title); }
+
+h2 {
+  font-size: clamp(24px, 3vw, 42px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--title);
+  letter-spacing: -0.5px;
+}
+
+h3 {
+  font-size: clamp(15px, 1.6vw, 22px);
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: clamp(15px, 1.5vw, 20px);
+  font-weight: 400;
+  color: #555;
+  line-height: 1.6;
+  margin-top: 14px;
+  max-width: 700px;
+}
+
+.body-text {
+  font-size: clamp(14px, 1.35vw, 18px);
+  font-weight: 400;
+  color: #444;
+  line-height: 1.7;
+}
+
+.small-text {
+  font-size: clamp(12px, 1.1vw, 15px);
+  color: #777;
+  line-height: 1.5;
+}
+
+.divider {
+  width: 48px;
+  height: 3px;
+  background: var(--title);
+  border-radius: 2px;
+  margin: 14px 0;
+}
+.divider-accent { background: var(--secondary); }
+
+/* ═══════════ COMPONENTS ═══════════ */
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(57,102,162,0.08);
+  border: 1px solid rgba(57,102,162,0.18);
+  border-radius: 100px;
+  padding: 7px 16px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--title);
+  letter-spacing: 0.06em;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  width: fit-content;
+}
+.badge .dot-blue {
+  width: 7px; height: 7px;
+  background: var(--secondary);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.badge .dot-gray {
+  width: 4px; height: 4px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Cards */
+.card-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  flex: 0;
+}
+.card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.card {
+  background: var(--light-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(16px, 2vw, 28px);
+  display: flex;
+  flex-direction: column;
+}
+.card .card-num {
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 800;
+  color: var(--title);
+  opacity: 0.2;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.card h3 { font-size: clamp(14px, 1.4vw, 20px); margin-bottom: 6px; }
+.card .body-text { font-size: clamp(12px, 1.2vw, 16px); }
+
+/* Quote Block */
+.quote-block {
+  border-left: 3px solid var(--secondary);
+  padding: 14px 22px;
+  background: rgba(97,145,211,0.06);
+  border-radius: 0 12px 12px 0;
+  margin: 14px 0;
+}
+.quote-block p {
+  font-size: clamp(14px, 1.35vw, 18px);
+  font-weight: 500;
+  color: var(--accent);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* VS / Comparison */
+.vs-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-top: 16px;
+}
+.vs-col {
+  flex: 1;
+  border-radius: 16px;
+  padding: clamp(14px, 1.6vw, 22px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.vs-col.left-col {
+  background: #f9fafb;
+  border: 1px solid var(--border);
+}
+.vs-col.right-col {
+  background: linear-gradient(135deg, rgba(57,102,162,0.08), rgba(57,102,162,0.03));
+  border: 1px solid rgba(57,102,162,0.25);
+}
+.vs-col .vs-tag {
+  display: inline-block;
+  font-size: clamp(10px, 0.85vw, 12px);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+.vs-col.left-col .vs-tag {
+  background: rgba(0,0,0,0.06);
+  color: #888;
+}
+.vs-col.right-col .vs-tag {
+  background: rgba(57,102,162,0.12);
+  color: var(--title);
+}
+.vs-col h3 { font-size: clamp(15px, 1.5vw, 20px); margin-bottom: 8px; }
+.vs-col ul { list-style: none; padding: 0; }
+.vs-col ul li {
+  font-size: clamp(12px, 1.15vw, 15px);
+  color: #555;
+  line-height: 1.6;
+  padding: 3px 0 3px 20px;
+  position: relative;
+}
+.vs-col ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.vs-col.left-col ul li::before { background: #ccc; }
+.vs-col.right-col ul li::before { background: var(--title); }
+
+/* Steps */
+.steps {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  align-items: stretch;
+}
+.step {
+  flex: 1;
+  background: var(--light-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(14px, 1.8vw, 24px) clamp(10px, 1.2vw, 20px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.step .step-num {
+  font-size: clamp(10px, 0.85vw, 13px);
+  font-weight: 700;
+  color: var(--secondary);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.step h3 { font-size: clamp(13px, 1.2vw, 17px); margin-bottom: 4px; }
+.step .small-text { font-size: clamp(11px, 0.95vw, 13px); }
+.step-arrow {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #ccc;
+}
+
+/* Highlight Bar */
+.highlight-bar {
+  background: linear-gradient(135deg, rgba(57,102,162,0.08), rgba(57,102,162,0.03));
+  border: 1px solid rgba(57,102,162,0.15);
+  border-radius: 12px;
+  padding: clamp(12px, 1.6vw, 20px) clamp(16px, 2vw, 26px);
+  margin-top: 12px;
+}
+.highlight-bar p {
+  font-size: clamp(14px, 1.3vw, 17px);
+  color: var(--text);
+  line-height: 1.6;
+}
+.highlight-bar .accent-word {
+  color: var(--title);
+  font-weight: 600;
+}
+
+/* Bullet List */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+.bullet-list li {
+  font-size: clamp(13px, 1.25vw, 17px);
+  color: #444;
+  line-height: 1.7;
+  padding: 3px 0 3px 20px;
+  position: relative;
+}
+.bullet-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--title);
+}
+.bullet-list li .em {
+  color: var(--title);
+  font-weight: 600;
+}
+
+/* IPO Flow */
+.ipo-flow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 28px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.ipo-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+}
+.ipo-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  border: 2px solid;
+}
+.ipo-circle.i { border-color: var(--title); color: var(--title); background: rgba(57,102,162,0.06); }
+.ipo-circle.p { border-color: var(--secondary); color: var(--secondary); background: rgba(97,145,211,0.06); }
+.ipo-circle.o { border-color: #2d9d5e; color: #2d9d5e; background: rgba(45,157,94,0.06); }
+.ipo-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.ipo-desc {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  max-width: 130px;
+}
+.ipo-arrow {
+  font-size: 22px;
+  color: #bbb;
+}
+
+/* Cover Meta */
+.cover-meta {
+  margin-top: 28px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.cover-tag {
+  font-size: clamp(11px, 1vw, 14px);
+  font-weight: 500;
+  color: #666;
+  background: var(--light-bg);
+  border: 1px solid var(--border);
+  padding: 5px 14px;
+  border-radius: 100px;
+}
+
+/* Figure */
+.fig-container {
+  margin-top: 16px;
+  text-align: center;
+}
+.fig-container img {
+  max-width: 100%;
+  max-height: 50vh;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.fig-caption {
+  font-size: clamp(11px, 1vw, 13px);
+  color: #888;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: clamp(11px, 1.1vw, 14px);
+}
+.data-table th {
+  background: var(--light-bg);
+  color: var(--title);
+  font-weight: 600;
+  padding: 8px 12px;
+  text-align: center;
+  border-bottom: 2px solid var(--border);
+}
+.data-table td {
+  padding: 7px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  color: #444;
+}
+.data-table tr:hover td { background: rgba(57,102,162,0.03); }
+.data-table .best { color: var(--title); font-weight: 700; }
+.data-table .second { text-decoration: underline; }
+.data-table .check { color: #2d9d5e; font-weight: 700; }
+.data-table .cross { color: #ccc; }
+
+/* End Card */
+.end-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.end-card h2 {
+  font-size: clamp(28px, 3.2vw, 46px);
+  margin-bottom: 10px;
+}
+
+/* Glow */
+.glow {
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.06;
+  pointer-events: none;
+}
+.glow-blue { background: var(--title); }
+.glow-light { background: var(--secondary); }
+
+/* Two-column layout */
+.two-col {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  align-items: flex-start;
+}
+.two-col .col-left { flex: 1; }
+.two-col .col-right { flex: 1; }
+
+/* Prompt Box */
+.prompt-box {
+  background: var(--light-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: clamp(14px, 1.8vw, 22px) clamp(16px, 2vw, 26px);
+  margin-top: 14px;
+}
+.prompt-box .prompt-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--secondary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.prompt-box p {
+  font-size: clamp(13px, 1.2vw, 16px);
+  color: #555;
+  line-height: 1.65;
+}
+.prompt-box p em {
+  color: var(--title);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* ═══════════ ANIMATIONS ═══════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide.active .anim { animation: fadeUp 0.5s ease both; }
+.slide.active .anim:nth-child(1) { animation-delay: 0.06s; }
+.slide.active .anim:nth-child(2) { animation-delay: 0.12s; }
+.slide.active .anim:nth-child(3) { animation-delay: 0.18s; }
+.slide.active .anim:nth-child(4) { animation-delay: 0.24s; }
+.slide.active .anim:nth-child(5) { animation-delay: 0.30s; }
+.slide.active .anim:nth-child(6) { animation-delay: 0.36s; }
+.slide.active .anim:nth-child(7) { animation-delay: 0.42s; }
+.slide.active .anim:nth-child(8) { animation-delay: 0.48s; }
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 900px) {
+  .slide { padding: 4vh 5vw; }
+  .card-grid.cols-2, .card-grid.cols-3 { grid-template-columns: 1fr; }
+  .vs-row { flex-direction: column; gap: 12px; }
+  .steps { flex-direction: column; }
+  .dots { display: none; }
+  .ipo-flow { flex-direction: column; }
+  .ipo-arrow { transform: rotate(90deg); }
+  .two-col { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="dots" id="dots"></div>
+
+<div class="deck" id="deck">
+
+<!-- ═══════════ Slide 1: 封面 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue" style="top:-120px;left:-120px;"></div>
+  <div class="glow glow-light" style="bottom:-120px;right:-120px;"></div>
+  <div class="anim badge">
+    <span class="dot-blue"></span>
+    PAPER READING
+    <span class="dot-gray"></span>
+    2026
+  </div>
+  <div class="anim" style="font-size: clamp(1.8rem, 3.4vw, 3rem); font-weight: 800; line-height: 1.18; color: var(--accent);">
+    <span class="highlight" style="color:var(--title);">Auto-Slides</span>: An Interactive<br>
+    Multi-Agent System for Creating<br>
+    and Customizing <span style="color:var(--title);">Research Presentations</span>
+  </div>
+  <p class="anim subtitle">基于 LLM 的多智能体框架，将学术论文自动转化为教学优化的演示文稿，支持自然语言交互式修订</p>
+  <div class="anim cover-meta">
+    <span class="cover-tag">Yuheng Yang, Wenjia Jiang, Yang Wang, Yi Song, Yiwei Wang, Chi Zhang*</span>
+  </div>
+  <div class="anim cover-meta">
+    <span class="cover-tag">AGI Lab, Westlake University</span>
+    <span class="cover-tag">ICME 2026</span>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 2: 摘要 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Abstract</div>
+  <div class="anim"><h2>摘要</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim quote-block">
+    <p>The rapid progress of large language models (LLMs) has opened new opportunities for education. While learners can interact with academic papers through LLM-powered dialogue, such interactions are typically fragmented and text-only, lacking the structured, multimodal presentation that supports effective learning.</p>
+  </div>
+  <div class="anim highlight-bar">
+    <p>本文提出 <span class="accent-word">AUTO-SLIDES</span>，一个 LLM 驱动的多智能体框架，将学术论文自动转化为 <span class="accent-word">教学优化的演示文稿</span>。系统包含三阶段流水线：<span class="accent-word">内容理解与结构化</span>、<span class="accent-word">质量保证</span> 和 <span class="accent-word">生成与交互式优化</span>，支持自然语言迭代修订。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 3: 引言 - 现有研究不足 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Introduction</div>
+  <div class="anim"><h2>研究背景与挑战</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim vs-row">
+    <div class="vs-col left-col">
+      <span class="vs-tag">LLM 对话式学习</span>
+      <h3>现有方式</h3>
+      <ul>
+        <li>问答碎片化，缺乏系统组织</li>
+        <li>纯文本输出，缺少视觉辅助</li>
+        <li>学习者难以形成整体认知</li>
+        <li>复杂关系与结构难以传达</li>
+      </ul>
+    </div>
+    <div class="vs-col right-col">
+      <span class="vs-tag">本文方案</span>
+      <h3 style="color:var(--title);">Auto-Slides</h3>
+      <ul>
+        <li>结构化、多模态的演示文稿</li>
+        <li>认知科学指导的内容重组</li>
+        <li>PMRC 教学叙事框架</li>
+        <li>人在回路的交互式修订</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 4: 引言 - 核心挑战 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue" style="top:40%;right:-80px;transform:translateY(-50%);"></div>
+  <div class="anim slide-label">Challenges</div>
+  <div class="anim"><h2>论文到幻灯片转化的三大挑战</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim card-grid cols-3">
+    <div class="card">
+      <span class="card-num">01</span>
+      <h3>叙事风格差异</h3>
+      <p class="body-text">学术论文以 IMRaD 结构记录新颖性与严谨性，假设读者已有背景知识；教学幻灯片需要从问题出发、逻辑递进的 PMRC 叙事</p>
+    </div>
+    <div class="card">
+      <span class="card-num">02</span>
+      <h3>多模态内容保真</h3>
+      <p class="body-text">论文包含复杂表格、公式与图表，现有 LLM 在多模态内容提取上存在不足，导致关键信息丢失或结构错误</p>
+    </div>
+    <div class="card">
+      <span class="card-num">03</span>
+      <h3>事实准确性</h3>
+      <p class="body-text">LLM 的上下文长度限制与幻觉倾向可能导致遗漏重要发现或引入与原文不符的事实错误</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 5: 本文贡献 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Contributions</div>
+  <div class="anim"><h2>本文贡献</h2></div>
+  <div class="anim divider"></div>
+  <ul class="anim bullet-list">
+    <li>提出 <span class="em">AUTO-SLIDES</span>，LLM 驱动的多智能体框架，实现论文到教学幻灯片的端到端自动转化</li>
+    <li>设计 <span class="em">Parser Agent</span> 实现高保真多模态内容解析，<span class="em">Planner Agent</span> 基于 PMRC 框架重组教学内容</li>
+    <li>引入 <span class="em">Verification + Adjustment</span> 双重质量保证机制，确保内容保真与事实准确</li>
+    <li>开发 <span class="em">Editor Agent</span> 支持 ReAct 风格的自然语言交互式修订</li>
+    <li>三项用户研究 + LLM-as-Judge 消融实验验证系统有效性</li>
+  </ul>
+</section>
+
+<!-- ═══════════ Slide 6: 相关工作 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Related Work</div>
+  <div class="anim"><h2>相关工作</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>LLM 在教育中的应用</h3>
+      <p class="body-text">LLM 驱动的对话式学习（如 ReAct）支持推理与行动的协同，但输出以纯文本为主，缺乏结构化视觉呈现</p>
+      <p class="body-text" style="margin-top:8px;color:#999;">不足：碎片化交互、缺少多模态支持</p>
+    </div>
+    <div class="card">
+      <h3>自动演示文稿生成</h3>
+      <p class="body-text">传统方法如 LaTeX Beamer 依赖手动编码；Marker 等工具仅做 PDF 格式转换，缺乏教学优化与交互能力</p>
+      <p class="body-text" style="margin-top:8px;color:#999;">不足：无内容重组、无质量保证、无交互修订</p>
+    </div>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:16px;">
+    <p>现有方法在 <span class="accent-word">多模态内容保真</span>、<span class="accent-word">教学叙事优化</span> 和 <span class="accent-word">交互式精调</span> 方面存在明显空白。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 7: 方法 - 总体框架 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Overview</div>
+  <div class="anim"><h2>Auto-Slides 总体框架</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim ipo-flow">
+    <div class="ipo-step">
+      <div class="ipo-circle i">1</div>
+      <div class="ipo-label">Content Understanding</div>
+      <div class="ipo-desc">Parser + Planner<br>IMRaD &rarr; PMRC</div>
+    </div>
+    <div class="ipo-arrow">&#8594;</div>
+    <div class="ipo-step">
+      <div class="ipo-circle p">2</div>
+      <div class="ipo-label">Quality Assurance</div>
+      <div class="ipo-desc">Verification +<br>Adjustment</div>
+    </div>
+    <div class="ipo-arrow">&#8594;</div>
+    <div class="ipo-step">
+      <div class="ipo-circle o">3</div>
+      <div class="ipo-label">Generation</div>
+      <div class="ipo-desc">Generator + Editor<br>LaTeX Slides</div>
+    </div>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:20px;">
+    <p>三阶段流水线：<span class="accent-word">Parser Agent</span> 解析论文多模态内容，<span class="accent-word">Planner Agent</span> 基于 PMRC 重组叙事，<span class="accent-word">Verification + Adjustment</span> 保证准确，<span class="accent-word">Generator</span> 输出 LaTeX，<span class="accent-word">Editor</span> 支持交互修订。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 8: 方法 - Pipeline 图 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Pipeline</div>
+  <div class="anim"><h2>系统流水线</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim fig-container">
+    <img src="./Auto-Slides_assets/crop_002_page003_reg1.png" alt="Pipeline of Auto-Slides">
+    <div class="fig-caption">Fig. 2 — Auto-Slides Pipeline: (1) Parser &amp; Planner Agents 设计 JSON 结构; (2) Verification &amp; Adjustment Agents 确保保真; (3) Generator &amp; Editor Agents 产出幻灯片并支持交互修订</div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 9: 方法 - Parser Agent ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Stage 1a</div>
+  <div class="anim"><h2>Parser Agent: 高保真内容解析</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim two-col">
+    <div class="col-left">
+      <h3>两阶段解析策略</h3>
+      <ul class="bullet-list">
+        <li><span class="em">第一阶段 (Base Parsing)</span>：使用 Marker 提取论文基础文本结构</li>
+        <li><span class="em">第二阶段 (Information Extraction)</span>：LLM 二次解析复杂表格、公式与图表</li>
+        <li>提取内容存入结构化数据库，支持后续智能体精确检索</li>
+      </ul>
+    </div>
+    <div class="col-right">
+      <div class="highlight-bar">
+        <p><span class="accent-word">表格保真</span>：二次解析保留表格结构、公式精度与数据关系，避免 Markdown 转换导致的信息丢失</p>
+      </div>
+      <div class="highlight-bar" style="margin-top:8px;">
+        <p><span class="accent-word">结构化输出</span>：解析结果以 JSON 格式存储，每条记录包含位置、类型与内容，支持精确 RAG 检索</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 10: 方法 - Planner Agent ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Stage 1b</div>
+  <div class="anim"><h2>Planner Agent: 认知驱动教学规划</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim vs-row">
+    <div class="vs-col left-col">
+      <span class="vs-tag">论文原始结构</span>
+      <h3>IMRaD</h3>
+      <ul>
+        <li>Introduction — 记录研究背景</li>
+        <li>Methods — 描述技术细节</li>
+        <li>Results — 展示实验数据</li>
+        <li>Discussion — 分析意义</li>
+      </ul>
+    </div>
+    <div class="vs-col right-col">
+      <span class="vs-tag">教学优化结构</span>
+      <h3 style="color:var(--title);">PMRC</h3>
+      <ul>
+        <li>Problem — 明确研究问题与动机</li>
+        <li>Motivation — 阐述方法设计理由</li>
+        <li>Results — 聚焦核心发现</li>
+        <li>Conclusion — 总结与展望</li>
+      </ul>
+    </div>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:14px;">
+    <p>PMRC 叙事受 <span class="accent-word">认知负荷理论</span> 与 <span class="accent-word">多媒体学习理论</span> 指导：渐进式概念递进、文本-视觉空间邻近，降低外在认知负荷。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 11: 方法 - QA ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Stage 2</div>
+  <div class="anim"><h2>质量保证：验证与调整</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim steps">
+    <div class="step">
+      <span class="step-num">STEP 1</span>
+      <h3>Verification Agent</h3>
+      <p class="small-text">将幻灯片计划与论文解析内容逐项对比，评估方法论、结果与结论的覆盖充分性</p>
+    </div>
+    <div class="step-arrow">&#8594;</div>
+    <div class="step">
+      <span class="step-num">STEP 2</span>
+      <h3>覆盖评估</h3>
+      <p class="small-text">使用宽松语义准则：只要核心概念或发现被传达即计入覆盖，而非要求逐句匹配</p>
+    </div>
+    <div class="step-arrow">&#8594;</div>
+    <div class="step">
+      <span class="step-num">STEP 3</span>
+      <h3>Adjustment Agent</h3>
+      <p class="small-text">仅在覆盖不足时触发，定位原文材料、整合到现有幻灯片或新建补充页</p>
+    </div>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:16px;">
+    <p>双重机制：<span class="accent-word">Verification</span> 确保关键发现不遗漏，<span class="accent-word">Adjustment</span> 仅修复高优先级缺失，避免过度修改。实验显示基础管线本身已具有较高的内容准确性 (85.7% Tie)。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 12: 方法 - 生成与交互 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method — Stage 3</div>
+  <div class="anim"><h2>生成与交互式修订</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <span class="card-num">01</span>
+      <h3>Generator Agent</h3>
+      <p class="body-text">将 JSON 计划转化为 LaTeX Beamer 代码，编译为 PDF 幻灯片。保留表格、公式与图表的多模态完整性</p>
+    </div>
+    <div class="card">
+      <span class="card-num">02</span>
+      <h3>Editor Agent</h3>
+      <p class="body-text">采用 ReAct 风格过程：解读用户自然语言指令 &rarr; 定位相关片段 &rarr; 检索内容 &rarr; 修改代码 &rarr; 编译更新，支持迭代式精调</p>
+    </div>
+  </div>
+  <div class="anim prompt-box" style="margin-top:14px;">
+    <div class="prompt-label">交互示例</div>
+    <p>用户: "I'd like you to <em>change the narrative</em> for you to make it <em>more detailed</em>." &rarr; Editor Agent 解读意图 &rarr; 定位需修改的幻灯片 &rarr; 检索原文补充内容 &rarr; 生成更新</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 13: Teaser 图 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">System Demo</div>
+  <div class="anim"><h2>Auto-Slides 能力展示</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim fig-container">
+    <img src="./Auto-Slides_assets/crop_001_page001_reg1.png" alt="Auto-Slides Teaser Figure">
+    <div class="fig-caption">Fig. 1 — 左: 从论文自动生成完整学术演示文稿; 右: 通过自然语言指令迭代修订幻灯片</div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 14: 实验 - 设置 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — Settings</div>
+  <div class="anim"><h2>实验设置</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim two-col">
+    <div class="col-left">
+      <h3>基座模型</h3>
+      <ul class="bullet-list">
+        <li><span class="em">Parser Agent</span>: Marker + GPT-4o</li>
+        <li><span class="em">Planner Agent</span>: GPT-4o</li>
+        <li><span class="em">Verification / Adjustment</span>: GPT-4o</li>
+        <li><span class="em">Generator</span>: GPT-4o &rarr; LaTeX Beamer</li>
+        <li><span class="em">Editor</span>: ReAct 风格 LLM 调用</li>
+      </ul>
+    </div>
+    <div class="col-right">
+      <h3>评估方法</h3>
+      <ul class="bullet-list">
+        <li><span class="em">User Study 1</span>: 20 名参与者评估可用性 (SUS)</li>
+        <li><span class="em">User Study 2</span>: 对比 LLM 对话学习 vs Auto-Slides</li>
+        <li><span class="em">User Study 3</span>: 8 名专家评估叙事优化</li>
+        <li><span class="em">LLM-as-Judge</span>: GPT-4o + Claude-3.7 评估表格保真与内容准确</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 15: 实验 - 用户研究 1 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — User Study 1</div>
+  <div class="anim"><h2>用户研究 1: 可用性评估</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim two-col">
+    <div class="col-left">
+      <div class="highlight-bar">
+        <p><span class="accent-word">SUS 评分: 85.0</span> (优秀)</p>
+      </div>
+      <ul class="bullet-list" style="margin-top:12px;">
+        <li>20 名参与者，跨 5 篇论文</li>
+        <li>SUS &ge; 80 即为"优秀"等级</li>
+        <li>参与者评价系统 <span class="em">易于使用</span>、<span class="em">输出质量高</span></li>
+      </ul>
+    </div>
+    <div class="col-right">
+      <h3>定性反馈</h3>
+      <ul class="bullet-list">
+        <li>幻灯片 <span class="em">结构清晰</span>，逻辑流畅</li>
+        <li>多模态元素（表格、公式）<span class="em">保真度高</span></li>
+        <li>自然语言修订功能被广泛认可</li>
+        <li>编辑精确度仍有提升空间</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 16: 实验 - 用户研究 2 & 3 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — User Study 2 &amp; 3</div>
+  <div class="anim"><h2>对比学习效果与叙事优化</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>Study 2: Auto-Slides vs LLM Chat</h3>
+      <p class="body-text">Auto-Slides 组在 <span class="em">Content Accuracy</span> (5.59 vs 4.96, p=0.026, d=0.99) 和 <span class="em">Narrative Flow</span> (4.96 vs 4.30, p=0.019, d=1.07) 上显著优于 LLM 对话组</p>
+      <p class="body-text" style="margin-top:6px;color:#777;">Information Density 无显著差异 (4.38 vs 4.50)，说明内容重组提升理解而非削减信息量</p>
+    </div>
+    <div class="card">
+      <h3>Study 3: 专家评估叙事优化</h3>
+      <p class="body-text">8 名研究者评估自有论文生成的幻灯片。PMRC 叙事优化在 <span class="em">Content Accuracy</span> 和 <span class="em">Narrative Structure &amp; Flow</span> 上优于线性结构基线</p>
+      <p class="body-text" style="margin-top:6px;color:#777;">专家将提升归因于更流畅的概念导航和更高的研究发现呈现保真度</p>
+    </div>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:14px;">
+    <p>叙事优化 <span class="accent-word">通过重组内容而非改变信息量来增强理解</span>，降低认知负荷，使受众更容易跟随复杂论证与验证证据。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 17: 实验 - 消融实验 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — Ablation</div>
+  <div class="anim"><h2>LLM-as-Judge 消融实验</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim" style="overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Judge</th>
+          <th>Full Win</th>
+          <th>Tie</th>
+          <th>Agreement</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="2">Table Fidelity</td>
+          <td>GPT-4o</td>
+          <td class="best">67.9% (19)</td>
+          <td>14.3% (4)</td>
+          <td>78.6%</td>
+        </tr>
+        <tr>
+          <td>Claude</td>
+          <td class="best">67.9% (19)</td>
+          <td>14.3% (4)</td>
+          <td>50.0%</td>
+        </tr>
+        <tr>
+          <td>Content Accuracy</td>
+          <td>GPT-4o</td>
+          <td>7.1% (2)</td>
+          <td class="best">85.7% (24)</td>
+          <td>71.4%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="anim highlight-bar" style="margin-top:14px;">
+    <p>表格保真方面，两个 Judge 模型均以 <span class="accent-word">67.9%</span> 的胜率支持完整系统，凸显 Parser Agent 在保持复杂结构中的关键作用。内容准确方面，85.7% 为平局，表明基础管线本身已高度准确，Verification Agent 主要作为 <span class="accent-word">安全网</span> 存在。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 18: 消融可视化 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments — Ablation Visualization</div>
+  <div class="anim"><h2>消融可视化</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim fig-container">
+    <img src="./Auto-Slides_assets/crop_003_page004_reg1.png" alt="Ablation visualization">
+    <div class="fig-caption">消融分析：Parser Agent 二次解析显著提升表格保真度，Verification-Adjustment 提供额外鲁棒性</div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 19: 总结 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue" style="top:30%;left:10%;"></div>
+  <div class="anim slide-label">Conclusion</div>
+  <div class="anim"><h2>总结与展望</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>核心贡献</h3>
+      <ul class="bullet-list">
+        <li>提出 <span class="em">AUTO-SLIDES</span> 多智能体框架</li>
+        <li>六智能体三阶段流水线：Parser, Planner, Verification, Adjustment, Generator, Editor</li>
+        <li>PMRC 认知驱动叙事优化</li>
+        <li>三项用户研究 + 消融实验验证有效性</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>局限与未来</h3>
+      <ul class="bullet-list">
+        <li>依赖 LLM 能力，生成质量受模型限制</li>
+        <li>当前仅支持 LaTeX Beamer 格式输出</li>
+        <li>未来方向：支持更多输出格式 (PPT, HTML)</li>
+        <li>扩展至更长文档与跨论文综述幻灯片</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 20: 结尾 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue" style="top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+  <div class="end-card">
+    <div class="anim"><h2 style="color:var(--title);">Thank You</h2></div>
+    <div class="anim divider divider-accent" style="margin:12px auto;"></div>
+    <div class="anim subtitle" style="max-width:560px;text-align:center;margin:0 auto;">
+      Auto-Slides: An Interactive Multi-Agent System for<br>
+      Creating and Customizing Research Presentations<br>
+      <span style="color:var(--title);font-weight:500;">ICME 2026</span>
+    </div>
+    <div class="anim cover-meta" style="margin-top:24px;">
+      <span class="cover-tag">Yuheng Yang et al.</span>
+      <span class="cover-tag">AGI Lab, Westlake University</span>
+    </div>
+    <div class="anim cover-meta" style="margin-top:8px;">
+      <span class="cover-tag">auto-slides.github.io</span>
+    </div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const progress = document.getElementById('progress');
+  const dotsWrap = document.getElementById('dots');
+
+  // Build dots
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+  }
+  const dots = dotsWrap.querySelectorAll('.dot');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total || idx === current) return;
+    const prev = slides[current];
+    const next = slides[idx];
+
+    prev.classList.remove('active');
+    prev.classList.add('exit-up');
+
+    requestAnimationFrame(() => {
+      next.classList.remove('exit-up');
+      next.classList.add('active');
+    });
+
+    setTimeout(() => {
+      prev.classList.remove('exit-up');
+    }, 700);
+
+    dots[current].classList.remove('active');
+    current = idx;
+    dots[current].classList.add('active');
+    progress.style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  slides[0].classList.add('active');
+  progress.style.width = (1 / total * 100) + '%';
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+  });
+
+  // Touch / swipe
+  let touchX = 0, touchY = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchX = e.changedTouches[0].screenX;
+    touchY = e.changedTouches[0].screenY;
+  }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].screenX - touchX;
+    const dy = e.changedTouches[0].screenY - touchY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      dx < 0 ? next() : prev();
+    }
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
