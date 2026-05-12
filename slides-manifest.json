@@ -77,13 +77,6 @@
       "description": "Dialogue Director 论文精读演示，聚焦对话可视化新任务、免训练三智能体框架（Script Director + Cinematographer + Storyboard Maker）与电影知识整合。",
       "kind": "Paper Reading",
       "accent": "rgba(57,102,162,.18)"
-    },
-    {
-      "title": "Auto-Slides 论文精读",
-      "file": "paper-slides/Auto-Slides.html",
-      "description": "Auto-Slides 论文精读演示，聚焦 LLM 驱动多智能体框架、PMRC 认知叙事优化、Verification-Adjustment 质量保证与 ReAct 风格交互式修订。",
-      "kind": "Paper Reading",
-      "accent": "rgba(57,102,162,.18)"
     }
   ]
 }
