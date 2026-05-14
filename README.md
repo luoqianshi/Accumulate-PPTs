@@ -2,7 +2,7 @@
 
 个人 HTML 演示文稿（PPT）仓库，用于存放和管理基于 HTML 的幻灯片作品、论文精读汇报与相关制作技能。
 <p align="center">
-  <img src="assets/Accumulate-PPTs.png" alt="Accumulate-PPTs" width="85%">
+  <img src="assets\accmulate-ppts.png" alt="Accumulate-PPTs" width="85%">
 </p>
 
 ## 简介
