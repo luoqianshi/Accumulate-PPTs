@@ -78,8 +78,6 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 2. 模型建议使用原生多模态的模型，例如KIMI K2.6等模型生成的效果会更佳
 3. 当前的模型生成的HTML-PPT仅为初稿，用户可以根据自己的需求与Agent多次对话以优化PPT的质量
 
-## 核心技术特点
-
 ## 技术栈
 
 - HTML5 + CSS3
