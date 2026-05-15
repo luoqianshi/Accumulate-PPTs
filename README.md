@@ -1,6 +1,5 @@
 # Accumulate-PPTs
 
-个人 HTML 演示文稿（PPT）仓库，用于存放和管理基于 HTML 的幻灯片作品、论文精读汇报与相关制作技能。
 <p align="center">
   <img src="assets\accmulate-ppts.png" alt="Accumulate-PPTs" width="85%">
 </p>
@@ -8,6 +7,10 @@
 ## 简介
 
 本仓库是一个专注于 HTML 幻灯片制作的个人项目集合，支持将论文原文、阅读笔记、Markdown 内容或答辩材料整理为可直接浏览器播放的单文件 HTML 演示文稿。根目录的 `index.html` 会读取 `slides-manifest.json`，将 `paper-slides/` 中收录的论文类演示文稿渲染为导航画廊。
+
+- 内置了一个图文并茂的专门用于制作论文汇报PPT的SKILL：html-paper-slides；
+- 生成的html格式的ppt存放于paper-slides目录下，并会自动更新slides-manifest.json文件；
+- 通过Github Actions自动部署PPT汇聚网站于Github Pages，可以基于此查看所有生成的ppt。
 
 单文件 HTML 幻灯片的底层方案参考自开源项目 [html-presentation](https://github.com/juanjuanjie/html-presentation)，在此基础上进行了主题定制、组件扩展与论文汇报场景适配。
 
@@ -22,11 +25,11 @@ Accumulate-PPTs/
 │   ├── your-paper-slides.html
 │   └── your-other-slides.html
 ├── skills/               # 幻灯片制作技能、脚本与模板文档
-│   ├── html-paper-slides/
+│   ├── html-paper-slides/         # 骆同学针对论文精读汇报场景优化的HTML幻灯片制作技能
 │   │   ├── SKILL.md
 │   │   └── scripts/
 │   │       └── pdf_extractor.py   # 从论文 PDF 中提取核心配图的辅助脚本
-│   └── html-slides/
+│   └── html-slides/               # 来自卷卷姐的原始版本的通用HTML幻灯片制作技能
 │       ├── SKILL.md
 │       └── templates/
 │           └── presentation.html
@@ -65,38 +68,17 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 ```
 - 删除`paper-slides/`目录下的所有文件，并将`slides-manifest.json`文件中的`slides`数组清空，当前是作者个人使用的数据。
 
-- 用**TRAE**、**CodeBuddy**等AI IDE打开当前的项目，然后使用以下的提示词开始制作你的第一份HTML格式的论文汇报PPT吧~
+- 用`Claude Code`、`TRAE`、`CodeBuddy`等AI IDE打开当前的项目，然后使用以下的提示词开始制作你的第一份HTML格式的论文汇报PPT吧~
 
-```prompts
-使用html-paper-slides技能(skills\html-paper-slides\SKILL.md)，帮我为[给定你要制作的PDF格式的论文的文件路径]制作一份HTML格式的PPT，最终文件存放在paper-slides目录下。
+```markdown
+请你使用html-paper-slides技能(skills\html-paper-slides\SKILL.md)，帮我为[给定你要制作的PDF格式的论文的文件路径]制作一份HTML格式的PPT，最终文件存放在paper-slides目录下。
 ```
+## 注意事项
+1. 当前的PDF论文图片提取的python脚本存在冗余提取的问题，用户可以在初稿生成完毕之后手动删除冗余的图片
+2. 模型建议使用原生多模态的模型，例如KIMI K2.6等模型生成的效果会更佳
+3. 当前的模型生成的HTML-PPT仅为初稿，用户可以根据自己的需求与Agent多次对话以优化PPT的质量
 
 ## 核心技术特点
-
-### 设计风格
-
-- **页面形态**：单文件 HTML 幻灯片，适合本地预览、论文汇报与技术分享
-- **字体规范**：Noto Sans SC（中文）+ Inter（英文/数字）等 Web 字体
-- **页面比例**：16:9 标准宽屏比例
-- **视觉组件**：卡片、徽章、高亮条、步骤流、数据表格、进度条等可复用模块
-
-### 功能组件
-
-- Slide Engine - 分页切换逻辑
-- 底部翻页控制 + 页码计数器
-- 顶部进度条
-- 右侧导航点
-- `slides-manifest.json` 驱动的演示文稿导航画廊
-
-## 使用方法
-
-1. **归档原文**：将论文、补充材料、数据集说明和参考链接放入 `raw/`，保留可追溯来源。
-2. **摄取提炼**：在 `ingest/` 中整理 Markdown 重点提取稿，形成论文信息卡、方法拆解、实验结论和汇报大纲。
-3. **提取配图**（可选）：运行 `skills/html-paper-slides/scripts/pdf_extractor.py`，从 `raw/` 中的论文 PDF 自动提取核心配图，供后续 PPT 使用。
-4. **生成 PPT**：根据 `html-slides/SKILL.md` 或既有 `paper-slides/` 样例，将 Markdown 内容转换为单文件 HTML。
-5. **收录到画廊**：将论文类 HTML 文件放入 `paper-slides/`，并在 `slides-manifest.json` 中补充或更新标题、路径、简介、类型与主题色。
-6. **预览画廊**：在浏览器中打开 `index.html`，通过导航页进入对应演示文稿。
-7. **演示播放**：打开具体 HTML 文件后，使用键盘方向键或页面按钮翻页。
 
 ## 技术栈
 
@@ -116,4 +98,4 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 
 ---
 
-*Last Updated: 2026-05-07*
+*Last Updated: 2026-05-15*
