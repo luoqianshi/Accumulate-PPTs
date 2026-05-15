@@ -1,6 +1,13 @@
 {
   "generatedAt": "2026-05-14T17:00:00+08:00",
   "slides": [
+        {
+      "title": "Attention Is All You Need",
+      "file": "paper-slides/Attention_Is_All_You_Need.html",
+      "description": "Transformer 经典论文演示，聚焦完全基于注意力机制的全新序列转导架构、多头自注意力、位置编码与机器翻译 SOTA 结果。",
+      "kind": "期刊/会议",
+      "accent": "rgba(57,102,162,.18)"
+    },
     {
       "title": "YOLO-Master Presentation",
       "file": "paper-slides/YOLO-Master_Presentation.html",
