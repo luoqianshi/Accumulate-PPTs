@@ -27,9 +27,11 @@ Accumulate-PPTs/
 ├── skills/               # 幻灯片制作技能、脚本与模板文档
 │   ├── html-paper-slides/         # 骆同学针对论文精读汇报场景优化的HTML幻灯片制作技能
 │   │   ├── SKILL.md
-│   │   └── scripts/
-│   │       ├── pdf_extractor.py   # 从论文 PDF 中提取核心配图的辅助脚本
-│   │       └── generate-thumbnails.py  # 为 HTML 幻灯片生成首屏缩略图（Playwright）
+│   │   ├── scripts/
+│   │   │   ├── pdf_extractor.py   # 从论文 PDF 中提取核心配图的辅助脚本
+│   │   │   └── generate-thumbnails.py  # 为 HTML 幻灯片生成首屏缩略图（Playwright）
+│   │   └── templates/
+│   │       └── presentation.html  # 论文汇报场景专用HTML幻灯片模板（含Slide Engine、进度条、导航点、动画及多种可复用组件）
 │   └── html-slides/               # 来自卷卷姐的原始版本的通用HTML幻灯片制作技能
 │       ├── SKILL.md
 │       └── templates/
