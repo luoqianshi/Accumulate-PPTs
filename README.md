@@ -28,12 +28,14 @@ Accumulate-PPTs/
 │   ├── html-paper-slides/         # 骆同学针对论文精读汇报场景优化的HTML幻灯片制作技能
 │   │   ├── SKILL.md
 │   │   └── scripts/
-│   │       └── pdf_extractor.py   # 从论文 PDF 中提取核心配图的辅助脚本
+│   │       ├── pdf_extractor.py   # 从论文 PDF 中提取核心配图的辅助脚本
+│   │       └── generate-thumbnails.py  # 为 HTML 幻灯片生成首屏缩略图（Playwright）
 │   └── html-slides/               # 来自卷卷姐的原始版本的通用HTML幻灯片制作技能
 │       ├── SKILL.md
 │       └── templates/
 │           └── presentation.html
 ├── assets/               # 通用静态资源
+│   └── thumbnails/       # HTML 幻灯片首屏缩略图（自动生成）
 ├── raw/                  # 原始论文与素材，保留 PDF 等一手资料
 ├── ingest/               # 摄取后的 Markdown 中间稿与提取素材
 └── output/               # 通用 HTML PPT 输出区，适合草稿、课程或非论文类演示
@@ -53,11 +55,11 @@ Accumulate-PPTs/
 
 ### 3. HTML PPT：演示成品入库
 
-HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。论文类成品优先放入 `paper-slides/`，课程、练习或通用内容可放入 `output/`。生成时应保留清晰的章节流：封面、背景、问题、方法、实验、消融、结论与展望，并通过卡片、流程图、对比表、指标高亮和导航控件强化阅读节奏。成品入库后，需要同步更新 `slides-manifest.json`，确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。
+HTML PPT 阶段将 `ingest/` 的结构化内容转化为单文件演示文稿。论文类成品优先放入 `paper-slides/`，课程、练习或通用内容可放入 `output/`。生成时应保留清晰的章节流：封面、背景、问题、方法、实验、消融、结论与展望，并通过卡片、流程图、对比表、指标高亮和导航控件强化阅读节奏。成品入库后，需要同步更新 `slides-manifest.json`，确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。随后运行 `python generate-thumbnails.py` 生成首屏缩略图，电子书柜的卡片便会直接展示真实的幻灯片封面，而非默认示意图。
 
 ### 质量检查
 
-在进入下一阶段前建议检查：`raw/` 是否可追溯到原始来源；`ingest/` 是否已经提炼出足够支撑 8-15 页汇报的主线；HTML PPT 是否可以单文件打开、键盘翻页、视觉层级清晰；`slides-manifest.json` 是否覆盖 `paper-slides/` 下的全部 HTML 文件。
+在进入下一阶段前建议检查：`raw/` 是否可追溯到原始来源；`ingest/` 是否已经提炼出足够支撑 8-15 页汇报的主线；HTML PPT 是否可以单文件打开、键盘翻页、视觉层级清晰；`slides-manifest.json` 是否覆盖 `paper-slides/` 下的全部 HTML 文件；`assets/thumbnails/` 是否已包含对应的缩略图且 `thumbnail` 字段已正确写入 manifest。
 
 ## 快速开始
 
@@ -73,12 +75,16 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 ```markdown
 请你使用html-paper-slides技能(skills\html-paper-slides\SKILL.md)，帮我为[给定你要制作的PDF格式的论文的文件路径]制作一份HTML格式的PPT，最终文件存放在paper-slides目录下。
 ```
+
+- 生成完成后，运行以下命令为新的 HTML PPT 生成首屏缩略图，使电子书柜卡片展示真实封面：
+
+```bash
+python skills/html-paper-slides/scripts/generate-thumbnails.py
+```
 ## 注意事项
 1. 当前的PDF论文图片提取的python脚本存在冗余提取的问题，用户可以在初稿生成完毕之后手动删除冗余的图片
 2. 模型建议使用原生多模态的模型，例如KIMI K2.6等模型生成的效果会更佳
 3. 当前的模型生成的HTML-PPT仅为初稿，用户可以根据自己的需求与Agent多次对话以优化PPT的质量
-
-## 核心技术特点
 
 ## 技术栈
 
@@ -87,6 +93,7 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 - CSS Grid / Flexbox 布局
 - CSS Variables 主题管理
 - Google Fonts 字体加载
+- Playwright（Python）—— 用于自动生成 HTML PPT 首屏缩略图
 
 ## 参考与致谢
 
@@ -98,4 +105,4 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 
 ---
 
-*Last Updated: 2026-05-15*
+*Last Updated: 2026-05-16*
