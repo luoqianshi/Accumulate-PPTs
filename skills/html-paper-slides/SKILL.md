@@ -79,6 +79,7 @@ Google Fonts: Noto Sans SC (中文) + Inter (英文/数字)
    - 结尾
 4. **填充内容**: 根据模板组件填充具体内容
 5. **预览调整**: 生成后检查效果并微调
+6. **生成缩略图**: 运行 `python .\skills\html-paper-slides\scripts\generate-thumbnails.py` 为新生成的 HTML 幻灯片截取首屏封面，输出到 `assets/thumbnails/`，并自动更新 `slides-manifest.json` 中的 `thumbnail` 字段，使电子书柜首页的卡片能展示真实的幻灯片封面而非默认示意图
 
 ## 分页规划建议
 
