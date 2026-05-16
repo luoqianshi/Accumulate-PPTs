@@ -466,11 +466,13 @@
         <!-- Cover preview area -->
         <div class="book-preview relative h-40 overflow-hidden">
           <div class="book-cover-bg absolute inset-0"></div>
+          <!-- Thumbnail image -->
+          <img class="book-thumbnail absolute inset-0 w-full h-full object-cover" src="" alt="" loading="lazy" style="display:none;" />
           <!-- Decorative shapes -->
           <div class="absolute left-5 top-5 h-20 w-20 rounded-full opacity-20 blur-xl blob-a" style="background:rgba(255,255,255,.6)"></div>
           <div class="absolute right-4 bottom-4 h-24 w-24 rounded-full opacity-15 blur-2xl blob-b" style="background:rgba(255,255,255,.4)"></div>
           <!-- Fallback presentation icon -->
-          <div class="absolute inset-0 flex items-center justify-center opacity-10">
+          <div class="book-fallback absolute inset-0 flex items-center justify-center opacity-10">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
           </div>
           <!-- Gradient fade to content -->
@@ -512,10 +514,12 @@
           <!-- Cover preview area (wider for featured) -->
           <div class="book-preview relative sm:w-2/5 h-44 sm:h-auto sm:min-h-[16rem] overflow-hidden flex-shrink-0">
             <div class="book-cover-bg absolute inset-0"></div>
+            <!-- Thumbnail image -->
+            <img class="book-thumbnail absolute inset-0 w-full h-full object-cover" src="" alt="" loading="lazy" style="display:none;" />
             <div class="absolute left-8 top-8 h-28 w-28 rounded-full opacity-20 blur-2xl blob-a" style="background:rgba(255,255,255,.6)"></div>
             <div class="absolute right-6 bottom-6 h-32 w-32 rounded-full opacity-15 blur-2xl blob-c" style="background:rgba(255,255,255,.4)"></div>
             <!-- Decorative grid pattern -->
-            <div class="absolute inset-0 flex items-center justify-center opacity-[.07]">
+            <div class="book-fallback absolute inset-0 flex items-center justify-center opacity-[.07]">
               <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=".8" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
             </div>
             <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FEFEFA] to-transparent sm:hidden"></div>
@@ -626,7 +630,8 @@
         file: normalizedFile,
         description: metadata.description || existing?.description || '从 paper-slides 目录发现的 HTML 格式 PPT，可直接嵌入放映或打开原页。',
         kind: metadata.kind || existing?.kind || '期刊/会议',
-        accent: metadata.accent || existing?.accent || (index % 2 === 0 ? 'rgba(93,112,82,.2)' : 'rgba(193,140,93,.22)')
+        accent: metadata.accent || existing?.accent || (index % 2 === 0 ? 'rgba(93,112,82,.2)' : 'rgba(193,140,93,.22)'),
+        thumbnail: metadata.thumbnail || existing?.thumbnail || ''
       };
     }
 
@@ -722,6 +727,14 @@
         node.querySelector('.deck-kind').textContent = deck.kind;
         node.querySelector('.deck-title').textContent = deck.title;
         node.querySelector('.deck-description').textContent = deck.description;
+
+        const thumbImg = node.querySelector('.book-thumbnail');
+        const fallback = node.querySelector('.book-fallback');
+        if (deck.thumbnail && thumbImg) {
+          thumbImg.src = deck.thumbnail;
+          thumbImg.style.display = '';
+          if (fallback) fallback.style.display = 'none';
+        }
 
         const playBtn = node.querySelector('.deck-play');
         const link = node.querySelector('.deck-link');

@@ -1,33 +1,37 @@
 {
   "generatedAt": "2026-05-14T17:00:00+08:00",
   "slides": [
-        {
+    {
       "title": "Attention Is All You Need",
       "file": "paper-slides/Attention_Is_All_You_Need.html",
       "description": "Transformer 经典论文演示，聚焦完全基于注意力机制的全新序列转导架构、多头自注意力、位置编码与机器翻译 SOTA 结果。",
       "kind": "期刊/会议",
-      "accent": "rgba(57,102,162,.18)"
+      "accent": "rgba(57,102,162,.18)",
+      "thumbnail": "assets/thumbnails/Attention_Is_All_You_Need.png"
     },
     {
       "title": "YOLO-Master Presentation",
       "file": "paper-slides/YOLO-Master_Presentation.html",
       "description": "YOLO-Master 论文演示，聚焦基于 MoE 加速的专业化 Transformer 实时目标检测方法。",
       "kind": "期刊/会议",
-      "accent": "rgba(97,145,211,.18)"
+      "accent": "rgba(97,145,211,.18)",
+      "thumbnail": "assets/thumbnails/YOLO-Master_Presentation.png"
     },
     {
       "title": "Boosting Long-tailed Object Detection via Step-wise Learning",
       "file": "paper-slides/smooth-tail_learning.html",
       "description": "ICCV 2023 长尾目标检测论文演示，聚焦平滑尾部数据构建、逐步学习框架与知识迁移策略。",
       "kind": "期刊/会议",
-      "accent": "rgba(57,102,162,.18)"
+      "accent": "rgba(57,102,162,.18)",
+      "thumbnail": "assets/thumbnails/smooth-tail_learning.png"
     },
     {
       "title": "Dialogue Director 论文精读",
       "file": "paper-slides/Dialogue_Director.html",
       "description": "Dialogue Director 论文精读演示，聚焦对话可视化新任务、免训练三智能体框架（Script Director + Cinematographer + Storyboard Maker）与电影知识整合。",
       "kind": "期刊/会议",
-      "accent": "rgba(57,102,162,.18)"
+      "accent": "rgba(57,102,162,.18)",
+      "thumbnail": "assets/thumbnails/Dialogue_Director.png"
     }
   ]
 }
