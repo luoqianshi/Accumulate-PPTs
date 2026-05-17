@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from playwright.async_api import async_playwright
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 SLIDES_DIR = BASE_DIR / "paper-slides"
 THUMB_DIR = BASE_DIR / "assets" / "thumbnails"
 MANIFEST_PATH = BASE_DIR / "slides-manifest.json"

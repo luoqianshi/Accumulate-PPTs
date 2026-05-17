@@ -32,6 +32,14 @@
       "kind": "期刊/会议",
       "accent": "rgba(57,102,162,.18)",
       "thumbnail": "assets/thumbnails/Dialogue_Director.png"
+    },
+    {
+      "title": "YOLOv12: Attention-Centric Real-Time Object Detectors",
+      "file": "paper-slides/YOLOv12_Attention-Centric.html",
+      "description": "YOLOv12 论文演示，聚焦以注意力机制为核心的实时目标检测框架，包括 Area Attention、R-ELAN 与多项架构优化。",
+      "kind": "期刊/会议",
+      "accent": "rgba(57,102,162,.18)",
+      "thumbnail": "assets/thumbnails/YOLOv12_Attention-Centric.png"
     }
   ]
 }
