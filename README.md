@@ -14,6 +14,11 @@
 
 单文件 HTML 幻灯片的底层方案参考自开源项目 [html-presentation](https://github.com/juanjuanjie/html-presentation)，在此基础上进行了主题定制、组件扩展与论文汇报场景适配。
 
+- 此外，仓库内也内置了一些其它场景的PPT制作的SKILL，包括：
+  - html-work-report-slides：学生工作述职报告PPT制作技能（苹果风/Notion风）
+  - html-slides：通用HTML幻灯片制作技能
+  这些SKILL可以用于给定场景的PPT制作，具体使用方法请参考对应的SKILL.md文件。
+
 ## 项目结构
 
 ```
@@ -31,7 +36,9 @@ Accumulate-PPTs/
 │   │   │   ├── pdf_extractor.py   # 从论文 PDF 中提取核心配图的辅助脚本
 │   │   │   └── generate-thumbnails.py  # 为 HTML 幻灯片生成首屏缩略图（Playwright）
 │   │   └── templates/
-│   │       └── presentation.html  # 论文汇报场景专用HTML幻灯片模板（含Slide Engine、进度条、导航点、动画及多种可复用组件）
+│   │       └── presentation.html  # 论文汇报场景专用HTML幻灯片模板
+│   ├── html-work-report-slides/   # 学生工作述职报告PPT制作技能（苹果风/Notion风）
+│   │   └── SKILL.md               # 述职报告场景专用HTML幻灯片规范、组件说明与分页规划建议
 │   └── html-slides/               # 来自卷卷姐的原始版本的通用HTML幻灯片制作技能
 │       ├── SKILL.md
 │       └── templates/
@@ -74,8 +81,14 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 
 - 用`Claude Code`、`TRAE`、`CodeBuddy`等AI IDE打开当前的项目，然后使用以下的提示词开始制作你的第一份HTML格式的论文汇报PPT吧~
 
+**论文汇报场景：**
 ```markdown
 请你使用html-paper-slides技能(skills\html-paper-slides\SKILL.md)，帮我为[给定你要制作的PDF格式的论文的文件路径]制作一份HTML格式的PPT，最终文件存放在paper-slides目录下。
+```
+
+**学生工作述职报告场景：**
+```markdown
+请你使用html-work-report-slides技能(skills\html-work-report-slides\SKILL.md)，帮我制作一份HTML格式的学生工作述职报告PPT，最终文件存放在output目录下。
 ```
 
 - 生成完成后，运行以下命令为新的 HTML PPT 生成首屏缩略图，使电子书柜卡片展示真实封面：
@@ -107,4 +120,4 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 ---
 
-*Last Updated: 2026-05-16*
+*Last Updated: 2026-05-27*
