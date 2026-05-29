@@ -127,3 +127,94 @@ font-family: 'Inter', 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft Y
 - **解决**：
   1. CSS 的 `.slide.active` 三个关键属性必须加 `!important`：`opacity`、`visibility`、`transform`
   2. JS 翻页函数**禁止使用 inline style**，只操作 `classList.add/remove('active')` 和 `classList.add('exit-up')`，完全由 CSS transition 处理动画
+
+---
+
+## HTML转PPTX转换
+
+### 转换原理
+
+将 HTML 述职报告（`.slide` 结构）逐页解析为 python-pptx 的 `Slide` 对象。核心思路：
+
+1. **读取 HTML + CSS**：分析每页 `.slide` 的布局结构（卡片网格、步骤流、时间线、数据大字等）
+2. **布局映射**：HTML 布局 → PPTX 形状（矩形、圆角矩形、文本框、圆形）
+3. **样式映射**：CSS 颜色/字号/间距 → python-pptx 的 `RGBColor` / `Pt` / `Inches`
+4. **逐页构建**：每页调用 `prs.slides.add_slide()` 独立创建
+
+### 关键步骤
+
+```python
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN
+from pptx.enum.shapes import MSO_SHAPE
+
+# 1. 创建 16:9 演示文稿
+prs = Presentation()
+prs.slide_width = Inches(13.333)
+prs.slide_height = Inches(7.5)
+
+# 2. 使用空白布局
+slide = prs.slides.add_slide(prs.slide_layouts[6])
+
+# 3. 绘制背景/形状
+shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height)
+shape.fill.solid()
+shape.fill.fore_color.rgb = RGBColor(0xF8, 0xFA, 0xFD)
+
+# 4. 添加文本框
+txBox = slide.shapes.add_textbox(left, top, width, height)
+tf = txBox.text_frame
+p = tf.paragraphs[0]
+p.text = "标题文字"
+p.font.size = Pt(28)
+p.font.color.rgb = RGBColor(0x39, 0x66, 0xA2)
+p.font.bold = True
+p.font.name = 'Microsoft YaHei'
+```
+
+### 组件映射表
+
+| HTML 组件 | PPTX 实现 |
+|-----------|----------|
+| `.card` | `MSO_SHAPE.ROUNDED_RECTANGLE` + 文本框覆盖 |
+| `.stat-number` | 大号 `Pt(36)` 文本框，颜色 `#132843`，居中对齐 |
+| `.steps` | 多个圆角矩形 + `MSO_SHAPE.OVAL` 编号圆 + 文本框 |
+| `.timeline` | 竖线矩形 + 小圆点 + 文本排列 |
+| `.highlight-bar` | 圆角矩形背景 + 左侧细条 accent 线 |
+| `.badge` | 小圆角矩形 `Pt(10-11)` + 居中文本 |
+| `.cover` | `slide.background.fill` 深蓝 + 白色/浅蓝文本 |
+| `.glow` | 大椭圆 `MSO_SHAPE.OVAL` 半透明填充 |
+
+### 已知限制
+
+1. **无动画**：pptx 不支持 CSS transition/animation，所有页面为静态快照
+2. **无交互**：进度条、导航点、键盘/滚轮翻页均不适用
+3. **渐变有限**：python-pptx 的渐变（`fill.gradient()`）实现复杂，`.step-num` 圆形使用纯色替代渐变
+4. **圆角差异**：pptx 的 `ROUNDED_RECTANGLE` 圆角半径固定，无法精确匹配 CSS `border-radius`
+5. **字体大小**：CSS `clamp()` 响应式字号只能取中间值近似为固定 `Pt`
+6. **卡片悬停**：`.card:hover` 效果无法在静态 PPTX 中体现
+7. **布局弹性**：CSS Grid/Flexbox 的弹性间距需手动计算为固定 `Inches` 值
+8. **中文编码**：Python 脚本中包含中文文本时建议使用 Unicode 转义或确保文件 UTF-8 编码，避免语法解析错误
+
+### 转换命令示例
+
+```bash
+# 生成 PPTX
+python html_to_pptx.py
+
+# 脚本入口
+# input:  HTML 文件（硬编码路径或命令行参数）
+# output: .pptx 文件，保存至 output 目录
+```
+
+### 质量评估标准
+
+| 维度 | 评估 |
+|------|------|
+| 页面对应 | 100%（14/14 页 1:1 映射） |
+| 内容完整性 | 高（所有文本、卡片、数据完整保留） |
+| 配色一致性 | 高（#ffffff / #3966A2 / #132843 / #6191D3 精确匹配） |
+| 布局还原度 | 中高（卡片网格、steps、timeline 结构保留，细节间距需微调） |
+| 缺失项 | 动画/交互/渐变/弹性间距
