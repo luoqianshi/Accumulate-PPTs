@@ -40,6 +40,14 @@
       "kind": "期刊/会议",
       "accent": "rgba(57,102,162,.18)",
       "thumbnail": "assets/thumbnails/YOLOv12_Attention-Centric.png"
+    },
+    {
+      "title": "Ultralytics YOLO26: Unified Real-Time End-to-End Vision Models",
+      "file": "paper-slides/YOLO26_Unified_Real-Time_Vision.html",
+      "description": "YOLO26 论文演示，聚焦统一实时端到端视觉模型家族，包括 DFL-free 双头架构、MuSGD、Progressive Loss、STAL 及多任务扩展。",
+      "kind": "期刊/会议",
+      "accent": "rgba(57,102,162,.18)",
+      "thumbnail": "assets/thumbnails/YOLO26_Unified_Real-Time_Vision.png"
     }
   ]
 }
