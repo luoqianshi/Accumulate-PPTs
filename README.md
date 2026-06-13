@@ -17,7 +17,7 @@
 
 ---
 
-## TL;DR — 30 秒看懂
+## 30 秒看懂
 
 `Accumulate-PPTs` 是面向**研究生与高校大学生**的 HTML 幻灯片工作流仓库,把"读论文 → 做汇报 → 答辩演练"这条最常见的痛点路径,封装成 3 个可被 AI Agent 直接调用的 SKILL。你给一句中文 prompt,Agent 就能在 5–20 分钟内产出一份苹果风/Notion 风的单文件 HTML 演示文稿,既能浏览器直接放映,也能嵌入个人主页长期展示。
 
@@ -288,7 +288,7 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 我们追求 80 分的稳定可用,而非 100 分的完美:
 
 1. **PDF 配图存在冗余提取**:首版生成后建议手动删除冗余图片,后续会引入视觉语言模型做精选
-2. **多模态模型效果更佳**:推荐使用 KIMI K2.6、GPT-4o、Claude Sonnet 4.5 等原生多模态模型,纯文本模型会丢失论文配图
+2. **多模态模型效果更佳**:推荐使用 KIMI K2.6、Minimax M3等原生多模态模型,纯文本模型会丢失论文配图
 3. **当前版本为高质量初稿**:建议在初稿生成后与 Agent 进行多轮对话精修,例如"第 5 页方法图换成架构图" / "页脚加学校 logo"
 4. **不直接从 LaTeX 源生成**:若需 LaTeX 高保真,请使用 Beamer;本仓库主打"用 PDF/Markdown 就能上手"
 5. **缩略图依赖 Playwright**:首次运行需 `pip install playwright && playwright install chromium`,无图形环境(headless 服务器)需补 `--with-deps` 步骤
@@ -298,27 +298,7 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 ## License
 
 本项目以 **MIT 协议**完全开源,个人和商用均免费,无需事先授权。
-
-```
-MIT License
-
-Copyright (c) 2026 Luo Qianshi (骆同学)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND...
-```
-
 详见 [LICENSE](LICENSE) 文件。
-
 ---
 
 ## 致谢
@@ -337,10 +317,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND...
 |------|------------|
 | GitHub | [@luoqianshi](https://github.com/luoqianshi) |
 | 在线画廊 | [luoqianshi.github.io/Accumulate-PPTs](https://luoqianshi.github.io/Accumulate-PPTs/) |
-| 知乎 | 骆同学(待补充) |
-| 公众号 | 骆同学(待补充) |
-| B 站 | 骆同学(待补充) |
-| 邮箱 | 待补充 |
 
 ---
 

@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Accumulate-PPTs/)
 [![Skills](https://img.shields.io/badge/Agent%20Skills-3-purple)](#-skill-matrix)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-contributing)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-contact)
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
 
 <p align="center">
@@ -17,7 +17,7 @@
 
 ---
 
-## TL;DR — 30-Second Overview
+## 30-Second Overview
 
 `Accumulate-PPTs` is an HTML slide workflow repository built for **graduate students and undergraduates**. It packages the most painful path — *read a paper → present it → defend it* — into 3 AI-Agent-callable SKILLs. Give one prompt in natural language, and the Agent will produce an Apple-style / Notion-style **single-file HTML** deck in 5–20 minutes, ready to play in any browser and embed in your personal homepage.
 
@@ -289,7 +289,7 @@ After that, the new HTML PPT will appear in the `index.html` gallery with its **
 We pursue an 80-point stable, usable experience rather than 100-point perfection:
 
 1. **PDF figure extraction has redundancy**: we recommend manually deleting redundant images after the first version, with VLM-based figure selection coming in future releases
-2. **Multimodal models work best**: native multimodal models like KIMI K2.6, GPT-4o, Claude Sonnet 4.5 are recommended — pure text models will miss paper figures
+2. **Multimodal models work best**: native multimodal models like KIMI K2.6 and Minimax M3 are recommended — pure text models will miss paper figures
 3. **Current version is a high-quality first draft**: we recommend multiple rounds of dialog refinement with the Agent, e.g. "replace page 5 method diagram with architecture diagram" / "add the school logo to the footer"
 4. **No direct generation from LaTeX source**: if you need LaTeX fidelity, please use Beamer; this repository focuses on "start with PDF / Markdown"
 5. **Thumbnails depend on Playwright**: the first run requires `pip install playwright && playwright install chromium`; headless server environments need `--with-deps`
@@ -299,25 +299,6 @@ We pursue an 80-point stable, usable experience rather than 100-point perfection
 ## License
 
 This project is fully open-sourced under the **MIT License**, free for personal and commercial use, no prior authorization required.
-
-```
-MIT License
-
-Copyright (c) 2026 Luo Qianshi
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND...
-```
-
 See the [LICENSE](LICENSE) file for details.
 
 ---
@@ -338,10 +319,6 @@ Stars, forks, issues, and PRs are welcome. If you want to discuss graduate studi
 |----------|----------------|
 | GitHub | [@luoqianshi](https://github.com/luoqianshi) |
 | Online Gallery | [luoqianshi.github.io/Accumulate-PPTs](https://luoqianshi.github.io/Accumulate-PPTs/) |
-| Zhihu | 骆同学 (TBD) |
-| WeChat Official Account | 骆同学 (TBD) |
-| Bilibili | 骆同学 (TBD) |
-| Email | TBD |
 
 ---
 
