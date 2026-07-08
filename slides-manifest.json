@@ -56,6 +56,14 @@
       "kind": "期刊/会议",
       "accent": "rgba(57,102,162,.18)",
       "thumbnail": "assets/thumbnails/YOLO26_Unified_Real-Time_Vision.png"
+    },
+    {
+      "title": "DySample: Learning to Upsample by Learning to Sample",
+      "file": "paper-slides/DySample_Learning_to_Upsample.html",
+      "description": "ICCV 2023 DySample 论文演示，聚焦从点采样视角设计的超轻量动态上采样器，绕过动态卷积，仅用 PyTorch 内置函数，在五项密集预测任务上全面领先。",
+      "kind": "期刊/会议",
+      "accent": "rgba(57,102,162,.18)",
+      "thumbnail": "assets/thumbnails/DySample_Learning_to_Upsample.png"
     }
   ]
 }
