@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-PDF 论文图片提取器
+PDF 论文图片/表格提取器（标题驱动版）
 
 功能:
-1. 从学术论文 PDF 中提取关键图片/图表（过滤小图标、Logo、作者照片、页眉页脚装饰）
-2. 支持矢量图表检测与页面裁剪提取（含透明背景）
-3. 智能去重：避免同一图表被重复提取
+1. 从学术论文 PDF 中按 Figure/Table 出现顺序逐一提取图表
+2. 标题驱动：先搜索 "Figure N"/"Table N" 标题文字，再定位对应图表区域并裁剪
+3. 三重过滤区分标题与正文引用：文本模式 + 邻近视觉内容验证 + 字体特征
+4. 智能双向查找：Figure 标题向上找图，Table 标题向下找表，找不到则反向兜底
+5. 语义命名输出：fig1.png, table2.png, algorithm1.png
+6. 保留盲裁剪模式作为 fallback（--fallback-blind-crop）
 
 用法:
-    python pdf_extractor.py <pdf_path> [--output-dir <dir>]
+    python pdf_extractor.py <pdf_path> [--output-dir <dir>] [--dpi 200]
+    python pdf_extractor.py paper.pdf --fallback-blind-crop --clean
 
 依赖:
     pip install pymupdf Pillow
 """
 
 import os
+import re
 import sys
 import argparse
 import json
@@ -25,271 +30,74 @@ from pathlib import Path
 import fitz  # PyMuPDF
 
 
+# ============================================================
+# 常量
+# ============================================================
 
-def is_likely_figure_or_table(img_info, page_width, page_height):
-    """
-    根据图片尺寸、面积、宽高比和在页面上的位置，判断其是否可能是论文中的有效图表。
-    过滤掉作者照片、小图标、装饰线、Logo 等。
-    """
-    w, h = img_info['width'], img_info['height']
-    area = w * h
-    aspect = w / h if h > 0 else 999
-    bbox = img_info.get('bbox')  # 页面坐标 (x0, y0, x1, y1)
+# 带标点的标题模式："Figure 1:", "Fig. 2.", "Table 3 —", "Algorithm 1."
+CAPTION_PATTERN_PUNCT = re.compile(
+    r'^(Figure|Fig\.|Table|Algorithm)\s+(\d+[a-z]?)\s*[:.。，—–\-]',
+    re.IGNORECASE,
+)
 
-    # 绝对尺寸阈值：太小的不要
-    if w < 150 or h < 150:
-        return False, "too_small"
+# 无标点的标题模式： "Figure 1 Architecture..."
+CAPTION_PATTERN_NOPUNCT = re.compile(
+    r'^(Figure|Fig\.|Table|Algorithm)\s+(\d+[a-z]?)\s+(\S+)',
+    re.IGNORECASE,
+)
 
-    # 面积阈值
-    if area < 30000:
-        return False, "too_small_area"
+# 正文引用中编号后常见的动词/句首词，用于排除无标点情况下的引用
+INLINE_REFERENCE_WORDS = {
+    'shows', 'show', 'illustrates', 'illustrate', 'demonstrates', 'demonstrate',
+    'presents', 'present', 'compares', 'compare', 'summarizes', 'summarize',
+    'depicts', 'depict', 'contains', 'contain', 'includes', 'include',
+    'lists', 'list', 'reports', 'report', 'gives', 'give', 'provides', 'provide',
+    'describes', 'describe', 'we', 'is', 'are', 'was', 'were', 'can', 'will',
+    'has', 'have', 'had', 'also', 'furthermore', 'moreover', 'however',
+    'while', 'when', 'where', 'it', 'these', 'those',
+}
 
-    # 过滤极端细长的装饰线（宽高比 > 20 或 < 0.05）
-    if aspect > 20 or aspect < 0.05:
-        return False, "extreme_aspect_ratio"
+# 页面边距（PDF 点数）
+PAGE_MARGIN_TOP = 50.0
+PAGE_MARGIN_BOTTOM_RATIO = 0.95
+PAGE_MARGIN_LEFT = 30.0
+PAGE_MARGIN_RIGHT = 30.0
 
-    # 过滤超宽但高度很小的图片（可能是页眉/页脚横线）
-    if w > 2000 and h < 100:
-        return False, "likely_separator_line"
+# 向上/向下搜索的最大距离（点数）
+MAX_SEARCH_DISTANCE = 550.0
 
-    # 位置感知过滤：正方形或接近正方形的图片
-    if 0.8 <= aspect <= 1.25:
-        # 如果面积小于阈值，很可能是作者头像或会议 Logo
-        if area < 350000:
-            return False, "likely_author_photo_or_logo"
+# 表格行间间隙阈值（点数），超过此值认为是表格与正文的分界
+TABLE_GAP_THRESHOLD = 18.0
 
-        # 即使面积大，如果位于页面顶部或底部边缘，也可能是 Logo
-        if bbox:
-            y_center = (bbox[1] + bbox[3]) / 2
-            page_h = page_height
-            # 页面顶部 15% 或底部 15% 区域
-            if y_center < page_h * 0.15 or y_center > page_h * 0.85:
-                return False, "likely_header_footer_logo"
+# 表格单元格文本长度上限：短于此值的文本块视为表格单元格而非段落
+TABLE_CELL_TEXT_MAX_LEN = 120
 
-    return True, "ok"
+# 最小裁剪区域尺寸（像素）
+MIN_CROP_WIDTH_PX = 80
+MIN_CROP_HEIGHT_PX = 80
 
+# 最小文件大小（字节），小于此值视为空白
+MIN_FILE_SIZE = 2048
 
-def extract_embedded_images(doc):
-    """
-    扫描 PDF 中内嵌的图像对象，过滤后仅返回元数据（不保存图片文件）。
-    利用页面上图片的 bbox 信息辅助判断，供后续裁剪去重使用。
-    返回提取的图片元数据列表。
-    """
-    extracted = []
-    seen_xrefs = set()
+# 视觉区域最小尺寸（点数）
+VISUAL_MIN_WIDTH = 30
+VISUAL_MIN_HEIGHT = 30
+VISUAL_MIN_AREA = 3000
 
-    for page_num in range(len(doc)):
-        page = doc.load_page(page_num)
-        image_list = page.get_images(full=True)
-        pw, ph = page.rect.width, page.rect.height
-
-        # 获取页面上所有图片的位置信息
-        img_bboxes = {}
-        try:
-            for info in page.get_image_info():
-                xref = info.get("xref")
-                bbox = info.get("bbox")
-                if xref and bbox:
-                    img_bboxes.setdefault(xref, []).append(bbox)
-        except Exception:
-            pass
-
-        for img in image_list:
-            xref = img[0]
-            if xref in seen_xrefs:
-                continue
-            seen_xrefs.add(xref)
-
-            try:
-                base_image = doc.extract_image(xref)
-                iw = base_image.get("width", 0)
-                ih = base_image.get("height", 0)
-
-                # 获取该图片在页面上的位置（取第一个实例）
-                bbox = None
-                if xref in img_bboxes and img_bboxes[xref]:
-                    b = img_bboxes[xref][0]
-                    bbox = (b.x0, b.y0, b.x1, b.y1)
-
-                img_info = {"width": iw, "height": ih, "bbox": bbox}
-                is_valid, reason = is_likely_figure_or_table(img_info, pw, ph)
-                if not is_valid:
-                    print(f"  [过滤] 第 {page_num+1} 页 xref={xref} ({iw}x{ih}): {reason}")
-                    continue
-
-                extracted.append({
-                    "page": page_num + 1,
-                    "width": iw,
-                    "height": ih,
-                    "source": "embedded_image",
-                    "bbox": bbox,
-                })
-
-            except Exception as e:
-                print(f"  [警告] 提取第 {page_num+1} 页图片 xref={xref} 时出错: {e}")
-                continue
-
-    return extracted
+# 类型前缀映射
+TYPE_PREFIX = {'figure': 'fig', 'table': 'table', 'algorithm': 'algorithm'}
 
 
-def detect_figure_regions_by_drawings(page, min_area=5000, padding=3):
-    """
-    通过分析页面的矢量绘制命令来检测可能的图表区域。
-    返回页面坐标系中的矩形区域列表 (x0, y0, x1, y1)。
-    """
-    try:
-        drawings = page.get_drawings()
-    except Exception:
-        return []
+# ============================================================
+# 工具函数
+# ============================================================
 
-    rects = []
-    for d in drawings:
-        rect = d.get("rect")
-        if rect is None:
-            continue
-        if rect.width < 50 or rect.height < 50:
-            continue
-        if rect.width * rect.height < min_area:
-            continue
-        r = fitz.Rect(
-            max(0, rect.x0 - padding),
-            max(0, rect.y0 - padding),
-            min(page.rect.width, rect.x1 + padding),
-            min(page.rect.height, rect.y1 + padding),
-        )
-        rects.append(r)
-
-    # 合并重叠矩形（迭代直到稳定）
-    merged = []
-    for r in rects:
-        found = False
-        for m in merged:
-            if m.intersects(r):
-                m |= r
-                found = True
-                break
-        if not found:
-            merged.append(fitz.Rect(r))
-
-    changed = True
-    while changed:
-        changed = False
-        new_merged = []
-        for r in merged:
-            found = False
-            for m in new_merged:
-                if m.intersects(r):
-                    m |= r
-                    found = True
-                    changed = True
-                    break
-            if not found:
-                new_merged.append(fitz.Rect(r))
-        merged = new_merged
-
-    return merged
-
-
-def detect_figure_regions_by_images(page):
-    """根据页面上图片的放置位置(bbox)确定区域。"""
-    regions = []
-    for img_dict in page.get_image_info():
-        bbox = img_dict.get("bbox")
-        if bbox:
-            regions.append(fitz.Rect(bbox))
-    return regions
-
-
-def detect_figure_regions_by_captions(page):
-    """
-    检测页面中包含 'Figure', 'Fig.', 'Table' 等字样的区域，
-    返回这些标题本身的 bbox 列表（用于辅助验证，不直接作为图表区域）。
-    """
-    captions = []
-    text_blocks = page.get_text("blocks")
-    for b in text_blocks:
-        if len(b) < 7:
-            continue
-        x0, y0, x1, y1, text, block_no, block_type = b[:7]
-        text_upper = text.strip().upper()
-        # 更严格的匹配：确保是图表标题而非其他包含这些词的文本
-        if (text_upper.startswith("FIGURE") or text_upper.startswith("FIG.") or
-                text_upper.startswith("TABLE") or text_upper.startswith("ALGORITHM")):
-            captions.append(fitz.Rect(x0, y0, x1, y1))
-    return captions
-
-
-def detect_non_text_regions(page, text_coverage_threshold=0.15):
-    """
-    检测文本覆盖率较低但存在大面积绘制内容的区域。
-    """
-    text_blocks = page.get_text("blocks")
-    try:
-        drawings = page.get_drawings()
-    except Exception:
-        return []
-
-    draw_rects = []
-    for d in drawings:
-        rect = d.get("rect")
-        if rect and rect.width > 50 and rect.height > 50:
-            draw_rects.append(rect)
-
-    if not draw_rects:
-        return []
-
-    text_rects = []
-    for b in text_blocks:
-        if len(b) >= 6:
-            text_rects.append(fitz.Rect(b[0], b[1], b[2], b[3]))
-
-    candidate_regions = []
-    for dr in draw_rects:
-        area = dr.width * dr.height
-        text_area = 0
-        for tr in text_rects:
-            inter = dr & tr
-            if inter:
-                text_area += inter.width * inter.height
-        coverage = text_area / area if area > 0 else 1
-        if coverage < text_coverage_threshold and area > 10000:
-            candidate_regions.append(dr)
-
-    merged = []
-    for r in candidate_regions:
-        found = False
-        for m in merged:
-            if m.intersects(r):
-                m |= r
-                found = True
-                break
-        if not found:
-            merged.append(fitz.Rect(r))
-
-    return merged
-
-
-def merge_overlapping_regions(regions, overlap_threshold=0.5):
-    """合并重叠率超过阈值的矩形区域。"""
+def merge_rects(regions, overlap_threshold=0.3):
+    """合并重叠率超过阈值的矩形区域，迭代直到稳定。"""
     if not regions:
         return []
 
-    merged = []
-    for r in regions:
-        found = False
-        for m in merged:
-            inter = m & r
-            if inter:
-                inter_area = inter.width * inter.height
-                min_area = min(m.width * m.height, r.width * r.height)
-                if min_area > 0 and inter_area / min_area > overlap_threshold:
-                    m |= r
-                    found = True
-                    break
-        if not found:
-            merged.append(fitz.Rect(r))
-
-    # 迭代直到稳定
+    merged = [fitz.Rect(r) for r in regions]
     changed = True
     while changed:
         changed = False
@@ -313,14 +121,521 @@ def merge_overlapping_regions(regions, overlap_threshold=0.5):
     return merged
 
 
-def extract_figures_by_region_cropping(doc, output_dir, dpi=200,
-                                       min_region_width=100, min_region_height=100,
-                                       max_regions_per_page=5):
+def get_page_visual_regions(page):
     """
-    通过区域检测+裁剪的方式提取矢量图表。
-    综合使用 drawing 检测、图片放置位置和非文本区域检测。
-    包含多层过滤以排除页眉、页脚、空白区域和整页误检。
-    仅保存裁剪后的图片，不保留中间文件。
+    获取页面上所有视觉内容区域（矢量绘图 + 内嵌图片），已合并重叠区域。
+    返回 fitz.Rect 列表。
+    """
+    regions = []
+    page_rect = page.rect
+    page_area = page_rect.width * page_rect.height
+
+    # 矢量绘图
+    try:
+        for d in page.get_drawings():
+            rect = d.get("rect")
+            if rect is None:
+                continue
+            # 裁剪到页面范围内（排除超出页面的裁剪路径/背景）
+            rect = fitz.Rect(rect) & page_rect
+            if rect.is_empty:
+                continue
+            if rect.width < VISUAL_MIN_WIDTH or rect.height < VISUAL_MIN_HEIGHT:
+                continue
+            if rect.width * rect.height < VISUAL_MIN_AREA:
+                continue
+            # 跳过覆盖页面面积 > 50% 的区域（页面级背景/容器）
+            if rect.width * rect.height > page_area * 0.5:
+                continue
+            regions.append(rect)
+    except Exception:
+        pass
+
+    # 内嵌图片
+    try:
+        for info in page.get_image_info():
+            bbox = info.get("bbox")
+            if bbox:
+                r = fitz.Rect(bbox)
+                if r.width >= VISUAL_MIN_WIDTH and r.height >= VISUAL_MIN_HEIGHT:
+                    regions.append(r)
+    except Exception:
+        pass
+
+    return merge_rects(regions, overlap_threshold=0.2)
+
+
+def get_text_block_rects(page):
+    """
+    获取页面上所有文本块的 (fitz.Rect, text) 列表，按 y 坐标排序。
+    """
+    blocks = []
+    for b in page.get_text("blocks"):
+        if len(b) < 7:
+            continue
+        x0, y0, x1, y1, text, block_no, block_type = b[:7]
+        if block_type != 0:
+            continue
+        blocks.append((fitz.Rect(x0, y0, x1, y1), text))
+
+    blocks.sort(key=lambda x: x[0].y0)
+    return blocks
+
+
+def _compute_horizontal_range(cap_bbox, page_width):
+    """
+    根据标题的 x 范围推断图表的水平搜索范围。
+    跨栏标题（宽度 > 页宽 60%）→ 全宽搜索；单栏标题 → 限制在该栏。
+    """
+    cap_width = cap_bbox.x1 - cap_bbox.x0
+    if cap_width > page_width * 0.6:
+        return PAGE_MARGIN_LEFT, page_width - PAGE_MARGIN_RIGHT
+    else:
+        x0 = max(PAGE_MARGIN_LEFT, cap_bbox.x0 - 20)
+        x1 = min(page_width - PAGE_MARGIN_RIGHT, cap_bbox.x1 + 20)
+        return x0, x1
+
+
+# ============================================================
+# 标题检测模块（三重过滤）
+# ============================================================
+
+def parse_caption_text(text):
+    """
+    过滤 1 — 文本模式匹配。
+    解析标题文本，返回 (type, number, full_caption) 或 None。
+    """
+    text = text.strip()
+
+    # 优先匹配带标点的模式（高置信度）
+    m = CAPTION_PATTERN_PUNCT.match(text)
+    if m:
+        kind_raw = m.group(1).lower()
+        number = m.group(2)
+        kind = _kind_from_raw(kind_raw)
+        return kind, number, text
+
+    # 无标点模式：需要排除正文引用
+    m = CAPTION_PATTERN_NOPUNCT.match(text)
+    if m:
+        kind_raw = m.group(1).lower()
+        number = m.group(2)
+        next_word = m.group(3).lower().strip('.,;:!?()[]')
+
+        # 排除正文引用
+        if next_word in INLINE_REFERENCE_WORDS:
+            return None
+
+        # 标题通常较短
+        if len(text) > 500:
+            return None
+
+        kind = _kind_from_raw(kind_raw)
+        return kind, number, text
+
+    return None
+
+
+def _kind_from_raw(kind_raw):
+    """将原始类型字符串转为标准类型。"""
+    if kind_raw.startswith('fig'):
+        return 'figure'
+    elif kind_raw.startswith('table'):
+        return 'table'
+    else:
+        return 'algorithm'
+
+
+def find_caption_candidates(page):
+    """
+    在页面上查找所有标题候选（仅文本模式过滤）。
+    返回列表，每项: {type, number, caption, bbox, page}
+    """
+    candidates = []
+    for b in page.get_text("blocks"):
+        if len(b) < 7:
+            continue
+        x0, y0, x1, y1, text, block_no, block_type = b[:7]
+        if block_type != 0:
+            continue
+
+        parsed = parse_caption_text(text)
+        if parsed is None:
+            continue
+
+        kind, number, caption = parsed
+        candidates.append({
+            'type': kind,
+            'number': number,
+            'caption': caption,
+            'bbox': fitz.Rect(x0, y0, x1, y1),
+            'page': page.number + 1,
+        })
+
+    return candidates
+
+
+def compute_search_area(cap_bbox, direction, text_blocks, page_width, page_height):
+    """
+    根据标题位置和搜索方向计算搜索区域。
+    Figure → up:  从标题上边缘向上到上一个文本块下边缘
+    Table  → down: 从标题下边缘向下到下一个文本块上边缘（需特殊处理表格单元格）
+    """
+    x0, x1 = _compute_horizontal_range(cap_bbox, page_width)
+
+    # 过滤掉标题自身及与标题 y 范围重叠的文本块（多行标题的后续部分）
+    # 只保留水平范围内有重叠的文本块
+    relevant = []
+    for rect, text in text_blocks:
+        if rect.y1 > cap_bbox.y0 - 2 and rect.y0 < cap_bbox.y1 + 2:
+            continue
+        if rect.x1 > x0 and rect.x0 < x1:
+            relevant.append((rect, text))
+
+    if direction == 'up':
+        y_bottom = cap_bbox.y0
+        y_top = PAGE_MARGIN_TOP
+
+        # 标题上方文本块，按 y0 降序排列（离标题最近的在前）
+        above = sorted(
+            [(r, t) for r, t in relevant if r.y1 <= cap_bbox.y0],
+            key=lambda x: x[0].y0, reverse=True,
+        )
+
+        # 仅使用上一个 Figure/Table 标题作为边界
+        # 不使用文本长度判断，因为长表格数据（多行合并）与正文段落难以区分
+        for r, t in above:
+            if parse_caption_text(t) is not None:
+                y_top = max(y_top, r.y1)
+                break
+
+        if y_bottom - y_top > MAX_SEARCH_DISTANCE:
+            y_top = y_bottom - MAX_SEARCH_DISTANCE
+
+    else:  # 'down'
+        y_top = cap_bbox.y1
+        y_bottom = page_height * PAGE_MARGIN_BOTTOM_RATIO
+
+        # 收集标题下方的文本块（已按 y0 排序）
+        below = [(r, t) for r, t in relevant if r.y0 >= cap_bbox.y1]
+
+        if below:
+            # 策略 1：查找显著间隙（表格与后续段落之间的空白）
+            prev_bottom = below[0][0].y0
+            for i, (rect, _) in enumerate(below):
+                if i > 0:
+                    gap = rect.y0 - prev_bottom
+                    if gap > TABLE_GAP_THRESHOLD:
+                        y_bottom = prev_bottom
+                        break
+                prev_bottom = max(prev_bottom, rect.y1)
+            else:
+                # 策略 2：查找第一个"长"文本块（段落而非单元格）
+                for rect, text in below:
+                    if len(text.strip()) > TABLE_CELL_TEXT_MAX_LEN:
+                        y_bottom = rect.y0
+                        break
+                else:
+                    # 策略 3：使用最后一个文本块的底部
+                    y_bottom = max(r.y1 for r, _ in below) + 5
+
+        if y_bottom - y_top > MAX_SEARCH_DISTANCE:
+            y_bottom = y_top + MAX_SEARCH_DISTANCE
+
+    search_area = fitz.Rect(x0, y_top, x1, y_bottom)
+    if search_area.width <= 0 or search_area.height <= 0:
+        return None
+    return search_area
+
+
+def verify_caption_with_visual_content(page, caption_info):
+    """
+    过滤 2 — 邻近视觉内容验证（最关键）。
+    真正的标题旁边一定有图表内容。
+    Figure → 向上查找优先；Table → 双向查找取最优。
+    返回 (is_valid, direction, search_area)
+    """
+    cap_bbox = caption_info['bbox']
+    kind = caption_info['type']
+    pw, ph = page.rect.width, page.rect.height
+
+    visual_regions = get_page_visual_regions(page)
+    text_blocks = get_text_block_rects(page)
+
+    if kind == 'figure':
+        # Figure：标题通常在图下方，先向上找，找不到再向下
+        for direction in ['up', 'down']:
+            search_area = compute_search_area(cap_bbox, direction, text_blocks, pw, ph)
+            if search_area is None:
+                continue
+            for vr in visual_regions:
+                inter = search_area & vr
+                if inter and inter.width > 20 and inter.height > 20:
+                    return True, direction, search_area
+        return False, None, None
+
+    else:
+        # Table/Algorithm：标题可能在上方或下方，双向查找取最优
+        best_dir = None
+        best_area = None
+        best_score = 0
+
+        for direction in ['down', 'up']:
+            search_area = compute_search_area(cap_bbox, direction, text_blocks, pw, ph)
+            if search_area is None:
+                continue
+
+            # 视觉区域（有边框的表格）
+            has_visual = False
+            for vr in visual_regions:
+                inter = search_area & vr
+                if inter and inter.width > 20 and inter.height > 20:
+                    has_visual = True
+                    break
+
+            if has_visual:
+                return True, direction, search_area
+
+            # 文本单元格计数（无边框表格）
+            cell_count = 0
+            for rect, _ in text_blocks:
+                if rect.y1 > cap_bbox.y0 - 2 and rect.y0 < cap_bbox.y1 + 2:
+                    continue
+                inter = search_area & rect
+                if inter and inter.width > 10 and inter.height > 5:
+                    cell_count += 1
+
+            if cell_count >= 2 and cell_count > best_score:
+                best_score = cell_count
+                best_dir = direction
+                best_area = search_area
+
+        if best_dir:
+            return True, best_dir, best_area
+        return False, None, None
+
+
+def detect_all_captions(doc):
+    """
+    扫描整个文档，检测所有有效标题（三重过滤：文本模式 + 视觉内容验证）。
+    返回按出现顺序排列、去重后的标题列表。
+    """
+    all_captions = []
+
+    for page_num in range(len(doc)):
+        page = doc.load_page(page_num)
+
+        for cap in find_caption_candidates(page):
+            is_valid, direction, search_area = verify_caption_with_visual_content(
+                page, cap
+            )
+            if is_valid:
+                cap['search_direction'] = direction
+                cap['search_area'] = search_area
+                all_captions.append(cap)
+            else:
+                print(f"  [过滤] 第 {page_num+1} 页 {cap['type']} {cap['number']}: "
+                      f"附近未找到视觉内容，判定为正文引用")
+
+    # 去重：同一 (type, number) 保留首次出现
+    seen = set()
+    unique = []
+    for cap in all_captions:
+        key = (cap['type'], cap['number'])
+        if key not in seen:
+            seen.add(key)
+            unique.append(cap)
+        else:
+            print(f"  [去重] {cap['type']} {cap['number']} 重复（第 {cap['page']} 页），跳过")
+
+    return unique
+
+
+# ============================================================
+# 区域关联与裁剪模块
+# ============================================================
+
+def refine_crop_region(page, search_area):
+    """
+    在搜索区域内，利用视觉区域信息精确缩小裁剪边界。
+    若找到视觉区域，取其合并后的范围；否则使用整个搜索区域。
+    """
+    visual_regions = get_page_visual_regions(page)
+
+    overlapping = []
+    for vr in visual_regions:
+        inter = search_area & vr
+        if inter and inter.width > 20 and inter.height > 20:
+            # 裁剪到搜索区域内
+            clipped = fitz.Rect(
+                max(vr.x0, search_area.x0),
+                max(vr.y0, search_area.y0),
+                min(vr.x1, search_area.x1),
+                min(vr.y1, search_area.y1),
+            )
+            if clipped.width > 20 and clipped.height > 20:
+                overlapping.append(clipped)
+
+    if overlapping:
+        # 取所有视觉区域的外接矩形（并集），确保完整覆盖由多个小元素组成的图表
+        x0 = min(r.x0 for r in overlapping)
+        y0 = min(r.y0 for r in overlapping)
+        x1 = max(r.x1 for r in overlapping)
+        y1 = max(r.y1 for r in overlapping)
+        crop_rect = fitz.Rect(x0, y0, x1, y1)
+    else:
+        # 无视觉区域（无边框表格）：使用搜索区域内的文本块外接矩形
+        text_blocks = get_text_block_rects(page)
+        text_rects = []
+        for rect, _ in text_blocks:
+            inter = search_area & rect
+            if inter and inter.width > 10 and inter.height > 5:
+                text_rects.append(rect)
+        if text_rects:
+            crop_rect = fitz.Rect(
+                min(r.x0 for r in text_rects),
+                min(r.y0 for r in text_rects),
+                max(r.x1 for r in text_rects),
+                max(r.y1 for r in text_rects),
+            )
+        else:
+            crop_rect = fitz.Rect(search_area)
+
+    # 添加边距
+    padding = 5.0
+    crop_rect = fitz.Rect(
+        max(0, crop_rect.x0 - padding),
+        max(0, crop_rect.y0 - padding),
+        min(page.rect.width, crop_rect.x1 + padding),
+        min(page.rect.height, crop_rect.y1 + padding),
+    )
+
+    return crop_rect
+
+
+def extract_captioned_figures(doc, output_dir, dpi=200):
+    """
+    标题驱动提取：按 Figure/Table 出现顺序逐一提取。
+    返回提取结果列表。
+    """
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    zoom = dpi / 72
+    mat = fitz.Matrix(zoom, zoom)
+
+    # 步骤 1：检测标题
+    print("[步骤 1/3] 检测 Figure/Table 标题...")
+    captions = detect_all_captions(doc)
+    print(f"[结果] 检测到 {len(captions)} 个有效标题:")
+    for cap in captions:
+        print(f"  - {cap['type']} {cap['number']} (第 {cap['page']} 页)")
+
+    if not captions:
+        return []
+
+    # 步骤 2：区域关联与裁剪
+    print(f"\n[步骤 2/3] 定位并裁剪图表区域...")
+    extracted = []
+
+    for cap in captions:
+        page = doc.load_page(cap['page'] - 1)
+        crop_rect = refine_crop_region(page, cap['search_area'])
+
+        if crop_rect is None:
+            print(f"  [跳过] {cap['type']} {cap['number']}: 无法确定裁剪区域")
+            continue
+
+        # 像素尺寸检查
+        rw = crop_rect.width * zoom
+        rh = crop_rect.height * zoom
+        if rw < MIN_CROP_WIDTH_PX or rh < MIN_CROP_HEIGHT_PX:
+            print(f"  [跳过] {cap['type']} {cap['number']}: 裁剪区域太小 "
+                  f"({rw:.0f}x{rh:.0f}px)")
+            continue
+
+        try:
+            pix = page.get_pixmap(matrix=mat, clip=crop_rect, alpha=True)
+
+            # 语义文件名
+            prefix = TYPE_PREFIX[cap['type']]
+            filename = f"{prefix}{cap['number']}.png"
+            output_path = output_dir / filename
+
+            # 文件名冲突处理
+            if output_path.exists():
+                filename = f"{prefix}{cap['number']}_page{cap['page']:03d}.png"
+                output_path = output_dir / filename
+
+            pix.save(output_path)
+
+            # 文件大小过滤
+            file_size = output_path.stat().st_size
+            if file_size < MIN_FILE_SIZE:
+                print(f"  [过滤] {filename} 文件过小 ({file_size} 字节)，丢弃")
+                output_path.unlink()
+                continue
+
+            extracted.append({
+                'type': cap['type'],
+                'number': cap['number'],
+                'label': f"{cap['type'].capitalize()} {cap['number']}",
+                'caption': cap['caption'],
+                'filename': filename,
+                'page': cap['page'],
+                'bbox': [crop_rect.x0, crop_rect.y0, crop_rect.x1, crop_rect.y1],
+                'width': pix.width,
+                'height': pix.height,
+            })
+
+            print(f"  [成功] {filename} (第 {cap['page']} 页, "
+                  f"{pix.width}x{pix.height}px)")
+
+        except Exception as e:
+            print(f"  [错误] 裁剪 {cap['type']} {cap['number']} 时出错: {e}")
+            continue
+
+    # 步骤 3：按出现顺序排序
+    extracted.sort(key=lambda x: (x['page'], x['bbox'][1]))
+
+    return extracted
+
+
+# ============================================================
+# 盲裁剪 fallback（保留自原脚本，简化版）
+# ============================================================
+
+def is_likely_figure_or_table(img_info, page_width, page_height):
+    """根据尺寸/面积/宽高比/位置判断是否可能是有效图表。"""
+    w, h = img_info['width'], img_info['height']
+    area = w * h
+    aspect = w / h if h > 0 else 999
+    bbox = img_info.get('bbox')
+
+    if w < 150 or h < 150:
+        return False, "too_small"
+    if area < 30000:
+        return False, "too_small_area"
+    if aspect > 20 or aspect < 0.05:
+        return False, "extreme_aspect_ratio"
+    if w > 2000 and h < 100:
+        return False, "likely_separator_line"
+
+    if 0.8 <= aspect <= 1.25:
+        if area < 350000:
+            return False, "likely_author_photo_or_logo"
+        if bbox:
+            y_center = (bbox[1] + bbox[3]) / 2
+            if y_center < page_height * 0.15 or y_center > page_height * 0.85:
+                return False, "likely_header_footer_logo"
+
+    return True, "ok"
+
+
+def extract_figures_blind_crop(doc, output_dir, dpi=200, max_regions_per_page=5):
+    """
+    盲裁剪 fallback：通过区域检测+裁剪提取矢量图表（不含标题关联）。
+    仅在标题驱动模式未提取到结果时使用。
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -336,54 +651,37 @@ def extract_figures_by_region_cropping(doc, output_dir, dpi=200,
         page_area = pw * ph
 
         # 收集候选区域
-        regions = []
-        regions.extend(detect_figure_regions_by_drawings(page))
-        regions.extend(detect_figure_regions_by_images(page))
-        regions.extend(detect_non_text_regions(page))
+        regions = get_page_visual_regions(page)
 
-        # 合并重叠区域
-        regions = merge_overlapping_regions(regions, overlap_threshold=0.3)
-
-        # 过滤候选区域
+        # 过滤
         filtered = []
         for r in regions:
-            # 1. 尺寸过滤（页面坐标系）
             if r.width < 40 or r.height < 40:
                 continue
-
-            # 2. 面积过滤：不能超过页面面积的 75%（避免裁剪整页）
             if r.width * r.height > page_area * 0.75:
                 continue
-
-            # 3. 位置过滤：排除页眉（y1 < 60pt）和页脚（y0 > ph * 0.95）
             if r.y1 < 60 or r.y0 > ph * 0.95:
                 continue
-
-            # 4. 像素尺寸过滤
-            rw = r.width * zoom
-            rh = r.height * zoom
-            if rw < min_region_width or rh < min_region_height:
+            rw, rh = r.width * zoom, r.height * zoom
+            if rw < 100 or rh < 100:
                 continue
-
-            # 5. 宽高比过滤
             aspect = rw / rh if rh > 0 else 999
             if aspect > 20 or aspect < 0.05:
                 continue
 
-            # 6. 避免与已有区域过度重叠
             overlap = False
             for existing in filtered:
                 inter = existing & r
                 if inter:
                     inter_area = inter.width * inter.height
-                    min_area = min(existing.width * existing.height, r.width * r.height)
+                    min_area = min(existing.width * existing.height,
+                                   r.width * r.height)
                     if min_area > 0 and inter_area / min_area > 0.7:
                         overlap = True
                         break
             if not overlap:
                 filtered.append(fitz.Rect(r))
 
-        # 按面积排序并限制数量
         filtered.sort(key=lambda r: r.width * r.height, reverse=True)
         filtered = filtered[:max_regions_per_page]
 
@@ -393,20 +691,20 @@ def extract_figures_by_region_cropping(doc, output_dir, dpi=200,
                 output_path = output_dir / f"crop_{img_counter:03d}_page{page_num+1:03d}_reg{idx}.png"
                 pix.save(output_path)
 
-                # 7. 文件大小过滤：裁剪后文件 < 3KB 的视为空白/无意义区域，丢弃
-                file_size = output_path.stat().st_size
-                if file_size < 3072:
-                    print(f"  [过滤] 第 {page_num+1} 页区域 {output_path.name} 文件过小 ({file_size} 字节)，可能是空白区域，丢弃")
+                if output_path.stat().st_size < MIN_FILE_SIZE:
                     output_path.unlink()
                     continue
 
                 extracted.append({
-                    "path": str(output_path),
-                    "page": page_num + 1,
-                    "width": pix.width,
-                    "height": pix.height,
-                    "source": "region_crop",
-                    "bbox": (r.x0, r.y0, r.x1, r.y1),
+                    'type': 'unknown',
+                    'number': str(img_counter),
+                    'label': f'Crop {img_counter}',
+                    'caption': '',
+                    'filename': output_path.name,
+                    'page': page_num + 1,
+                    'bbox': [r.x0, r.y0, r.x1, r.y1],
+                    'width': pix.width,
+                    'height': pix.height,
                 })
                 img_counter += 1
             except Exception as e:
@@ -416,58 +714,9 @@ def extract_figures_by_region_cropping(doc, output_dir, dpi=200,
     return extracted
 
 
-def remove_duplicate_extractions(embedded, cropped, iou_threshold=0.6):
-    """
-    移除裁剪区域中与内嵌图片高度重叠的重复项。
-    返回去重后的裁剪列表（不合并内嵌图片，仅用于去重参考）。
-    """
-    # 对于每个裁剪区域，检查是否与任何内嵌图片的 bbox 有高度重叠
-    # 注意：内嵌图片的 bbox 是页面坐标，裁剪区域也有 bbox
-    filtered_cropped = []
-    for c in cropped:
-        c_bbox = c.get("bbox")
-        if c_bbox is None:
-            filtered_cropped.append(c)
-            continue
-
-        cx0, cy0, cx1, cy1 = c_bbox
-        c_area = (cx1 - cx0) * (cy1 - cy0)
-        if c_area <= 0:
-            filtered_cropped.append(c)
-            continue
-
-        is_dup = False
-        for e in embedded:
-            e_bbox = e.get("bbox")
-            if e_bbox is None:
-                continue
-            ex0, ey0, ex1, ey1 = e_bbox
-            e_area = (ex1 - ex0) * (ey1 - ey0)
-            if e_area <= 0:
-                continue
-
-            ix0 = max(cx0, ex0)
-            iy0 = max(cy0, ey0)
-            ix1 = min(cx1, ex1)
-            iy1 = min(cy1, ey1)
-            if ix1 <= ix0 or iy1 <= iy0:
-                continue
-
-            inter_area = (ix1 - ix0) * (iy1 - iy0)
-            union_area = c_area + e_area - inter_area
-            iou = inter_area / union_area if union_area > 0 else 0
-
-            if iou > iou_threshold:
-                is_dup = True
-                c_name = Path(c['path']).name if 'path' in c else "unknown"
-                print(f"  [去重] 裁剪区域 {c_name} 与第 {e.get('page', '?')} 页内嵌图片重叠 (IoU={iou:.2f})，跳过")
-                break
-
-        if not is_dup:
-            filtered_cropped.append(c)
-
-    return filtered_cropped
-
+# ============================================================
+# 页面渲染（后备）
+# ============================================================
 
 def render_pages_as_fallback(doc, output_dir, dpi=200):
     """将每一页渲染为高清图片。"""
@@ -488,42 +737,27 @@ def render_pages_as_fallback(doc, output_dir, dpi=200):
     return rendered
 
 
-def main():
-    parser = argparse.ArgumentParser(description="从学术论文 PDF 中提取图片和文本")
-    parser.add_argument("pdf_path", help="输入 PDF 文件路径")
-    parser.add_argument(
-        "--output-dir",
-        default=None,
-        help="输出目录（默认与 PDF 同名文件夹）",
-    )
-    parser.add_argument(
-        "--dpi",
-        type=int,
-        default=200,
-        help="渲染分辨率 DPI（默认 200）",
-    )
-    parser.add_argument(
-        "--no-region-crop",
-        action="store_true",
-        help="跳过矢量图表区域裁剪",
-    )
-    parser.add_argument(
-        "--render-pages",
-        action="store_true",
-        help="同时渲染每一页为高清图片（后备方案）",
-    )
-    parser.add_argument(
-        "--max-regions-per-page",
-        type=int,
-        default=5,
-        help="每页最多裁剪区域数（默认 5）",
-    )
-    parser.add_argument(
-        "--clean",
-        action="store_true",
-        help="清空输出目录后再提取",
-    )
+# ============================================================
+# 主函数
+# ============================================================
 
+def main():
+    parser = argparse.ArgumentParser(
+        description="从学术论文 PDF 中按 Figure/Table 出现顺序提取图表"
+    )
+    parser.add_argument("pdf_path", help="输入 PDF 文件路径")
+    parser.add_argument("--output-dir", default=None,
+                        help="输出目录（默认 paper-slides/<PDF名>_assets/）")
+    parser.add_argument("--dpi", type=int, default=200,
+                        help="渲染分辨率 DPI（默认 200）")
+    parser.add_argument("--fallback-blind-crop", action="store_true",
+                        help="标题驱动未提取到结果时，回退到盲裁剪模式")
+    parser.add_argument("--render-pages", action="store_true",
+                        help="同时渲染每一页为高清图片")
+    parser.add_argument("--max-regions-per-page", type=int, default=5,
+                        help="盲裁剪模式每页最多裁剪区域数（默认 5）")
+    parser.add_argument("--clean", action="store_true",
+                        help="清空输出目录后再提取")
     args = parser.parse_args()
 
     pdf_path = Path(args.pdf_path).resolve()
@@ -534,7 +768,7 @@ def main():
     if args.output_dir:
         output_dir = Path(args.output_dir).resolve()
     else:
-        output_dir = Path("d:/Data/New_Codes/SKILLS/Accumulate-PPTs/paper-slides") / pdf_path.stem
+        output_dir = Path("d:/Data/New_Codes/SKILLS/Accumulate-PPTs/paper-slides") / f"{pdf_path.stem}_assets"
 
     if args.clean and output_dir.exists():
         print(f"[信息] 清空输出目录: {output_dir}")
@@ -546,47 +780,46 @@ def main():
 
     doc = fitz.open(str(pdf_path))
 
-    # 1. 扫描内嵌图片（仅用于获取元数据，不保存文件）
-    print("[步骤 1/3] 扫描内嵌图片（用于去重参考）...")
-    embedded = extract_embedded_images(doc)
-    print(f"[结果] 扫描到 {len(embedded)} 张有效内嵌图片（仅作去重参考，不保存）")
+    # 主流程：标题驱动提取
+    print("[标题驱动模式] 开始提取...\n")
+    items = extract_captioned_figures(doc, output_dir, dpi=args.dpi)
 
-    # 2. 区域裁剪提取矢量图表（仅保留裁剪图片）
-    cropped = []
-    if not args.no_region_crop:
-        print("\n[步骤 2/3] 检测并裁剪矢量图表区域...")
-        cropped = extract_figures_by_region_cropping(
-            doc,
-            output_dir,
-            dpi=args.dpi,
+    # Fallback：盲裁剪
+    if not items and args.fallback_blind_crop:
+        print("\n[回退] 标题驱动未提取到结果，启用盲裁剪模式...")
+        items = extract_figures_blind_crop(
+            doc, output_dir, dpi=args.dpi,
             max_regions_per_page=args.max_regions_per_page,
         )
-        print(f"[结果] 裁剪到 {len(cropped)} 个图表区域")
-        for img in cropped:
-            print(f"  - {Path(img['path']).name} (第 {img['page']} 页, {img['width']}x{img['height']}, {img['source']})")
+        print(f"[结果] 盲裁剪提取到 {len(items)} 个区域")
 
-    # 3. 去重：移除与内嵌图片重叠的裁剪区域
-    print("\n[步骤 3/3] 去重...")
-    all_images = remove_duplicate_extractions(embedded, cropped, iou_threshold=0.6)
-    print(f"[结果] 去重后共 {len(all_images)} 张唯一裁剪图片")
-
-    # 4. 渲染页面（可选）
+    # 可选：渲染整页
     rendered = []
     if args.render_pages:
         print("\n[可选] 渲染页面为高清图片...")
         rendered = render_pages_as_fallback(doc, output_dir / "pages", dpi=args.dpi)
         print(f"[结果] 渲染了 {len(rendered)} 页")
 
+    # 统计
+    figures = [i for i in items if i['type'] == 'figure']
+    tables = [i for i in items if i['type'] == 'table']
+    algorithms = [i for i in items if i['type'] == 'algorithm']
+    unknowns = [i for i in items if i['type'] == 'unknown']
+
+    # 生成 summary
     summary = {
         "pdf_path": str(pdf_path),
         "output_dir": str(output_dir),
         "total_pages": len(doc),
-        "embedded_images_scanned": len(embedded),
-        "cropped_regions": len(cropped),
-        "unique_crop_images": len(all_images),
+        "total_items": len(items),
+        "total_figures": len(figures),
+        "total_tables": len(tables),
+        "total_algorithms": len(algorithms),
+        "total_unknowns": len(unknowns),
         "rendered_pages": len(rendered),
-        "images": all_images,
+        "items": items,
     }
+
     summary_path = output_dir / "extraction_summary.json"
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
@@ -594,8 +827,11 @@ def main():
     doc.close()
 
     print("\n" + "=" * 50)
-    print(f"[完成] 全部提取完毕! 共保留 {len(all_images)} 张唯一裁剪图片。")
+    print(f"[完成] 共提取 {len(items)} 个图表 "
+          f"(Figure: {len(figures)}, Table: {len(tables)}, "
+          f"Algorithm: {len(algorithms)}, Unknown: {len(unknowns)})")
     print(f"[汇总] 结果保存在: {output_dir}")
+    print(f"[JSON] 清单文件: {summary_path}")
 
 
 if __name__ == "__main__":
