@@ -2,12 +2,12 @@
 
 🌐 [中文](README.md) · [English](#)
 
-> **"Type one sentence. Get a presentation-ready paper deck."**
-> *AI 打一句话,一份能直接讲的论文 PPT 落地。*
+> **"Feed it one PDF. Get two lasting assets back: a Chinese reading note + a playable HTML deck."**
+> *喂给 AI 一篇论文,它同时替你写好博客笔记、做组会 PPT,并把知识长期攒成个人知识库。*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Accumulate-PPTs/)
-[![Skills](https://img.shields.io/badge/Agent%20Skills-3-purple)](#-skill-matrix)
+[![Skills](https://img.shields.io/badge/Agent%20Skills-2-purple)](#-skill-matrix)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-contact)
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
 
@@ -19,13 +19,12 @@
 
 ## 30-Second Overview
 
-`Accumulate-PPTs` is an HTML slide workflow repository built for **graduate students and undergraduates**. It packages the most painful path — *read a paper → present it → defend it* — into 3 AI-Agent-callable SKILLs. Give one prompt in natural language, and the Agent will produce an Apple-style / Notion-style **single-file HTML** deck in 5–20 minutes, ready to play in any browser and embed in your personal homepage.
+`Accumulate-PPTs` is my **personal AI + paper knowledge base**. It turns "reading one paper" into two long-lived, reusable assets — a structured **Chinese reading note (blog post)** and a **single-file HTML deck** you can present directly. Both paths are automated by an AI Agent through 2 SKILLs: hand it a PDF, and it writes the note, builds the deck, and archives both into a version-controllable e-bookshelf you can deploy to GitHub Pages in one click.
 
-- **Paper reading / group meeting / thesis defense** → `html-paper-slides`
-- **Student cadre report / club annual review** → `html-work-report-slides`
-- **General-purpose presentation** → `html-slides`
+- Read a paper deeply & distill it into a blog note → `lzk-paper-reading`
+- Turn a paper into a group-meeting / defense deck → `html-paper-slides`
 
-**The essential difference from PowerPoint / Gamma / Notion Slides**: we deliver **offline single-file HTML** that is reproducible, version-controllable, and deployable to GitHub Pages as a personal portfolio.
+**The essential difference from generic PPT tools**: what we deliver is not "one-off slides" but **two searchable assets in a knowledge base** — Markdown notes (diff-able, full-text searchable, re-processable) + offline single-file HTML decks (playable via `file://`, embeddable in your homepage). Every paper you read keeps stacking up in this bookshelf.
 
 ---
 
@@ -36,7 +35,17 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 cd Accumulate-PPTs
 ```
 
-Open the project in any AI IDE that supports Skills (Claude Code / TRAE / CodeBuddy), and send the Agent this prompt:
+Open the project in any AI IDE that supports Skills (Claude Code / TRAE / CodeBuddy), and send the Agent either prompt:
+
+**Produce a Chinese reading note:**
+
+```markdown
+Please use the lzk-paper-reading skill (skills\lzk-paper-reading\SKILL.md)
+to write a Chinese paper-reading note for ./raw/my-paper.pdf.
+The final .md file should be saved in the paper-notes directory.
+```
+
+**Produce an HTML deck:**
 
 ```markdown
 Please use the html-paper-slides skill (skills\html-paper-slides\SKILL.md)
@@ -44,27 +53,29 @@ to make an HTML paper-presentation PPT for ./raw/my-paper.pdf.
 The final file should be saved in the paper-slides directory.
 ```
 
-5–15 minutes later, a browser-playable single-file HTML deck will appear in `paper-slides/`, and it will be auto-listed in the gallery at `index.html`.
+A few minutes later, a structured note appears in `paper-notes/`, or a browser-playable single-file HTML deck appears in `paper-slides/` — the latter is auto-listed in the gallery at `index.html`.
 
 ---
 
 ## Skill Matrix
 
-The repository ships with 3 SKILLs, covering the three most common presentation scenarios for graduate students and undergraduates:
+The repository ships with 2 SKILLs, covering the two core ways of distilling "reading a paper":
 
 | SKILL | Typical Scenario | Input | Output | Typical Time |
 |------|------------------|-------|--------|--------------|
-| [`html-paper-slides`](skills/html-paper-slides/SKILL.md) | Paper reading · Thesis defense · Research progress report | One PDF paper | Single-file HTML deck + thumbnail | 8–15 min |
-| [`html-work-report-slides`](skills/html-work-report-slides/SKILL.md) | Student cadre report · Club / department annual review | Markdown outline / draft | Apple-style / Notion-style single-file HTML | 10–20 min |
-| [`html-slides`](skills/html-slides/SKILL.md) | Course presentation · Book sharing · General topics | Markdown / free text | Generic HTML slides | 5–15 min |
+| [`lzk-paper-reading`](skills/lzk-paper-reading/SKILL.md) | Paper deep-reading · Blog note · Knowledge distillation | A PDF / arXiv link / title | Structured Chinese Markdown note + figure folder | 5–12 min |
+| [`html-paper-slides`](skills/html-paper-slides/SKILL.md) | Group meeting · Thesis defense · Research progress report | One PDF paper | Single-file HTML deck + thumbnail | 8–15 min |
 
-All outputs are **offline single-file HTML**: zero external dependencies, `file://` open, keyboard navigation, fade-in animations, CSS-Grid responsive layout. Deploy with one click to GitHub Pages / Vercel / Netlify.
+- **`lzk-paper-reading`** produces a Chinese note on a fixed five-section skeleton (Motivation / Contributions / Method / Experiments / Strengths & Innovations) + a paper-info table + a disclaimer. It enforces the formula pattern "lead-in sentence → LaTeX → where-explanation", the "2–3 sentences + 1 figure" experiment rhythm, and gates output with `scripts/new_note.py` (scaffold) and `scripts/check_note.py` (validator).
+- **`html-paper-slides`** generates Apple-style / Notion-style single-file HTML decks: zero external dependencies, `file://` open, keyboard navigation, fade-in animations, CSS-Grid responsive layout. Deploy with one click to GitHub Pages / Vercel / Netlify.
+
+> Both skills share the same "paper understanding" layer: `pdf_extractor.py` first pulls transparent-background figures from the PDF, which then feed the note flow and the deck flow. One paper can produce "note + deck" in a single pass.
 
 ---
 
 ## Showcase · Real Paper Decks
 
-The 7 decks below were all generated with `html-paper-slides` assisted by an AI Agent. Click any thumbnail to preview:
+The 8 decks below were all generated with `html-paper-slides` assisted by an AI Agent. Click any thumbnail to preview:
 
 <table>
   <tr>
@@ -124,7 +135,11 @@ The 7 decks below were all generated with `html-paper-slides` assisted by an AI 
       <br><sub>Dialogue visualization · Three-agent framework · Film knowledge integration</sub>
     </td>
     <td align="center" width="50%">
-      <i>More decks coming · see <a href="https://luoqianshi.github.io/Accumulate-PPTs/">online gallery</a></i>
+      <a href="paper-slides/DySample_Learning_to_Upsample.html">
+        <img src="assets/thumbnails/DySample_Learning_to_Upsample.png" alt="DySample" width="100%">
+      </a>
+      <br><b>DySample: Learning to Upsample by Learning to Sample</b>
+      <br><sub>Dynamic upsampling · Content-aware · Plug-and-play</sub>
     </td>
   </tr>
 </table>
@@ -133,34 +148,39 @@ The 7 decks below were all generated with `html-paper-slides` assisted by an AI 
 
 ---
 
-## Core Workflow: raw → ingest → HTML PPT
+## Core Workflow: raw → ingest → Note / HTML PPT
 
-The repository's differentiator is unifying "paper reading" and "deck generation" into one **reproducible, version-controlled** workflow:
+The repository's differentiator is unifying "paper reading" into one **reproducible, version-controlled** distillation pipeline, where a single paper can yield both a "note" and a "deck":
 
 ```
-┌──────────┐    ┌──────────┐    ┌────────────────┐
-│   raw    │ →  │  ingest  │ →  │  HTML PPT      │
-│  Source  │    │  MD      │    │  Single-file   │
-└──────────┘    └──────────┘    └────────────────┘
-  PDF / URLs       Info card +      paper-slides/
-  Supplements      Summary +        output/
-                   Outline
+┌──────────┐    ┌──────────┐    ┌──────────────────────────┐
+│   raw    │ →  │  ingest  │ →  │     Distilled Assets     │
+│  Source  │    │  MD      │    │  ┌────────┐  ┌────────┐  │
+└──────────┘    └──────────┘    │  │ Note   │  │ HTML   │  │
+  PDF / URLs       Info card +   │  │ .md    │  │ Deck   │  │
+  Supplements      Figures       │  └────────┘  └────────┘  │
+                                 └──────────────────────────┘
+                                  paper-notes/   paper-slides/
 ```
 
 ### 1. `raw/` — Source Archive
 Store the paper PDF, supplementary materials, web links, author info, dataset notes, code repo URLs, and temporary excerpts. Don't polish, just keep sources complete and traceable. Recommended: organize by topic or file name, and record title, year, venue, authors, paper link, code link, and data source.
 
-### 2. `ingest/` — Markdown Distillation
-The core layer for paper understanding and content compression. Distill `raw/` materials into structured Markdown, focusing on: **research problem & motivation, core contributions, method framework, key modules, experimental setup, core metrics, ablation conclusions, visualization evidence, limitations, reproducibility practices,** and a **presentation outline**. Each intermediate draft should follow the structure *Paper Info Card + Key Summary + Method Breakdown + Experiment Conclusion + Outline*, ready to be converted into HTML PPT.
+### 2. `ingest/` — Extraction Layer
+The core layer for paper understanding and content compression. Use `pdf_extractor.py` to pull transparent-background figures from the PDF, and distill key points into structured Markdown. Both output paths share this layer:
+- **Note flow**: extract *research problem & motivation, core contributions, method framework, key modules, experimental setup, core metrics, ablation conclusions, visualization evidence, limitations,* and a *narrative thread*.
+- **Deck flow**: compress content into a 13–22 page presentation structure.
 
-### 3. `HTML PPT` — Final Deliverable
-Convert the structured `ingest/` content into single-file decks. Paper decks go to `paper-slides/`; course or general content goes to `output/`. Keep a clear chapter flow: **Cover → Abstract → Introduction → Method → Experiments → Ablation → Conclusion & Outlook**, reinforced with cards, flow diagrams, comparison tables, metric highlights, and navigation controls. After ingestion into the gallery, **always update `slides-manifest.json`** so `index.html` can render title, path, description, kind, and accent correctly. Then run `python skills/html-paper-slides/scripts/generate-thumbnails.py` to generate real cover thumbnails for the gallery cards.
+### 3. Distilled Assets — Two Deliverables
+- **`paper-notes/` (Chinese reading notes)**: produced by `lzk-paper-reading` — a fixed five-section skeleton + paper-info table + disclaimer, with figures in `assets/<category>/`. Notes are the knowledge base's *searchable text assets*: diff-able, full-text searchable, re-processable.
+- **`paper-slides/` (HTML decks)**: produced by `html-paper-slides` — single-file decks. Keep a clear chapter flow: **Cover → Abstract → Introduction → Method → Experiments → Ablation → Conclusion & Outlook**, reinforced with cards, flow diagrams, comparison tables, metric highlights, and navigation controls. After ingestion, **always update `slides-manifest.json`** so `index.html` can render title, path, description, kind, and accent correctly. Then run `python skills/html-paper-slides/scripts/generate-thumbnails.py` to generate real cover thumbnails for the gallery cards.
 
 ### Quality Checklist
 Before moving to the next stage, confirm:
 - `raw/` can be traced back to the original source
-- `ingest/` has distilled enough material to support an 8–15 page report
-- The HTML PPT opens as a single file, supports keyboard navigation, and has clear visual hierarchy
+- `ingest/` has distilled enough material to support a note / an 8–15 page report
+- The note passes the `check_note.py` gate (skeleton / spacing / banned phrases / strengths section / no fabrication)
+- The HTML deck opens as a single file, supports keyboard navigation, and has clear visual hierarchy
 - `slides-manifest.json` covers all HTML files in `paper-slides/`
 - `assets/thumbnails/` contains matching thumbnails, with the `thumbnail` field correctly set in manifest
 
@@ -170,37 +190,38 @@ Before moving to the next stage, confirm:
 
 ```
 Accumulate-PPTs/
-├── index.html            # HTML Slides Gallery homepage (auto-deployed via GitHub Pages)
+├── index.html            # HTML Slides Gallery homepage / e-bookshelf (auto-deployed via GitHub Pages)
 ├── slides-manifest.json  # paper-slides deck manifest
 ├── README.md             # Chinese README (default)
 ├── README.en.md          # English README
 ├── LICENSE               # MIT License
-├── paper-slides/         # Paper reading / thesis defense / research report HTML PPT outputs
+├── paper-notes/          # Chinese reading notes (.md) from lzk-paper-reading + figures
+│   └── assets/<category>/ # figures referenced by notes
+├── paper-slides/         # HTML PPT outputs from html-paper-slides + matching _assets/ figures
 │   ├── Attention_Is_All_You_Need.html
 │   ├── DETRs_Beat_YOLOs_on_Real-time_Object_Detection.html
 │   └── ... (more paper decks)
-├── skills/               # Slide-creation skills, scripts, and template docs
-│   ├── html-paper-slides/        # Paper-reading / defense scenario
+├── skills/               # Note/slide-creation skills, scripts, and template docs
+│   ├── lzk-paper-reading/        # Paper reading → Chinese reading note
 │   │   ├── SKILL.md
 │   │   ├── scripts/
-│   │   │   ├── pdf_extractor.py   # Extract key figures from paper PDFs
-│   │   │   └── generate-thumbnails.py  # Generate first-screen thumbnails
-│   │   └── templates/
-│   │       └── presentation.html  # Paper-presentation HTML slide template
-│   ├── html-work-report-slides/  # Student cadre / club reporting scenario
-│   │   └── SKILL.md
-│   └── html-slides/              # Generic HTML slide creation skill
+│   │   │   ├── new_note.py        # Generate frontmatter + five-section skeleton
+│   │   │   └── check_note.py      # Note gate validation
+│   │   └── references/            # Skeleton variants, phrase corpus, domain transfer, examples
+│   └── html-paper-slides/        # Paper reading → HTML presentation deck
 │       ├── SKILL.md
+│       ├── scripts/
+│       │   ├── pdf_extractor.py   # Extract key figures from paper PDFs (shared by both flows)
+│       │   └── generate-thumbnails.py  # Generate first-screen thumbnails
 │       └── templates/
-│           └── presentation.html
+│           └── presentation.html  # Paper-presentation HTML slide template
 ├── assets/               # Shared static assets
 │   ├── thumbnails/       # HTML slide first-screen thumbnails (auto-generated)
 │   ├── design-prompts/   # Style design prompt collection
 │   ├── accmulate-ppts.png
 │   └── favicon.png
-├── raw/                  # Original papers and assets, retaining PDFs and other first-hand materials
-├── ingest/               # Distilled Markdown intermediate drafts and extracted assets
-└── output/               # Generic HTML PPT output area, for drafts, courses, or non-paper decks
+├── raw/                  # Original papers and assets, retaining PDFs (gitignored)
+└── ingest/               # Distilled Markdown intermediate drafts and extracted assets (gitignored)
 ```
 
 ---
@@ -214,13 +235,22 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 cd Accumulate-PPTs
 ```
 
-- Delete all `.html` files in `paper-slides/` (these are the author's personal data)
+- Delete all `.html` files in `paper-slides/` and all notes in `paper-notes/` (these are the author's personal knowledge-base data)
 - Clear the `slides` array in `slides-manifest.json`
 - (Optional) Install thumbnail dependencies: `pip install playwright && playwright install chromium`
+- (Optional) Install PDF-extraction dependencies: `pip install pymupdf Pillow`
 
-### 2. Choose a scenario, launch the AI Agent
+### 2. Choose an output, launch the AI Agent
 
 Open the project in an AI IDE such as `Claude Code` / `TRAE` / `CodeBuddy`.
+
+**Chinese reading-note scenario:**
+
+```markdown
+Please use the lzk-paper-reading skill (skills\lzk-paper-reading\SKILL.md)
+to write a Chinese paper-reading note for [path to your PDF paper].
+The final .md file should be saved in the paper-notes directory.
+```
 
 **Paper presentation scenario:**
 
@@ -230,20 +260,7 @@ to make an HTML paper-presentation PPT for [path to your PDF paper].
 The final file should be saved in the paper-slides directory.
 ```
 
-**Student work report scenario:**
-
-```markdown
-Please use the html-work-report-slides skill (skills\html-work-report-slides\SKILL.md)
-to make an HTML student-work-report PPT.
-The final file should be saved in the output directory.
-```
-
-**General-purpose scenario:**
-
-```markdown
-Please use the html-slides skill (skills\html-slides\SKILL.md)
-to make an HTML presentation on [given topic].
-```
+> For the same paper, you can run the note flow first to read it deeply, then the deck flow to present it — both share the same `ingest/` extraction output.
 
 ### 3. Generate thumbnails and auto-include in the gallery
 
@@ -261,7 +278,8 @@ After that, the new HTML PPT will appear in the `index.html` gallery with its **
 - **Vanilla JavaScript** — Pagination engine, keyboard interaction, fade-in animations (no framework dependency)
 - **CSS Grid / Flexbox** — 16:9 responsive layout
 - **CSS Variables** — Theme color and font variable management
-- **Google Fonts** — Noto Sans SC (Chinese) + Inter (English / numbers)
+- **Markdown + LaTeX** — Note carrier (inline `$...$`, display `$$...$$`)
+- **PyMuPDF + Pillow** — Extract transparent-background figures from paper PDFs
 - **Playwright (Python)** — Auto-generate HTML PPT first-screen thumbnails
 - **GitHub Actions** — Auto-deploy `index.html` to GitHub Pages
 
@@ -269,18 +287,18 @@ After that, the new HTML PPT will appear in the `index.html` gallery with its **
 
 ## Comparison with Alternatives
 
-| Dimension | PowerPoint | Gamma | Notion Slides | **Accumulate-PPTs** |
+| Dimension | PowerPoint | Gamma | Zotero / Note | **Accumulate-PPTs** |
 |-----------|-----------|-------|---------------|---------------------|
-| Onboarding cost | Medium (need to learn layout) | Low (web drag-and-drop) | Low (inside Notion) | **One sentence** (talk to the Agent) |
-| Automatic paper figure extraction | Not supported | Not supported | Not supported | **Supported** (`pdf_extractor.py`) |
+| Onboarding cost | Medium (need to learn layout) | Low (web drag-and-drop) | Medium (manual organizing) | **One sentence** (talk to the Agent) |
+| Automatic paper figure extraction | Not supported | Not supported | Partial (manual) | **Supported** (`pdf_extractor.py`) |
+| Structured Chinese reading note | Not supported | Not supported | Hand-written | **Supported** (`lzk-paper-reading` five-section skeleton) |
 | AI Agent workflow | Manual coordination | Semi-auto | Not supported | **Native support** |
-| Offline single file | `.pptx` | Web only | Web only | **Single-file HTML** |
-| Version control / reproducibility | Average | Difficult | Difficult | **Git-friendly** |
-| Deployment cost | Microsoft 365 | Subscription | Notion | **GitHub Pages free** |
-| Customizable templates | Fully free | Limited | Limited | **Fully free (pure HTML/CSS)** |
-| Commercial License | Subscription | Subscription | Subscription | **MIT open source** |
+| Offline single file | `.pptx` | Web only | App only | **Single-file HTML** |
+| Version control / reproducibility | Average | Difficult | Average | **Git-friendly (note + deck both diff-able)** |
+| Deployment cost | Microsoft 365 | Subscription | Client | **GitHub Pages free** |
+| Commercial License | Subscription | Subscription | Free/Paid | **MIT open source** |
 
-> **Positioning tagline**: PowerPoint is a graphics tool, Gamma is an AI web product, Accumulate-PPTs is the **Agent skill that makes the graphics-tool layer disappear**.
+> **Positioning tagline**: Zotero stores your papers, Gamma makes your slides, Accumulate-PPTs turns "a paper you've read" into **both a searchable note and a playable deck**, and stacks them into a long-growing personal knowledge base.
 
 ---
 
@@ -291,8 +309,9 @@ We pursue an 80-point stable, usable experience rather than 100-point perfection
 1. **PDF figure extraction has redundancy**: we recommend manually deleting redundant images after the first version, with VLM-based figure selection coming in future releases
 2. **Multimodal models work best**: native multimodal models like KIMI K2.6 and Minimax M3 are recommended — pure text models will miss paper figures
 3. **Current version is a high-quality first draft**: we recommend multiple rounds of dialog refinement with the Agent, e.g. "replace page 5 method diagram with architecture diagram" / "add the school logo to the footer"
-4. **No direct generation from LaTeX source**: if you need LaTeX fidelity, please use Beamer; this repository focuses on "start with PDF / Markdown"
-5. **Thumbnails depend on Playwright**: the first run requires `pip install playwright && playwright install chromium`; headless server environments need `--with-deps`
+4. **Note paradigm has domain skew**: the `lzk-paper-reading` corpus is mostly tabular-data ML; for vision/detection papers, switch the experiments-section style per `references/research/domain-transfer.md`
+5. **No direct generation from LaTeX source**: if you need LaTeX fidelity, please use Beamer; this repository focuses on "start with PDF / Markdown"
+6. **Thumbnails depend on Playwright**: the first run requires `pip install playwright && playwright install chromium`; headless server environments need `--with-deps`
 
 ---
 
@@ -306,6 +325,7 @@ See the [LICENSE](LICENSE) file for details.
 ## Acknowledgements
 
 - [html-presentation](https://github.com/juanjuanjie/html-presentation) — original HTML slide template and playback engine reference
+- The Cnblogs "乌漆WhiteMoon" Paper Reading column — the distillation source of the `lzk-paper-reading` note paradigm
 - [Claude Code](https://claude.com/claude-code) · [CodeBuddy](https://www.codebuddy.ai/) · [TRAE](https://www.trae.ai/) — AI Agent platforms
 - All open-source paper authors and the open-source community
 
@@ -332,4 +352,4 @@ If this repository helps you, please consider giving a Star to support our conti
 
 ---
 
-*Last Updated: 2026-06-13 · v1.0 · 7 paper decks collected*
+*Last Updated: 2026-09-04 · v1.1 · Personal AI + paper knowledge base · 2 SKILLs · 8 paper decks collected*

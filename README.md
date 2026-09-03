@@ -2,12 +2,12 @@
 
 🌐 [中文](#) · [English](README.en.md)
 
-> **「AI 打一句话,一份能直接讲的论文 PPT 落地。」**
-> *Type one sentence. Get a presentation-ready paper deck.*
+> **「一篇 PDF 进,两份沉淀出:中文阅读笔记 + 可放映的 HTML PPT。」**
+> *喂给 AI 一篇论文,它同时替你写好博客笔记、做组会 PPT,并把知识长期攒成个人知识库。*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Accumulate-PPTs/)
-[![Skills](https://img.shields.io/badge/Agent%20Skills-3-purple)](#-能力矩阵)
+[![Skills](https://img.shields.io/badge/Agent%20Skills-2-purple)](#-能力矩阵)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-贡献)
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
 
@@ -19,13 +19,12 @@
 
 ## 30 秒看懂
 
-`Accumulate-PPTs` 是面向**研究生与高校大学生**的 HTML 幻灯片工作流仓库,把"读论文 → 做汇报 → 答辩演练"这条最常见的痛点路径,封装成 3 个可被 AI Agent 直接调用的 SKILL。你给一句中文 prompt,Agent 就能在 5–20 分钟内产出一份苹果风/Notion 风的单文件 HTML 演示文稿,既能浏览器直接放映,也能嵌入个人主页长期展示。
+`Accumulate-PPTs` 是我个人的 **AI + 论文知识库**:把「读一篇论文」这件事沉淀成两种可长期复用的产物——一篇结构化的**中文阅读笔记(博客)**,和一份能直接放映的**单文件 HTML PPT**。两条路径都由 AI Agent 通过 2 个 SKILL 自动完成:你丢给它一篇 PDF,它替你写好笔记、做好 PPT,并把它们归档进一个可版本管理、可一键部署到 GitHub Pages 的电子书柜里。
 
-- 论文精读 / 答辩组会:用 `html-paper-slides`
-- 学生干部述职 / 社团汇报:用 `html-work-report-slides`
-- 通用主题分享:用 `html-slides`
+- 想把论文读透、沉淀成博客笔记 → 用 `lzk-paper-reading`
+- 想把论文做成组会 / 答辩汇报 PPT → 用 `html-paper-slides`
 
-**和 PowerPoint / Gamma / Notion Slides 的本质差异**:我们交付的是**离线单文件 HTML**,在 AI Agent 工作流中可重复、可版本管理、可一键部署到 GitHub Pages 形成个人作品集。
+**和普通 PPT 工具的本质差异**:这里交付的不是"一次性幻灯片",而是**知识库里的两个可检索资产**——Markdown 笔记(可 diff、可全文搜索、可再加工)+ 离线单文件 HTML PPT(可 `file://` 放映、可嵌入个人主页)。读过的每一篇,都会在这个书柜里越攒越厚。
 
 ---
 
@@ -36,35 +35,47 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 cd Accumulate-PPTs
 ```
 
-用 Claude Code / TRAE / CodeBuddy 等任意支持 Skills 的 AI IDE 打开,然后把这句话发给 Agent:
+用 Claude Code / TRAE / CodeBuddy 等任意支持 Skills 的 AI IDE 打开,然后把下面任意一句发给 Agent:
+
+**产出中文阅读笔记:**
+
+```markdown
+请你使用 lzk-paper-reading 技能(skills\lzk-paper-reading\SKILL.md),
+帮我为 ./raw/my-paper.pdf 写一篇中文论文阅读笔记,
+最终 .md 文件存放在 paper-notes 目录下。
+```
+
+**产出 HTML 汇报 PPT:**
 
 ```markdown
 请你使用 html-paper-slides 技能(skills\html-paper-slides\SKILL.md),
-帮我为 ./raw/my-paper.pdf 制作一份 HTML 格式的论文汇报 PPT,
+帮我为 ./pdf-papers/my-paper.pdf 制作一份 HTML 格式的论文汇报 PPT,
 最终文件存放在 paper-slides 目录下。
 ```
 
-5–15 分钟后,`paper-slides/` 下会出现一份可浏览器放映的单文件 HTML 演示文稿,首页会通过 `index.html` 自动收录到演示画廊中。
+几分钟后,`paper-notes/` 下会出现一篇结构化笔记,或 `paper-slides/` 下会出现一份可浏览器放映的单文件 HTML 演示文稿,后者还会通过 `index.html` 自动收录进电子书柜画廊。
 
 ---
 
 ## 能力矩阵
 
-仓库内置 3 个 SKILL,覆盖研究生与大学生最常见的三类汇报场景:
+仓库内置 2 个 SKILL,覆盖「读论文」最核心的两种沉淀方式:
 
 | SKILL | 典型场景 | 输入 | 交付物 | 典型耗时 |
 |------|----------|------|--------|----------|
-| [`html-paper-slides`](skills/html-paper-slides/SKILL.md) | 论文精读 · 答辩组会 · 研究进展汇报 | 一篇 PDF 论文 | 单文件 HTML deck + 首屏缩略图 | 8–15 min |
-| [`html-work-report-slides`](skills/html-work-report-slides/SKILL.md) | 学生干部述职 · 社团/部门年度总结 · 班委汇报 | Markdown 大纲 / 草稿 | 苹果风 / Notion 风单文件 HTML | 10–20 min |
-| [`html-slides`](skills/html-slides/SKILL.md) | 课程展示 · 读书分享 · 通用主题 | Markdown / 自由文本 | 通用 HTML 幻灯片 | 5–15 min |
+| [`lzk-paper-reading`](skills/lzk-paper-reading/SKILL.md) | 论文精读 · 博客笔记 · 知识沉淀 | 一篇 PDF / arXiv 链接 / 标题 | 结构化中文 Markdown 笔记(`ingest/`)+ 配图库(`assets/paper-imgs/`) | 5–12 min |
+| [`html-paper-slides`](skills/html-paper-slides/SKILL.md) | 组会汇报 · 答辩演练 · 研究进展展示 | 一篇 PDF 论文 | 单文件 HTML deck + 首屏缩略图 | 8–15 min |
 
-所有产出统一为**离线单文件 HTML**:无外部依赖、可直接 `open file://` 播放、键盘翻页、淡入动画、CSS Grid 响应式排版,适合 GitHub Pages / Vercel / Netlify 一键部署。
+- **`lzk-paper-reading`** 按固定五节骨架(研究动机 / 文章贡献 / 本文方法 / 实验结果 / 优点和创新点)+ 论文概况表 + 免责声明产出中文笔记,强制执行公式"铺垫句→LaTeX→其中解释"三段式、"2-3 句 + 1 图"实验节奏,并用 `scripts/new_note.py` 起稿、`scripts/check_note.py` 门禁验收。
+- **`html-paper-slides`** 生成苹果风 / Notion 风的单文件 HTML 演示文稿:无外部依赖、可直接 `open file://` 播放、键盘翻页、淡入动画、CSS Grid 响应式排版,适合 GitHub Pages / Vercel / Netlify 一键部署。
+
+> 两个技能共享同一套"论文理解"能力:先用 `pdf_extractor.py` 从 PDF 提取透明背景原图,再分别喂给笔记流与 PPT 流。同一篇论文,可以一次生成"笔记 + PPT"两份资产。
 
 ---
 
 ## Showcase · 真实论文 PPT 演示
 
-下面 7 份演示文稿均使用 `html-paper-slides` 在 AI Agent 协助下完成,可直接点击预览:
+下面 8 份演示文稿均使用 `html-paper-slides` 在 AI Agent 协助下完成,可直接点击预览:
 
 <table>
   <tr>
@@ -124,7 +135,11 @@ cd Accumulate-PPTs
       <br><sub>对话可视化 · 三智能体 · 电影知识整合</sub>
     </td>
     <td align="center" width="50%">
-      <i>更多论文演示持续更新中 · 见 <a href="https://luoqianshi.github.io/Accumulate-PPTs/">在线画廊</a></i>
+      <a href="paper-slides/DySample_Learning_to_Upsample.html">
+        <img src="assets/thumbnails/DySample_Learning_to_Upsample.png" alt="DySample" width="100%">
+      </a>
+      <br><b>DySample: Learning to Upsample by Learning to Sample</b>
+      <br><sub>动态上采样 · 内容感知 · 即插即用</sub>
     </td>
   </tr>
 </table>
@@ -133,33 +148,38 @@ cd Accumulate-PPTs
 
 ---
 
-## 核心工作流:raw → ingest → HTML PPT
+## 核心工作流:raw → ingest → 笔记 / HTML PPT
 
-本仓库的差异化在于把"论文精读"和"演示文稿生成"统一到一条**可复现、可版本化**的工作流上:
+本仓库的差异化在于把"论文精读"统一到一条**可复现、可版本化**的知识沉淀流水线上,一篇论文可同时产出"笔记"与"PPT"两种资产:
 
 ```
-┌──────────┐    ┌──────────┐    ┌────────────────┐
-│   raw    │ →  │  ingest  │ →  │  HTML PPT      │
-│ 原始材料 │    │ 结构化MD │    │ 单文件HTML演示 │
-└──────────┘    └──────────┘    └────────────────┘
-  PDF / 网页       信息卡 +        paper-slides/
-  补充材料          重点摘要         output/
-                   汇报大纲
+┌──────────┐    ┌──────────┐    ┌──────────────────────────┐
+│   raw    │ →  │  ingest  │ →  │        知识沉淀          │
+│ 原始材料 │    │ 结构化MD │    │  ┌────────┐  ┌────────┐  │
+└──────────┘    └──────────┘    │  │ 笔记   │  │ HTML   │  │
+  PDF / 网页       重点提取       │  │ .md    │  │ PPT    │  │
+  补充材料         配图抽取       │  └────────┘  └────────┘  │
+                                └──────────────────────────┘
+                                  paper-notes/   paper-slides/
 ```
 
 ### 1. `raw/` —— 原始材料归档
 保存论文 PDF、补充材料、网页链接、作者信息、数据集说明、代码仓库地址和临时摘录。不追求排版,只要求材料完整、来源清晰、文件命名可追踪。建议按论文主题或文件名保存,并记录标题、年份、会议/期刊、作者、论文链接、代码链接、数据来源。
 
-### 2. `ingest/` —— Markdown 重点提取
-论文理解与内容压缩的核心层。将 `raw/` 中的材料整理为结构化 Markdown,重点提取:**研究问题与动机、核心贡献、方法框架、关键模块、实验设置、核心指标、消融结论、可视化证据、局限性、可复现实践**和**适合放进 PPT 的讲述主线**。每份中间稿应形成"论文信息卡 + 重点摘要 + 方法拆解 + 实验结论 + 汇报大纲"结构,便于直接转为 HTML PPT。
+### 2. `ingest/` —— 中间提取层
+论文理解与内容压缩的核心层。用 `pdf_extractor.py` 从 PDF 抽取透明背景原图,并把论文要点整理为结构化 Markdown。两条产出路径共享这一层:
+- **笔记流**:提炼"研究问题与动机、核心贡献、方法框架、关键模块、实验设置、核心指标、消融结论、可视化证据、局限性与讲述主线"。
+- **PPT 流**:按分页规划把内容压缩成 13–22 页的讲述结构。
 
-### 3. `HTML PPT` —— 演示成品入库
-将 `ingest/` 的结构化内容转化为单文件演示文稿。论文类成品优先放入 `paper-slides/`,课程、练习或通用内容可放入 `output/`。生成时应保留清晰的章节流:**封面 → 摘要 → 引言 → 方法 → 实验 → 消融 → 结论与展望**,并通过卡片、流程图、对比表、指标高亮、导航控件强化阅读节奏。成品入库后,**必须同步更新 `slides-manifest.json`**,确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。随后运行 `python skills/html-paper-slides/scripts/generate-thumbnails.py` 生成首屏缩略图,画廊卡片便会直接展示真实幻灯片封面。
+### 3. 知识沉淀 —— 两种成品
+- **`paper-notes/`(中文阅读笔记)**:由 `lzk-paper-reading` 产出,固定五节骨架 + 论文概况表 + 免责声明,`assets/<分类>/` 存配图。笔记是知识库的"可检索文本资产",可 diff、可全文搜索、可二次加工。
+- **`paper-slides/`(HTML PPT)**:由 `html-paper-slides` 产出,单文件演示文稿。章节流为**封面 → 摘要 → 引言 → 方法 → 实验 → 消融 → 结论与展望**,通过卡片、流程图、对比表、指标高亮、导航控件强化阅读节奏。成品入库后,**必须同步更新 `slides-manifest.json`**,确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。随后运行 `python skills/html-paper-slides/scripts/generate-thumbnails.py` 生成首屏缩略图,画廊卡片便会直接展示真实幻灯片封面。
 
 ### 质量检查清单
 在进入下一阶段前建议确认:
 - `raw/` 是否可追溯到原始来源
-- `ingest/` 是否已经提炼出足够支撑 8–15 页汇报的主线
+- `ingest/` 是否已经提炼出足够支撑笔记 / 8–15 页汇报的主线
+- 笔记是否通过 `check_note.py` 门禁(骨架 / 空格 / 禁用词 / 优点节 / 无编造)
 - HTML PPT 是否可以单文件打开、键盘翻页、视觉层级清晰
 - `slides-manifest.json` 是否覆盖 `paper-slides/` 下的全部 HTML 文件
 - `assets/thumbnails/` 是否已包含对应缩略图且 `thumbnail` 字段已正确写入 manifest
@@ -170,37 +190,38 @@ cd Accumulate-PPTs
 
 ```
 Accumulate-PPTs/
-├── index.html            # HTML Slides Gallery 导航页(由 GitHub Pages 自动部署)
+├── index.html            # HTML Slides Gallery 电子书柜首页(由 GitHub Pages 自动部署)
 ├── slides-manifest.json  # paper-slides 演示文稿清单
 ├── README.md             # 中文 README(默认)
 ├── README.en.md          # 英文 README
 ├── LICENSE               # MIT 协议
-├── paper-slides/         # 论文精读、答辩与研究汇报类 HTML PPT 成品
+├── paper-notes/          # lzk-paper-reading 产出的中文阅读笔记(.md)+ 配图
+│   └── assets/<分类>/     # 笔记引用的论文配图
+├── paper-slides/         # html-paper-slides 产出的 HTML PPT 成品 + 对应 _assets/ 配图
 │   ├── Attention_Is_All_You_Need.html
 │   ├── DETRs_Beat_YOLOs_on_Real-time_Object_Detection.html
 │   └── ... (更多论文演示)
-├── skills/               # 幻灯片制作技能、脚本与模板文档
-│   ├── html-paper-slides/        # 论文精读 / 答辩汇报场景
+├── skills/               # 幻灯片 / 笔记制作技能、脚本与模板文档
+│   ├── lzk-paper-reading/        # 论文精读 → 中文阅读笔记
 │   │   ├── SKILL.md
 │   │   ├── scripts/
-│   │   │   ├── pdf_extractor.py   # 从论文 PDF 中提取核心配图
-│   │   │   └── generate-thumbnails.py  # 为 HTML 幻灯片生成首屏缩略图
-│   │   └── templates/
-│   │       └── presentation.html  # 论文汇报场景专用 HTML 幻灯片模板
-│   ├── html-work-report-slides/  # 学生工作述职 / 社团汇报场景
-│   │   └── SKILL.md
-│   └── html-slides/              # 通用 HTML 幻灯片制作技能
+│   │   │   ├── new_note.py        # 生成 frontmatter + 五节骨架
+│   │   │   └── check_note.py      # 笔记门禁校验
+│   │   └── references/            # 骨架变体、句式语料、领域迁移映射、典范样例
+│   └── html-paper-slides/        # 论文精读 → HTML 汇报 PPT
 │       ├── SKILL.md
+│       ├── scripts/
+│       │   ├── pdf_extractor.py   # 从论文 PDF 中提取核心配图(两条流共用)
+│       │   └── generate-thumbnails.py  # 为 HTML 幻灯片生成首屏缩略图
 │       └── templates/
-│           └── presentation.html
+│           └── presentation.html  # 论文汇报场景专用 HTML 幻灯片模板
 ├── assets/               # 通用静态资源
 │   ├── thumbnails/       # HTML 幻灯片首屏缩略图(自动生成)
 │   ├── design-prompts/   # 风格设计提示词集合
 │   ├── accmulate-ppts.png
 │   └── favicon.png
-├── raw/                  # 原始论文与素材,保留 PDF 等一手资料
-├── ingest/               # 摄取后的 Markdown 中间稿与提取素材
-└── output/               # 通用 HTML PPT 输出区,适合草稿、课程或非论文类演示
+├── raw/                  # 原始论文与素材,保留 PDF 等一手资料(已 gitignore)
+└── ingest/               # 摄取后的 Markdown 中间稿与提取素材(已 gitignore)
 ```
 
 ---
@@ -214,15 +235,24 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 cd Accumulate-PPTs
 ```
 
-- 删除 `paper-slides/` 目录下的所有 `.html` 文件
-- 将 `slides-manifest.json` 文件中的 `slides` 数组清空(以上为作者个人使用数据)
+- 删除 `paper-slides/` 目录下的所有 `.html` 文件与 `paper-notes/` 下的笔记(以上为作者个人知识库数据)
+- 将 `slides-manifest.json` 文件中的 `slides` 数组清空
 - (可选)安装缩略图生成依赖:`pip install playwright && playwright install chromium`
+- (可选)安装 PDF 提取依赖:`pip install pymupdf Pillow`
 
-### 2. 选择场景,启动 AI Agent
+### 2. 选择产出,启动 AI Agent
 
 用 `Claude Code` / `TRAE` / `CodeBuddy` 等 AI IDE 打开当前项目。
 
-**论文汇报场景:**
+**中文阅读笔记场景:**
+
+```markdown
+请你使用 lzk-paper-reading 技能(skills\lzk-paper-reading\SKILL.md),
+帮我为 [给定你要阅读的 PDF 论文文件路径] 写一篇中文论文阅读笔记,
+最终 .md 文件存放在 paper-notes 目录下。
+```
+
+**论文汇报 PPT 场景:**
 
 ```markdown
 请你使用 html-paper-slides 技能(skills\html-paper-slides\SKILL.md),
@@ -230,21 +260,9 @@ cd Accumulate-PPTs
 HTML 格式的 PPT,最终文件存放在 paper-slides 目录下。
 ```
 
-**学生工作述职场景:**
+> 同一篇论文,你可以先跑笔记流把内容读透,再跑 PPT 流生成汇报,两条流共享同一份 `ingest/` 提取产物。
 
-```markdown
-请你使用 html-work-report-slides 技能(skills\html-work-report-slides\SKILL.md),
-帮我制作一份 HTML 格式的学生工作述职报告 PPT,最终文件存放在 output 目录下。
-```
-
-**通用主题场景:**
-
-```markdown
-请你使用 html-slides 技能(skills\html-slides\SKILL.md),
-围绕 [给定主题] 制作一份 HTML 格式的演示文稿。
-```
-
-### 3. 生成缩略图,自动收录到画廊
+### 3. 生成缩略图,自动收录到电子书柜
 
 ```bash
 python skills/html-paper-slides/scripts/generate-thumbnails.py
@@ -260,7 +278,8 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 - **Vanilla JavaScript** —— 分页引擎、键盘交互、淡入动画(无框架依赖)
 - **CSS Grid / Flexbox** —— 16:9 响应式布局
 - **CSS Variables** —— 主题色与字体变量化管理
-- **Google Fonts** —— Noto Sans SC(中文)+ Inter(英文/数字)
+- **Markdown + LaTeX** —— 阅读笔记载体(公式行内 `$...$`、独立 `$$...$$`)
+- **PyMuPDF + Pillow** —— 从论文 PDF 提取透明背景配图
 - **Playwright (Python)** —— 自动生成 HTML PPT 首屏缩略图
 - **GitHub Actions** —— 自动部署 `index.html` 至 GitHub Pages
 
@@ -268,18 +287,18 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 ## 与同类方案对比
 
-| 维度 | PowerPoint | Gamma | Notion Slides | **Accumulate-PPTs** |
+| 维度 | PowerPoint | Gamma | Zotero / Note | **Accumulate-PPTs** |
 |------|-----------|-------|---------------|---------------------|
-| 上手成本 | 中等(需学排版) | 低(网页拖拽) | 低(Notion 内) | **一句话**(对 Agent 说话) |
-| 论文配图自动提取 | 不支持 | 不支持 | 不支持 | **支持**(`pdf_extractor.py`) |
+| 上手成本 | 中等(需学排版) | 低(网页拖拽) | 中(手动整理) | **一句话**(对 Agent 说话) |
+| 论文配图自动提取 | 不支持 | 不支持 | 部分(手动) | **支持**(`pdf_extractor.py`) |
+| 结构化中文阅读笔记 | 不支持 | 不支持 | 需手写 | **支持**(`lzk-paper-reading` 五节骨架) |
 | AI Agent 工作流 | 需手动配合 | 半自动 | 不支持 | **原生支持** |
-| 离线单文件 | `.pptx` | 仅网页 | 仅网页 | **单文件 HTML** |
-| 版本管理 / 复现 | 一般 | 困难 | 困难 | **Git 友好** |
-| 部署成本 | Microsoft 365 | 订阅 | Notion | **GitHub Pages 免费** |
-| 可定制模板 | 完全自由 | 受限 | 受限 | **完全自由(纯 HTML/CSS)** |
-| 商用 License | 订阅制 | 订阅制 | 订阅制 | **MIT 完全开源** |
+| 离线单文件 | `.pptx` | 仅网页 | 仅 App 内 | **单文件 HTML** |
+| 版本管理 / 复现 | 一般 | 困难 | 一般 | **Git 友好(笔记 + PPT 均可 diff)** |
+| 部署成本 | Microsoft 365 | 订阅 | 客户端 | **GitHub Pages 免费** |
+| 商用 License | 订阅制 | 订阅制 | 免费/付费 | **MIT 完全开源** |
 
-> **定位金句**:PowerPoint 是图形工具,Gamma 是 AI 网页产品,Accumulate-PPTs 是 **"让图形工具这层消失"** 的 Agent 技能。
+> **定位金句**:Zotero 帮你存论文,Gamma 帮你做 PPT,Accumulate-PPTs 帮你把"读过的一篇论文"同时沉淀成**能检索的笔记**和**能放映的 PPT**,并攒成一个长期生长的个人知识库。
 
 ---
 
@@ -288,10 +307,11 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 我们追求 80 分的稳定可用,而非 100 分的完美:
 
 1. **PDF 配图存在冗余提取**:首版生成后建议手动删除冗余图片,后续会引入视觉语言模型做精选
-2. **多模态模型效果更佳**:推荐使用 KIMI K2.6、Minimax M3等原生多模态模型,纯文本模型会丢失论文配图
+2. **多模态模型效果更佳**:推荐使用 KIMI K2.6、Minimax M3 等原生多模态模型,纯文本模型会丢失论文配图
 3. **当前版本为高质量初稿**:建议在初稿生成后与 Agent 进行多轮对话精修,例如"第 5 页方法图换成架构图" / "页脚加学校 logo"
-4. **不直接从 LaTeX 源生成**:若需 LaTeX 高保真,请使用 Beamer;本仓库主打"用 PDF/Markdown 就能上手"
-5. **缩略图依赖 Playwright**:首次运行需 `pip install playwright && playwright install chromium`,无图形环境(headless 服务器)需补 `--with-deps` 步骤
+4. **笔记范式有领域偏斜**:`lzk-paper-reading` 语料以表格数据 ML 为主,写视觉检测类论文时按 `references/research/domain-transfer.md` 切换实验节写法
+5. **不直接从 LaTeX 源生成**:若需 LaTeX 高保真,请使用 Beamer;本仓库主打"用 PDF/Markdown 就能上手"
+6. **缩略图依赖 Playwright**:首次运行需 `pip install playwright && playwright install chromium`,无图形环境(headless 服务器)需补 `--with-deps` 步骤
 
 ---
 
@@ -304,6 +324,7 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 ## 致谢
 
 - [html-presentation](https://github.com/juanjuanjie/html-presentation) —— 原始 HTML 幻灯片模板与播放引擎参考仓库
+- 博客园「乌漆WhiteMoon」Paper Reading 专栏 —— `lzk-paper-reading` 笔记范式的蒸馏来源
 - [Claude Code](https://claude.com/claude-code) · [CodeBuddy](https://www.codebuddy.ai/) · [TRAE](https://www.trae.ai/) —— AI Agent 平台
 - 所有开源论文作者与开源社区
 
@@ -330,4 +351,4 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 ---
 
-*Last Updated: 2026-06-13 · v1.0 · 累计收录论文演示 7 份*
+*Last Updated: 2026-09-04 · v1.1 · 个人 AI + 论文知识库 · 2 个 SKILL · 累计收录论文演示 8 份*
