@@ -7,3 +7,6 @@ ingest/*
 # Agents
 .claude/
 .codebuddy/
+
+# Dev
+.trae/documents/*
