@@ -3,7 +3,7 @@
 🌐 [中文](#) · [English](README.en.md)
 
 > **「一篇 PDF 进,两份沉淀出:中文阅读笔记 + 可放映的 HTML PPT。」**
-> *喂给 AI 一篇论文,它同时替你写好博客笔记、做组会 PPT,并把知识长期攒成个人知识库。*
+> *嵌入各类 AI 编程工具 / AI 办公工具的科研人 AI 原生论文知识库:喂给 AI 一篇论文,它同时替你写好博客笔记、做组会 PPT,并把知识长期攒成个人知识库。*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Accumulate-PPTs/)
@@ -19,7 +19,7 @@
 
 ## 30 秒看懂
 
-`Accumulate-PPTs` 是我个人的 **AI + 论文知识库**:把「读一篇论文」这件事沉淀成两种可长期复用的产物——一篇结构化的**中文阅读笔记(博客)**,和一份能直接放映的**单文件 HTML PPT**。两条路径都由 AI Agent 通过 2 个 SKILL 自动完成:你丢给它一篇 PDF,它替你写好笔记、做好 PPT,并把它们归档进一个可版本管理、可一键部署到 GitHub Pages 的电子书柜里。
+`Accumulate-PPTs` 是面向科研人的 **AI 原生论文知识库**,可嵌入 Claude Code / TRAE / CodeBuddy 等各类 AI 编程工具与 AI 办公工具:把「读一篇论文」这件事沉淀成两种可长期复用的产物——一篇结构化的**中文阅读笔记(博客)**,和一份能直接放映的**单文件 HTML PPT**。两条路径都由 AI Agent 通过 2 个 SKILL 自动完成:你把 PDF 丢进 `pdf-papers/`,它替你写好笔记、做好 PPT,并把它们归档进一个可版本管理、可一键部署到 GitHub Pages 的电子书柜里。
 
 - 想把论文读透、沉淀成博客笔记 → 用 `lzk-paper-reading`
 - 想把论文做成组会 / 答辩汇报 PPT → 用 `html-paper-slides`
@@ -35,14 +35,15 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 cd Accumulate-PPTs
 ```
 
-用 Claude Code / TRAE / CodeBuddy 等任意支持 Skills 的 AI IDE 打开,然后把下面任意一句发给 Agent:
+用 Claude Code / TRAE / CodeBuddy 等任意支持 Skills 的 AI 编程工具 / AI 办公工具打开,然后把下面任意一句发给 Agent:
 
 **产出中文阅读笔记:**
 
 ```markdown
 请你使用 lzk-paper-reading 技能(skills\lzk-paper-reading\SKILL.md),
-帮我为 ./raw/my-paper.pdf 写一篇中文论文阅读笔记,
-最终 .md 文件存放在 paper-notes 目录下。
+帮我为 ./pdf-papers/my-paper.pdf 写一篇中文论文阅读笔记,
+最终 .md 文件存放在 ingest 目录下,
+提取的论文配图按论文标题归档到 assets/paper-imgs 目录下。
 ```
 
 **产出 HTML 汇报 PPT:**
@@ -53,7 +54,7 @@ cd Accumulate-PPTs
 最终文件存放在 paper-slides 目录下。
 ```
 
-几分钟后,`paper-notes/` 下会出现一篇结构化笔记,或 `paper-slides/` 下会出现一份可浏览器放映的单文件 HTML 演示文稿,后者还会通过 `index.html` 自动收录进电子书柜画廊。
+几分钟后,`ingest/` 下会出现一篇结构化中文阅读笔记,或 `paper-slides/` 下会出现一份可浏览器放映的单文件 HTML 演示文稿,后者还会通过 `index.html` 自动收录进电子书柜画廊。
 
 ---
 
@@ -69,7 +70,7 @@ cd Accumulate-PPTs
 - **`lzk-paper-reading`** 按固定五节骨架(研究动机 / 文章贡献 / 本文方法 / 实验结果 / 优点和创新点)+ 论文概况表 + 免责声明产出中文笔记,强制执行公式"铺垫句→LaTeX→其中解释"三段式、"2-3 句 + 1 图"实验节奏,并用 `scripts/new_note.py` 起稿、`scripts/check_note.py` 门禁验收。
 - **`html-paper-slides`** 生成苹果风 / Notion 风的单文件 HTML 演示文稿:无外部依赖、可直接 `open file://` 播放、键盘翻页、淡入动画、CSS Grid 响应式排版,适合 GitHub Pages / Vercel / Netlify 一键部署。
 
-> 两个技能共享同一套"论文理解"能力:先用 `pdf_extractor.py` 从 PDF 提取透明背景原图,再分别喂给笔记流与 PPT 流。同一篇论文,可以一次生成"笔记 + PPT"两份资产。
+> 两个技能共享同一套"论文理解"能力:先用 `pdf_extractor.py` 从 PDF 提取透明背景原图,按论文标题统一归档到 `assets/paper-imgs/<论文标题>/`,再分别喂给笔记流与 PPT 流。同一篇论文,可以一次生成"笔记 + PPT"两份资产。
 
 ---
 
@@ -148,38 +149,36 @@ cd Accumulate-PPTs
 
 ---
 
-## 核心工作流:raw → ingest → 笔记 / HTML PPT
+## 核心工作流:pdf-papers → ingest → paper-slides
 
-本仓库的差异化在于把"论文精读"统一到一条**可复现、可版本化**的知识沉淀流水线上,一篇论文可同时产出"笔记"与"PPT"两种资产:
+本仓库的差异化在于把"论文精读"统一到一条**可复现、可版本化**的三段式流水线上,一篇论文可同时产出"笔记"与"PPT"两种资产:
 
 ```
-┌──────────┐    ┌──────────┐    ┌──────────────────────────┐
-│   raw    │ →  │  ingest  │ →  │        知识沉淀          │
-│ 原始材料 │    │ 结构化MD │    │  ┌────────┐  ┌────────┐  │
-└──────────┘    └──────────┘    │  │ 笔记   │  │ HTML   │  │
-  PDF / 网页       重点提取       │  │ .md    │  │ PPT    │  │
-  补充材料         配图抽取       │  └────────┘  └────────┘  │
-                                └──────────────────────────┘
-                                  paper-notes/   paper-slides/
+┌────────────┐    ┌────────────┐    ┌──────────────────────────┐
+│ pdf-papers │ →  │   ingest   │ →  │      paper-slides        │
+│ 原始论文库 │    │ 中文MD笔记 │    │  ┌────────────────────┐  │
+└────────────┘    └────────────┘    │  │ 单文件 HTML PPT    │  │
+  仅存原始 PDF      五节骨架笔记     │  └────────────────────┘  │
+  命名可追踪        配图统一入库      └──────────────────────────┘
+                    assets/paper-imgs/<论文标题>/
 ```
 
-### 1. `raw/` —— 原始材料归档
-保存论文 PDF、补充材料、网页链接、作者信息、数据集说明、代码仓库地址和临时摘录。不追求排版,只要求材料完整、来源清晰、文件命名可追踪。建议按论文主题或文件名保存,并记录标题、年份、会议/期刊、作者、论文链接、代码链接、数据来源。
+### 1. `pdf-papers/` —— 原始论文 PDF 归档
+只保存 PDF 格式的原始论文,不再存放补充材料、网页链接、临时摘录等其他素材。不追求排版,只要求来源清晰、文件命名可追踪(建议直接以论文标题命名),方便后续流程按标题建立配图目录。
 
-### 2. `ingest/` —— 中间提取层
-论文理解与内容压缩的核心层。用 `pdf_extractor.py` 从 PDF 抽取透明背景原图,并把论文要点整理为结构化 Markdown。两条产出路径共享这一层:
-- **笔记流**:提炼"研究问题与动机、核心贡献、方法框架、关键模块、实验设置、核心指标、消融结论、可视化证据、局限性与讲述主线"。
-- **PPT 流**:按分页规划把内容压缩成 13–22 页的讲述结构。
+### 2. `ingest/` —— 中文阅读笔记(MD 博客)
+`lzk-paper-reading` 技能的产出层:每篇 PDF 论文对应一份结构化中文 Markdown 阅读笔记(博客),按固定五节骨架 + 论文概况表 + 免责声明组织,提炼"研究问题与动机、核心贡献、方法框架、关键模块、实验设置、核心指标、消融结论、可视化证据、局限性与讲述主线"。笔记是知识库的"可检索文本资产",可 diff、可全文搜索、可二次加工。
 
-### 3. 知识沉淀 —— 两种成品
-- **`paper-notes/`(中文阅读笔记)**:由 `lzk-paper-reading` 产出,固定五节骨架 + 论文概况表 + 免责声明,`assets/<分类>/` 存配图。笔记是知识库的"可检索文本资产",可 diff、可全文搜索、可二次加工。
-- **`paper-slides/`(HTML PPT)**:由 `html-paper-slides` 产出,单文件演示文稿。章节流为**封面 → 摘要 → 引言 → 方法 → 实验 → 消融 → 结论与展望**,通过卡片、流程图、对比表、指标高亮、导航控件强化阅读节奏。成品入库后,**必须同步更新 `slides-manifest.json`**,确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。随后运行 `python skills/html-paper-slides/scripts/generate-thumbnails.py` 生成首屏缩略图,画廊卡片便会直接展示真实幻灯片封面。
+论文配图统一入库:由 `pdf_extractor.py` 提取的重要截图,按**论文标题**创建文件夹,存入 `assets/paper-imgs/<论文标题>/`,供笔记与 PPT 两条流共用。
+
+### 3. `paper-slides/` —— HTML 汇报 PPT
+由 `html-paper-slides` 产出,单文件演示文稿,基于 `ingest/` 中同一篇论文的阅读笔记与 `assets/paper-imgs/` 配图,按分页规划压缩成 13–22 页的讲述结构。章节流为**封面 → 摘要 → 引言 → 方法 → 实验 → 消融 → 结论与展望**,通过卡片、流程图、对比表、指标高亮、导航控件强化阅读节奏。成品入库后,**必须同步更新 `slides-manifest.json`**,确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。随后运行 `python skills/html-paper-slides/scripts/generate-thumbnails.py` 生成首屏缩略图,画廊卡片便会直接展示真实幻灯片封面。
 
 ### 质量检查清单
 在进入下一阶段前建议确认:
-- `raw/` 是否可追溯到原始来源
-- `ingest/` 是否已经提炼出足够支撑笔记 / 8–15 页汇报的主线
-- 笔记是否通过 `check_note.py` 门禁(骨架 / 空格 / 禁用词 / 优点节 / 无编造)
+- `pdf-papers/` 是否可追溯到原始来源(仅 PDF、命名可追踪)
+- `ingest/` 笔记是否通过 `check_note.py` 门禁(骨架 / 空格 / 禁用词 / 优点节 / 无编造),并提炼出足够支撑 8–15 页汇报的主线
+- 配图是否已按论文标题归档到 `assets/paper-imgs/<论文标题>/`
 - HTML PPT 是否可以单文件打开、键盘翻页、视觉层级清晰
 - `slides-manifest.json` 是否覆盖 `paper-slides/` 下的全部 HTML 文件
 - `assets/thumbnails/` 是否已包含对应缩略图且 `thumbnail` 字段已正确写入 manifest
@@ -195,8 +194,6 @@ Accumulate-PPTs/
 ├── README.md             # 中文 README(默认)
 ├── README.en.md          # 英文 README
 ├── LICENSE               # MIT 协议
-├── paper-notes/          # lzk-paper-reading 产出的中文阅读笔记(.md)+ 配图
-│   └── assets/<分类>/     # 笔记引用的论文配图
 ├── paper-slides/         # html-paper-slides 产出的 HTML PPT 成品 + 对应 _assets/ 配图
 │   ├── Attention_Is_All_You_Need.html
 │   ├── DETRs_Beat_YOLOs_on_Real-time_Object_Detection.html
@@ -216,12 +213,14 @@ Accumulate-PPTs/
 │       └── templates/
 │           └── presentation.html  # 论文汇报场景专用 HTML 幻灯片模板
 ├── assets/               # 通用静态资源
+│   ├── paper-imgs/       # 论文重要截图库:按论文标题分文件夹归档
+│   │   └── <论文标题>/    # 每篇论文提取的重要配图
 │   ├── thumbnails/       # HTML 幻灯片首屏缩略图(自动生成)
 │   ├── design-prompts/   # 风格设计提示词集合
 │   ├── accmulate-ppts.png
 │   └── favicon.png
-├── raw/                  # 原始论文与素材,保留 PDF 等一手资料(已 gitignore)
-└── ingest/               # 摄取后的 Markdown 中间稿与提取素材(已 gitignore)
+├── pdf-papers/           # 原始论文 PDF 归档(仅 PDF 格式,已 gitignore)
+└── ingest/               # lzk-paper-reading 产出的中文阅读笔记 .md 博客文件(已 gitignore)
 ```
 
 ---
@@ -235,21 +234,22 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 cd Accumulate-PPTs
 ```
 
-- 删除 `paper-slides/` 目录下的所有 `.html` 文件与 `paper-notes/` 下的笔记(以上为作者个人知识库数据)
+- 删除 `paper-slides/` 目录下的所有 `.html` 文件、`ingest/` 下的笔记与 `assets/paper-imgs/` 下的配图(以上为作者个人知识库数据)
 - 将 `slides-manifest.json` 文件中的 `slides` 数组清空
 - (可选)安装缩略图生成依赖:`pip install playwright && playwright install chromium`
 - (可选)安装 PDF 提取依赖:`pip install pymupdf Pillow`
 
 ### 2. 选择产出,启动 AI Agent
 
-用 `Claude Code` / `TRAE` / `CodeBuddy` 等 AI IDE 打开当前项目。
+用 `Claude Code` / `TRAE` / `CodeBuddy` 等 AI 编程工具 / AI 办公工具打开当前项目。
 
 **中文阅读笔记场景:**
 
 ```markdown
 请你使用 lzk-paper-reading 技能(skills\lzk-paper-reading\SKILL.md),
 帮我为 [给定你要阅读的 PDF 论文文件路径] 写一篇中文论文阅读笔记,
-最终 .md 文件存放在 paper-notes 目录下。
+最终 .md 文件存放在 ingest 目录下,
+提取的论文配图按论文标题归档到 assets/paper-imgs 目录下。
 ```
 
 **论文汇报 PPT 场景:**
@@ -260,7 +260,7 @@ cd Accumulate-PPTs
 HTML 格式的 PPT,最终文件存放在 paper-slides 目录下。
 ```
 
-> 同一篇论文,你可以先跑笔记流把内容读透,再跑 PPT 流生成汇报,两条流共享同一份 `ingest/` 提取产物。
+> 同一篇论文,你可以先跑笔记流把内容读透,再跑 PPT 流生成汇报,两条流共享 `ingest/` 里的阅读笔记与 `assets/paper-imgs/` 里的配图。
 
 ### 3. 生成缩略图,自动收录到电子书柜
 
@@ -298,7 +298,7 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 | 部署成本 | Microsoft 365 | 订阅 | 客户端 | **GitHub Pages 免费** |
 | 商用 License | 订阅制 | 订阅制 | 免费/付费 | **MIT 完全开源** |
 
-> **定位金句**:Zotero 帮你存论文,Gamma 帮你做 PPT,Accumulate-PPTs 帮你把"读过的一篇论文"同时沉淀成**能检索的笔记**和**能放映的 PPT**,并攒成一个长期生长的个人知识库。
+> **定位金句**:Zotero 帮你存论文,Gamma 帮你做 PPT,Accumulate-PPTs 帮你把"读过的一篇论文"同时沉淀成**能检索的笔记**和**能放映的 PPT**,并攒成一个嵌入 AI 编程 / 办公工具、长期生长的科研人 AI 原生知识库。
 
 ---
 
@@ -351,4 +351,4 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 ---
 
-*Last Updated: 2026-09-04 · v1.1 · 个人 AI + 论文知识库 · 2 个 SKILL · 累计收录论文演示 8 份*
+*Last Updated: 2026-09-04 · v1.1 · 科研人的 AI 原生论文知识库 · 2 个 SKILL · 累计收录论文演示 8 份*
