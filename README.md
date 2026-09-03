@@ -42,7 +42,7 @@ cd Accumulate-PPTs
 ```markdown
 请你使用 lzk-paper-reading 技能(skills\lzk-paper-reading\SKILL.md),
 帮我为 ./pdf-papers/my-paper.pdf 写一篇中文论文阅读笔记,
-最终 .md 文件存放在 ingest 目录下,
+最终 .md 文件存放在 paper-blogs 目录下,
 提取的论文配图按论文标题归档到 assets/paper-imgs 目录下。
 ```
 
@@ -54,7 +54,7 @@ cd Accumulate-PPTs
 最终文件存放在 paper-slides 目录下。
 ```
 
-几分钟后,`ingest/` 下会出现一篇结构化中文阅读笔记,或 `paper-slides/` 下会出现一份可浏览器放映的单文件 HTML 演示文稿,后者还会通过 `index.html` 自动收录进电子书柜画廊。
+几分钟后,`paper-blogs/` 下会出现一篇结构化中文阅读笔记,或 `paper-slides/` 下会出现一份可浏览器放映的单文件 HTML 演示文稿,后者还会通过 `index.html` 自动收录进电子书柜画廊。
 
 ---
 
@@ -64,7 +64,7 @@ cd Accumulate-PPTs
 
 | SKILL | 典型场景 | 输入 | 交付物 | 典型耗时 |
 |------|----------|------|--------|----------|
-| [`lzk-paper-reading`](skills/lzk-paper-reading/SKILL.md) | 论文精读 · 博客笔记 · 知识沉淀 | 一篇 PDF / arXiv 链接 / 标题 | 结构化中文 Markdown 笔记(`ingest/`)+ 配图库(`assets/paper-imgs/`) | 5–12 min |
+| [`lzk-paper-reading`](skills/lzk-paper-reading/SKILL.md) | 论文精读 · 博客笔记 · 知识沉淀 | 一篇 PDF / arXiv 链接 / 标题 | 结构化中文 Markdown 笔记(`paper-blogs/`)+ 配图库(`assets/paper-imgs/`) | 5–12 min |
 | [`html-paper-slides`](skills/html-paper-slides/SKILL.md) | 组会汇报 · 答辩演练 · 研究进展展示 | 一篇 PDF 论文 | 单文件 HTML deck + 首屏缩略图 | 8–15 min |
 
 - **`lzk-paper-reading`** 按固定五节骨架(研究动机 / 文章贡献 / 本文方法 / 实验结果 / 优点和创新点)+ 论文概况表 + 免责声明产出中文笔记,强制执行公式"铺垫句→LaTeX→其中解释"三段式、"2-3 句 + 1 图"实验节奏,并用 `scripts/new_note.py` 起稿、`scripts/check_note.py` 门禁验收。
@@ -149,13 +149,13 @@ cd Accumulate-PPTs
 
 ---
 
-## 核心工作流:pdf-papers → ingest → paper-slides
+## 核心工作流:pdf-papers → paper-blogs → paper-slides
 
 本仓库的差异化在于把"论文精读"统一到一条**可复现、可版本化**的三段式流水线上,一篇论文可同时产出"笔记"与"PPT"两种资产:
 
 ```
 ┌────────────┐    ┌────────────┐    ┌──────────────────────────┐
-│ pdf-papers │ →  │   ingest   │ →  │      paper-slides        │
+│ pdf-papers │ →  │   paper-blogs   │ →  │      paper-slides        │
 │ 原始论文库 │    │ 中文MD笔记 │    │  ┌────────────────────┐  │
 └────────────┘    └────────────┘    │  │ 单文件 HTML PPT    │  │
   仅存原始 PDF      五节骨架笔记     │  └────────────────────┘  │
@@ -166,18 +166,18 @@ cd Accumulate-PPTs
 ### 1. `pdf-papers/` —— 原始论文 PDF 归档
 只保存 PDF 格式的原始论文,不再存放补充材料、网页链接、临时摘录等其他素材。不追求排版,只要求来源清晰、文件命名可追踪(建议直接以论文标题命名),方便后续流程按标题建立配图目录。
 
-### 2. `ingest/` —— 中文阅读笔记(MD 博客)
+### 2. `paper-blogs/` —— 中文阅读笔记(MD 博客)
 `lzk-paper-reading` 技能的产出层:每篇 PDF 论文对应一份结构化中文 Markdown 阅读笔记(博客),按固定五节骨架 + 论文概况表 + 免责声明组织,提炼"研究问题与动机、核心贡献、方法框架、关键模块、实验设置、核心指标、消融结论、可视化证据、局限性与讲述主线"。笔记是知识库的"可检索文本资产",可 diff、可全文搜索、可二次加工。
 
 论文配图统一入库:由 `pdf_extractor.py` 提取的重要截图,按**论文标题**创建文件夹,存入 `assets/paper-imgs/<论文标题>/`,供笔记与 PPT 两条流共用。
 
 ### 3. `paper-slides/` —— HTML 汇报 PPT
-由 `html-paper-slides` 产出,单文件演示文稿,基于 `ingest/` 中同一篇论文的阅读笔记与 `assets/paper-imgs/` 配图,按分页规划压缩成 13–22 页的讲述结构。章节流为**封面 → 摘要 → 引言 → 方法 → 实验 → 消融 → 结论与展望**,通过卡片、流程图、对比表、指标高亮、导航控件强化阅读节奏。成品入库后,**必须同步更新 `slides-manifest.json`**,确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。随后运行 `python skills/html-paper-slides/scripts/generate-thumbnails.py` 生成首屏缩略图,画廊卡片便会直接展示真实幻灯片封面。
+由 `html-paper-slides` 产出,单文件演示文稿,基于 `paper-blogs/` 中同一篇论文的阅读笔记与 `assets/paper-imgs/` 配图,按分页规划压缩成 13–22 页的讲述结构。章节流为**封面 → 摘要 → 引言 → 方法 → 实验 → 消融 → 结论与展望**,通过卡片、流程图、对比表、指标高亮、导航控件强化阅读节奏。成品入库后,**必须同步更新 `slides-manifest.json`**,确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。随后运行 `python skills/html-paper-slides/scripts/generate-thumbnails.py` 生成首屏缩略图,画廊卡片便会直接展示真实幻灯片封面。
 
 ### 质量检查清单
 在进入下一阶段前建议确认:
 - `pdf-papers/` 是否可追溯到原始来源(仅 PDF、命名可追踪)
-- `ingest/` 笔记是否通过 `check_note.py` 门禁(骨架 / 空格 / 禁用词 / 优点节 / 无编造),并提炼出足够支撑 8–15 页汇报的主线
+- `paper-blogs/` 笔记是否通过 `check_note.py` 门禁(骨架 / 空格 / 禁用词 / 优点节 / 无编造),并提炼出足够支撑 8–15 页汇报的主线
 - 配图是否已按论文标题归档到 `assets/paper-imgs/<论文标题>/`
 - HTML PPT 是否可以单文件打开、键盘翻页、视觉层级清晰
 - `slides-manifest.json` 是否覆盖 `paper-slides/` 下的全部 HTML 文件
@@ -220,7 +220,7 @@ Accumulate-PPTs/
 │   ├── accmulate-ppts.png
 │   └── favicon.png
 ├── pdf-papers/           # 原始论文 PDF 归档(仅 PDF 格式,已 gitignore)
-└── ingest/               # lzk-paper-reading 产出的中文阅读笔记 .md 博客文件(已 gitignore)
+└── paper-blogs/               # lzk-paper-reading 产出的中文阅读笔记 .md 博客文件(已 gitignore)
 ```
 
 ---
@@ -234,7 +234,7 @@ git clone https://github.com/luoqianshi/Accumulate-PPTs.git
 cd Accumulate-PPTs
 ```
 
-- 删除 `paper-slides/` 目录下的所有 `.html` 文件、`ingest/` 下的笔记与 `assets/paper-imgs/` 下的配图(以上为作者个人知识库数据)
+- 删除 `paper-slides/` 目录下的所有 `.html` 文件、`paper-blogs/` 下的笔记与 `assets/paper-imgs/` 下的配图(以上为作者个人知识库数据)
 - 将 `slides-manifest.json` 文件中的 `slides` 数组清空
 - (可选)安装缩略图生成依赖:`pip install playwright && playwright install chromium`
 - (可选)安装 PDF 提取依赖:`pip install pymupdf Pillow`
@@ -248,7 +248,7 @@ cd Accumulate-PPTs
 ```markdown
 请你使用 lzk-paper-reading 技能(skills\lzk-paper-reading\SKILL.md),
 帮我为 [给定你要阅读的 PDF 论文文件路径] 写一篇中文论文阅读笔记,
-最终 .md 文件存放在 ingest 目录下,
+最终 .md 文件存放在 paper-blogs 目录下,
 提取的论文配图按论文标题归档到 assets/paper-imgs 目录下。
 ```
 
@@ -260,7 +260,7 @@ cd Accumulate-PPTs
 HTML 格式的 PPT,最终文件存放在 paper-slides 目录下。
 ```
 
-> 同一篇论文,你可以先跑笔记流把内容读透,再跑 PPT 流生成汇报,两条流共享 `ingest/` 里的阅读笔记与 `assets/paper-imgs/` 里的配图。
+> 同一篇论文,你可以先跑笔记流把内容读透,再跑 PPT 流生成汇报,两条流共享 `paper-blogs/` 里的阅读笔记与 `assets/paper-imgs/` 里的配图。
 
 ### 3. 生成缩略图,自动收录到电子书柜
 
