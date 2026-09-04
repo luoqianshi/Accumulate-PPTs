@@ -32,6 +32,14 @@
       "date": "2026-08-30",
       "source_url": "https://arxiv.org/abs/2608.07051",
       "thumbnail": "assets/paper-imgs/YOLO-PEFT/yolopeft_fig1_overview.png"
+    },
+    {
+      "title": "Powerful-IoU: More straightforward and faster bounding box regression loss with a nonmonotonic focusing mechanism",
+      "file": "paper-blogs/Powerful-IoU.md",
+      "category": "损失函数",
+      "date": "2026-09-04",
+      "source_url": "https://github.com/fppccc/Powerful-IoU",
+      "thumbnail": "assets/paper-imgs/Powerful-IoU/piou_fig1_regression_process.png"
     }
   ]
 }
