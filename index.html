@@ -83,6 +83,7 @@
     html.sidebar-collapsed .sidebar-label { display: none !important; }
     html.sidebar-collapsed .nav-item { justify-content: center; }
     html.sidebar-collapsed .sidebar-bottom { align-items: center; }
+    html.sidebar-collapsed .sidebar-logo { justify-content: center; padding-left: .75rem; padding-right: .75rem; }
     .sidebar-toggle .icon-collapse { display: none; }
     html.sidebar-collapsed .sidebar-toggle .icon-collapse { display: block; }
     html.sidebar-collapsed .sidebar-toggle .icon-expand { display: none; }
@@ -238,11 +239,6 @@
       animation: cardIn .75s cubic-bezier(.22,1,.36,1) forwards;
     }
 
-    /* Featured card */
-    .book-featured .book-inner {
-      min-height: 100%;
-    }
-
     /* Filter pills */
     .filter-pill {
       transition: all .3s cubic-bezier(.22,1,.36,1);
@@ -371,7 +367,7 @@
 
   <!-- ── Left Sidebar Navigation ── -->
   <aside id="sidebar" class="fixed left-0 top-0 z-40 flex h-full w-16 flex-col border-r border-timber/50 bg-white/55 backdrop-blur-2xl md:w-64">
-    <a href="#home" class="flex items-center justify-center gap-3 px-3 py-5 md:justify-start md:px-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/60">
+    <a href="#home" id="sidebar-logo" class="sidebar-logo flex items-center justify-center gap-3 px-3 py-5 md:justify-start md:px-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/60" aria-label="Paper-Master 首页">
       <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-moss text-mist shadow-[0_2px_12px_-2px_rgba(93,112,82,.35)]">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19.5V5.8c0-1.1.9-2 2-2h11.5A2.5 2.5 0 0 1 20 6.3v13.2H7.2A3.2 3.2 0 0 1 4 16.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 8h8M8 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </span>
@@ -689,58 +685,6 @@
     </article>
   </template>
 
-  <!-- Featured Deck Card Template (first card, larger) -->
-  <template id="deck-featured-template">
-    <article class="book-card book-featured reveal-card group sm:col-span-2 lg:col-span-2" data-kind="" data-title="" data-desc="">
-      <div class="book-inner relative overflow-hidden rounded-2xl bg-[#FEFEFA] shadow-[0_2px_24px_-6px_rgba(44,44,36,.1)] cursor-pointer">
-        <!-- Spine edge -->
-        <div class="book-spine absolute left-0 top-0 bottom-0 w-[6px] rounded-l-2xl opacity-70 z-10"></div>
-
-        <div class="flex flex-col sm:flex-row">
-          <!-- Cover preview area (wider for featured) -->
-          <div class="book-preview relative sm:w-2/5 h-44 sm:h-auto sm:min-h-[16rem] overflow-hidden flex-shrink-0">
-            <div class="book-cover-bg absolute inset-0"></div>
-            <!-- Thumbnail image -->
-            <img class="book-thumbnail absolute inset-0 w-full h-full object-cover" src="" alt="" loading="lazy" style="display:none;" />
-            <div class="absolute left-8 top-8 h-28 w-28 rounded-full opacity-20 blur-2xl blob-a" style="background:rgba(255,255,255,.6)"></div>
-            <div class="absolute right-6 bottom-6 h-32 w-32 rounded-full opacity-15 blur-2xl blob-c" style="background:rgba(255,255,255,.4)"></div>
-            <!-- Decorative grid pattern -->
-            <div class="book-fallback absolute inset-0 flex items-center justify-center opacity-[.07]">
-              <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=".8" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-            </div>
-            <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FEFEFA] to-transparent sm:hidden"></div>
-            <!-- Featured badge -->
-            <span class="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[.18em] text-moss backdrop-blur-sm shadow-sm">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              Featured
-            </span>
-            <span class="deck-kind absolute top-4 right-4 rounded-full bg-white/80 px-3 py-1 text-[10px] font-semibold text-grass/70 backdrop-blur-sm shadow-sm"></span>
-          </div>
-
-          <!-- Content area (wider for featured) -->
-          <div class="relative flex-1 px-6 py-5 sm:px-7 sm:py-6">
-            <span class="deck-index text-[10px] font-bold uppercase tracking-[.18em] text-moss/60"></span>
-            <h3 class="deck-title mt-2 font-display text-[1.375rem] font-semibold leading-snug tracking-[-0.015em] text-loam sm:text-[1.5rem]"></h3>
-            <p class="deck-description mt-3 text-[13px] leading-[1.7] text-grass/70 font-light line-clamp-3 sm:line-clamp-4"></p>
-            <div class="mt-5 flex items-center gap-3">
-              <button type="button" class="deck-play inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-moss px-5 text-[13px] font-semibold text-mist shadow-[0_2px_12px_-4px_rgba(93,112,82,.35)] transition-all duration-300 hover:shadow-[0_4px_20px_-6px_rgba(93,112,82,.45)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z"/></svg>
-                嵌入放映
-              </button>
-              <a class="deck-link inline-flex h-10 items-center gap-2 rounded-full border border-clay/60 px-5 text-[13px] font-semibold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2" target="_blank" rel="noopener">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"/></svg>
-                打开原页
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3D Shine overlay -->
-        <div class="book-shine pointer-events-none absolute inset-0 rounded-2xl opacity-0" style="background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.1) 45%, rgba(255,255,255,.03) 50%, transparent 55%)"></div>
-      </div>
-    </article>
-  </template>
-
   <!-- Blog Card Template -->
   <template id="blog-card-template">
     <article class="book-card reveal-card group" data-kind="" data-title="">
@@ -903,7 +847,6 @@
 
       const grid = document.getElementById('deck-grid');
       const template = document.getElementById('deck-card-template');
-      const featuredTemplate = document.getElementById('deck-featured-template');
       const deckCount = document.getElementById('deck-count');
       const loadMore = document.getElementById('load-more');
       const sentinel = document.getElementById('load-sentinel');
@@ -1031,9 +974,7 @@
         const nextDecks = decks.slice(loaded, loaded + PAGE_SIZE);
         nextDecks.forEach((deck, offset) => {
           const absoluteIndex = loaded + offset;
-          const isFeatured = absoluteIndex === 0;
-          const tpl = isFeatured ? featuredTemplate : template;
-          const node = tpl.content.firstElementChild.cloneNode(true);
+          const node = template.content.firstElementChild.cloneNode(true);
 
           node.dataset.kind = deck.kind;
           node.dataset.title = deck.title;
@@ -1046,7 +987,7 @@
 
           node.querySelector('.book-spine').style.background = spineColor;
           node.querySelector('.book-cover-bg').style.background = coverGradient;
-          node.querySelector('.deck-index').textContent = isFeatured ? `No. 01` : `No. ${String(absoluteIndex + 1).padStart(2, '0')}`;
+          node.querySelector('.deck-index').textContent = `No. ${String(absoluteIndex + 1).padStart(2, '0')}`;
           node.querySelector('.deck-kind').textContent = deck.kind;
           node.querySelector('.deck-title').textContent = deck.title;
           node.querySelector('.deck-description').textContent = deck.description;
@@ -1379,6 +1320,16 @@
         const { text, segments } = extractMath(body);
         const html = restoreMath(marked.parse(text, { gfm: true, breaks: false }), segments);
         readerContent.innerHTML = html;
+        // Notes reference assets relative to paper-blogs/ (e.g. ../assets/...),
+        // but this inline reader lives at the site root — resolve against the
+        // note's own directory so images/links load correctly.
+        const blogBase = new URL('paper-blogs/', location.href);
+        readerContent.querySelectorAll('img[src]').forEach(img => {
+          img.src = new URL(img.getAttribute('src'), blogBase).href;
+        });
+        readerContent.querySelectorAll('a[href]').forEach(a => {
+          a.href = new URL(a.getAttribute('href'), blogBase).href;
+        });
         if (await ensureMathRenderer()) {
           renderMathInElement(readerContent, {
             delimiters: [
@@ -1458,6 +1409,16 @@
       syncSidebarToggle();
     });
     syncSidebarToggle();
+
+    /* Collapsed state: clicking the top logo expands the sidebar */
+    document.getElementById('sidebar-logo').addEventListener('click', (e) => {
+      if (document.documentElement.classList.contains('sidebar-collapsed')) {
+        e.preventDefault();
+        document.documentElement.classList.remove('sidebar-collapsed');
+        localStorage.setItem('pm-sidebar-collapsed', '0');
+        syncSidebarToggle();
+      }
+    });
 
     /* ══════════ Global: parallax blobs + sway activation + init ══════════ */
     if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
