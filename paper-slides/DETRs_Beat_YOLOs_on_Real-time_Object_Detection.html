@@ -1107,23 +1107,10 @@ h3 {
 
   function goTo(idx) {
     if (idx < 0 || idx >= total || idx === current) return;
-    const prev = slides[current];
-    const next = slides[idx];
-
-    prev.classList.remove('active');
-    prev.classList.add('exit-up');
-
-    requestAnimationFrame(() => {
-      next.classList.remove('exit-up');
-      next.classList.add('active');
-    });
-
-    setTimeout(() => {
-      prev.classList.remove('exit-up');
-    }, 700);
-
-    dots[current].classList.remove('active');
+    slides.forEach(s => s.classList.remove('active', 'exit-up'));
+    dots.forEach(d => d.classList.remove('active'));
     current = idx;
+    slides[current].classList.add('active');
     dots[current].classList.add('active');
     counter.textContent = pad(current + 1) + ' / ' + pad(total);
     progress.style.width = ((current + 1) / total * 100) + '%';

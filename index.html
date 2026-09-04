@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..800,80,1&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoFkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
   <script>
     tailwind = {
       config: {
@@ -38,9 +38,15 @@
     }
   </script>
   <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFQjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+  <script>
+    /* Restore sidebar collapse state before paint to avoid flash */
+    if (localStorage.getItem('pm-sidebar-collapsed') === '1') {
+      document.documentElement.classList.add('sidebar-collapsed');
+    }
+  </script>
   <style>
     :root { color-scheme: light; }
     html { scroll-behavior: smooth; }
@@ -68,6 +74,18 @@
         radial-gradient(circle at 45% 75%, rgba(193,140,93,.6) 0 1px, transparent 1.7px);
       background-size: 40px 40px, 56px 56px, 76px 76px;
     }
+
+    /* ── Sidebar collapse (icons-only) ── */
+    #sidebar { transition: width .3s cubic-bezier(.22,1,.36,1); }
+    #main { transition: padding .3s cubic-bezier(.22,1,.36,1); }
+    html.sidebar-collapsed #sidebar { width: 4rem !important; }
+    html.sidebar-collapsed #main { padding-left: 4rem !important; }
+    html.sidebar-collapsed .sidebar-label { display: none !important; }
+    html.sidebar-collapsed .nav-item { justify-content: center; }
+    html.sidebar-collapsed .sidebar-bottom { align-items: center; }
+    .sidebar-toggle .icon-collapse { display: none; }
+    html.sidebar-collapsed .sidebar-toggle .icon-collapse { display: block; }
+    html.sidebar-collapsed .sidebar-toggle .icon-expand { display: none; }
 
     /* Organic blob shapes */
     .blob-a { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
@@ -352,31 +370,37 @@
   <div class="cinema-intro" aria-hidden="true"></div>
 
   <!-- ── Left Sidebar Navigation ── -->
-  <aside class="fixed left-0 top-0 z-40 flex h-full w-16 flex-col border-r border-timber/50 bg-white/55 backdrop-blur-2xl md:w-64">
+  <aside id="sidebar" class="fixed left-0 top-0 z-40 flex h-full w-16 flex-col border-r border-timber/50 bg-white/55 backdrop-blur-2xl md:w-64">
     <a href="#home" class="flex items-center justify-center gap-3 px-3 py-5 md:justify-start md:px-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/60">
       <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-moss text-mist shadow-[0_2px_12px_-2px_rgba(93,112,82,.35)]">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19.5V5.8c0-1.1.9-2 2-2h11.5A2.5 2.5 0 0 1 20 6.3v13.2H7.2A3.2 3.2 0 0 1 4 16.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 8h8M8 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </span>
-      <span class="hidden md:block">
+      <span class="sidebar-label hidden min-w-0 md:block">
+        <span class="block truncate font-display text-[15px] font-bold leading-tight tracking-[-0.01em] text-loam">Paper-Master</span>
+        <span class="block text-[9px] font-bold uppercase leading-tight tracking-[.18em] text-grass/60">Paper Knowledge Base</span>
       </span>
     </a>
 
     <nav class="mt-2 flex flex-col gap-1 px-2 md:px-4" aria-label="主导航">
       <a href="#home" data-view="home" aria-current="page" class="nav-item flex items-center justify-center gap-3 rounded-xl bg-moss px-3 py-2.5 text-[14px] font-semibold text-mist shadow-[0_2px_12px_-4px_rgba(93,112,82,.4)] transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 md:justify-start">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0"><path d="m3 10.5 9-7.5 9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
-        <span class="hidden md:inline">首页</span>
+        <span class="sidebar-label hidden md:inline">首页</span>
       </a>
       <a href="#slides" data-view="slides" class="nav-item flex items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-semibold text-loam/70 transition-colors duration-300 hover:bg-moss/8 hover:text-loam focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 md:justify-start">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" class="shrink-0"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-        <span class="hidden md:inline">幻灯片</span>
+        <span class="sidebar-label hidden md:inline">幻灯片</span>
       </a>
       <a href="#blogs" data-view="blogs" class="nav-item flex items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-semibold text-loam/70 transition-colors duration-300 hover:bg-moss/8 hover:text-loam focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 md:justify-start">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        <span class="hidden md:inline">博客</span>
+        <span class="sidebar-label hidden md:inline">博客</span>
       </a>
     </nav>
 
-    <div class="mt-auto flex flex-col items-center gap-4 px-3 pb-6 md:items-start md:px-5">
+    <div class="sidebar-bottom mt-auto flex flex-col items-center gap-4 px-3 pb-6 md:items-start md:px-5">
+      <button id="sidebar-toggle" type="button" aria-expanded="true" aria-label="收起侧边栏" class="sidebar-toggle hidden h-9 w-9 cursor-pointer place-items-center rounded-full border border-timber/50 bg-white/60 text-loam transition-all duration-300 hover:bg-stone hover:border-timber focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 md:grid">
+        <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        <svg class="icon-collapse" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
       <a href="https://github.com/luoqianshi/Accumulate-PPTs" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub 仓库" class="grid h-10 w-10 place-items-center rounded-full border border-timber/50 bg-white/60 text-loam transition-all duration-300 hover:bg-stone hover:border-timber hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
       </a>
@@ -384,7 +408,7 @@
   </aside>
 
   <!-- ── Right Content Area ── -->
-  <main class="relative pl-16 md:pl-64">
+  <main id="main" class="relative pl-16 md:pl-64">
 
     <!-- ══ View: Home (Slogan landing) ══ -->
     <section id="view-home" class="relative overflow-hidden">
@@ -1317,18 +1341,49 @@
         return html.replace(/@@MATH(\d+)@@/g, (_, i) => segments[Number(i)]);
       }
 
-      function renderMarkdown(mdText) {
+      /* ── Math renderer availability guard ──
+         auto-render's UMD bakes in the katex global at load time; if katex
+         failed to load (CDN/network flake), calling renderMathInElement throws
+         "Cannot read properties of undefined (reading 'ParseError')". Here we
+         lazily (re)load the scripts on demand, with a fallback CDN. */
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = src;
+          s.onload = resolve;
+          s.onerror = () => reject(new Error(`加载失败: ${src}`));
+          document.head.appendChild(s);
+        });
+      }
+
+      async function ensureMathRenderer() {
+        if (window.katex && window.renderMathInElement) return true;
+        const sources = [
+          'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist',
+          'https://unpkg.com/katex@0.16.11/dist'
+        ];
+        for (const base of sources) {
+          try {
+            if (!window.katex) await loadScript(`${base}/katex.min.js`);
+            if (!window.renderMathInElement) await loadScript(`${base}/contrib/auto-render.min.js`);
+            if (window.katex && window.renderMathInElement) return true;
+          } catch { /* try next CDN */ }
+        }
+        return false;
+      }
+
+      async function renderMarkdown(mdText) {
         let body = stripFrontMatter(mdText);
         // Drop the duplicate top-level H1 — the reader header already shows the title
         body = body.replace(/^#\s+[^\n]+\n+/, '');
         const { text, segments } = extractMath(body);
         const html = restoreMath(marked.parse(text, { gfm: true, breaks: false }), segments);
         readerContent.innerHTML = html;
-        if (window.renderMathInElement) {
+        if (await ensureMathRenderer()) {
           renderMathInElement(readerContent, {
             delimiters: [
               { left: '$$', right: '$$', display: true },
-              { left: '$', right: '$$', display: false }
+              { left: '$', right: '$', display: false }
             ],
             throwOnError: false
           });
@@ -1353,8 +1408,9 @@
           const r = await fetch(repoUrl(blog.file), { cache: 'no-store' });
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
           const mdText = await r.text();
-          renderMarkdown(mdText);
+          await renderMarkdown(mdText);
         } catch (err) {
+          console.error('笔记加载失败:', err);
           readerContent.innerHTML = `<p class="text-grass/60 font-light">笔记内容加载失败（${err.message}）。可尝试通过右上角「查看原文」访问论文出处。</p>`;
         }
       }
@@ -1388,6 +1444,20 @@
 
       initGallery();
     })();
+
+    /* ══════════ Sidebar collapse toggle ══════════ */
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    function syncSidebarToggle() {
+      const collapsed = document.documentElement.classList.contains('sidebar-collapsed');
+      sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+      sidebarToggle.setAttribute('aria-label', collapsed ? '展开侧边栏' : '收起侧边栏');
+    }
+    sidebarToggle.addEventListener('click', () => {
+      const collapsed = document.documentElement.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('pm-sidebar-collapsed', collapsed ? '1' : '0');
+      syncSidebarToggle();
+    });
+    syncSidebarToggle();
 
     /* ══════════ Global: parallax blobs + sway activation + init ══════════ */
     if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {

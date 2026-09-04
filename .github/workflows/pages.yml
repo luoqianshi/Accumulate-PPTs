@@ -43,14 +43,34 @@ jobs:
                   return html.unescape(re.sub(r"\s+", " ", match.group(1))).strip()
               return path.stem.replace("_", " ").replace("-", " ").title()
 
+          # Preserve manually curated metadata (title/description/kind/accent/
+          # thumbnail) from the committed manifest; only brand-new files fall
+          # back to auto-discovered defaults.
+          curated = {}
+          manifest_path = root / "slides-manifest.json"
+          if manifest_path.exists():
+              try:
+                  existing = json.loads(manifest_path.read_text(encoding="utf-8"))
+                  entries = existing if isinstance(existing, list) else existing.get("slides", [])
+                  curated = {
+                      entry.get("file"): entry
+                      for entry in entries
+                      if isinstance(entry, dict) and entry.get("file")
+                  }
+              except (json.JSONDecodeError, OSError):
+                  curated = {}
+
           slides = []
           for index, path in enumerate(sorted(slides_dir.glob("*.html"), key=lambda item: item.name.lower())):
+              rel = path.relative_to(root).as_posix()
+              kept = curated.get(rel, {})
               slides.append({
-                  "title": title_from_file(path),
-                  "file": path.relative_to(root).as_posix(),
-                  "description": "从 paper-slides 目录自动发现的 HTML 格式 PPT，可直接嵌入放映或打开原页。",
-                  "kind": "HTML PPT",
-                  "accent": "rgba(93,112,82,.2)" if index % 2 == 0 else "rgba(193,140,93,.22)"
+                  "title": kept.get("title") or title_from_file(path),
+                  "file": rel,
+                  "description": kept.get("description") or "从 paper-slides 目录自动发现的 HTML 格式 PPT，可直接嵌入放映或打开原页。",
+                  "kind": kept.get("kind") or "HTML PPT",
+                  "accent": kept.get("accent") or ("rgba(93,112,82,.2)" if index % 2 == 0 else "rgba(193,140,93,.22)"),
+                  **({"thumbnail": kept["thumbnail"]} if kept.get("thumbnail") else {})
               })
 
           manifest = {

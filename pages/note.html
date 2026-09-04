@@ -38,7 +38,7 @@
   <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
   <style>
     :root { color-scheme: light; }
     body {
@@ -133,7 +133,7 @@
   <!-- Top bar -->
   <header class="sticky top-0 z-40 border-b border-timber/50 bg-white/75 backdrop-blur-2xl">
     <div class="mx-auto flex w-[min(56rem,calc(100%-2rem))] items-center gap-3 py-3.5">
-      <a href="blogs.html" class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-timber/50 bg-white/60 px-4 text-[13px] font-semibold text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40">
+      <a href="../index.html#blogs" class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-timber/50 bg-white/60 px-4 text-[13px] font-semibold text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
         返回书架
       </a>
@@ -193,12 +193,43 @@
       return html.replace(/@@MATH(\d+)@@/g, (_, i) => segments[Number(i)]);
     }
 
-    function renderMarkdown(mdText) {
+    /* ── Math renderer availability guard ──
+       auto-render's UMD bakes in the katex global at load time; if katex
+       failed to load (CDN/network flake), calling renderMathInElement throws
+       "Cannot read properties of undefined (reading 'ParseError')". Here we
+       lazily (re)load the scripts on demand, with a fallback CDN. */
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error(`加载失败: ${src}`));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function ensureMathRenderer() {
+      if (window.katex && window.renderMathInElement) return true;
+      const sources = [
+        'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist',
+        'https://unpkg.com/katex@0.16.11/dist'
+      ];
+      for (const base of sources) {
+        try {
+          if (!window.katex) await loadScript(`${base}/katex.min.js`);
+          if (!window.renderMathInElement) await loadScript(`${base}/contrib/auto-render.min.js`);
+          if (window.katex && window.renderMathInElement) return true;
+        } catch { /* try next CDN */ }
+      }
+      return false;
+    }
+
+    async function renderMarkdown(mdText) {
       let body = stripFrontMatter(mdText);
       const { text, segments } = extractMath(body);
       const html = restoreMath(marked.parse(text, { gfm: true, breaks: false }), segments);
       noteContent.innerHTML = html;
-      if (window.renderMathInElement) {
+      if (await ensureMathRenderer()) {
         renderMathInElement(noteContent, {
           delimiters: [
             { left: '$$', right: '$$', display: true },
@@ -237,7 +268,7 @@
       else noteSource.style.display = 'none';
 
       if (!file || !/\.md$/i.test(file) || file.includes('..')) {
-        noteContent.innerHTML = '<p class="text-grass/60 font-light">未指定有效的笔记文件。请从 <a href="blogs.html" class="text-moss font-semibold hover:underline">阅读笔记书架</a> 选择一篇笔记。</p>';
+        noteContent.innerHTML = '<p class="text-grass/60 font-light">未指定有效的笔记文件。请从 <a href="../index.html#blogs" class="text-moss font-semibold hover:underline">阅读笔记书架</a> 选择一篇笔记。</p>';
         return;
       }
 
@@ -245,9 +276,10 @@
         const r = await fetch(repoUrl(file), { cache: 'no-store' });
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const mdText = await r.text();
-        renderMarkdown(mdText);
+        await renderMarkdown(mdText);
         updateProgress();
       } catch (err) {
+        console.error('笔记加载失败:', err);
         noteContent.innerHTML = `<p class="text-grass/60 font-light">笔记内容加载失败（${err.message}）。请返回 <a href="../index.html#blogs" class="text-moss font-semibold hover:underline">阅读笔记书架</a> 重试。</p>`;
       }
     }
