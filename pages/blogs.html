@@ -74,41 +74,6 @@
     .blob-b { border-radius: 36% 64% 68% 32% / 46% 38% 62% 54%; }
     .blob-c { border-radius: 48% 52% 36% 64% / 58% 44% 56% 42%; }
 
-    /* Cinema intro */
-    .cinema-intro {
-      position: fixed;
-      inset: 0;
-      z-index: 80;
-      pointer-events: none;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 48%, rgba(253,252,248,.04), transparent 22%),
-        linear-gradient(125deg, #1a2415 0%, #3e4d36 42%, #fdfcf8 100%);
-      animation: introFade 3.2s cubic-bezier(.22,1,.36,1) forwards;
-      perspective: 1200px;
-    }
-    .cinema-intro::before,
-    .cinema-intro::after {
-      content: "";
-      position: absolute;
-      inset: -16%;
-      background:
-        radial-gradient(ellipse at 20% 42%, rgba(230,220,205,.32) 0 10%, transparent 30%),
-        radial-gradient(ellipse at 74% 36%, rgba(193,140,93,.28) 0 12%, transparent 32%),
-        radial-gradient(ellipse at 52% 78%, rgba(93,112,82,.4) 0 16%, transparent 40%);
-      filter: blur(20px);
-      transform-origin: 50% 50%;
-      animation: cameraDrift 3.2s cubic-bezier(.22,1,.36,1) forwards;
-    }
-    .cinema-intro::after {
-      background:
-        linear-gradient(90deg, rgba(10,15,8,.68), transparent 18%, transparent 82%, rgba(10,15,8,.64)),
-        repeating-linear-gradient(90deg, transparent 0 78px, rgba(255,255,255,.06) 78px 80px);
-      mix-blend-mode: soft-light;
-      filter: blur(0);
-      animation: gateOpen 3.2s cubic-bezier(.22,1,.36,1) forwards;
-    }
-
     /* Hero stage */
     .hero-stage {
       animation: heroReveal 1.7s .5s cubic-bezier(.22,1,.36,1) both;
@@ -281,20 +246,6 @@
       }
     }
 
-    @keyframes introFade {
-      0%, 70% { opacity: 1; }
-      100% { opacity: 0; visibility: hidden; }
-    }
-    @keyframes cameraDrift {
-      0% { transform: translate3d(-10%, 6%, -160px) rotate(-6deg) scale(1.3); }
-      45% { transform: translate3d(4%, -2%, 80px) rotate(1.5deg) scale(1.06); }
-      100% { transform: translate3d(0, 0, 400px) rotate(0deg) scale(1.5); }
-    }
-    @keyframes gateOpen {
-      0% { clip-path: inset(0 0 0 0); opacity: 1; }
-      60% { clip-path: inset(7% 13% 7% 13% round 32px); opacity: .9; }
-      100% { clip-path: inset(48% 50% 48% 50% round 999px); opacity: 0; }
-    }
     @keyframes heroReveal {
       0% { transform: scale(1.1) translateY(28px); filter: blur(16px) saturate(.75); opacity: .12; }
       100% { transform: scale(1) translateY(0); filter: blur(0) saturate(1); opacity: 1; }
@@ -313,7 +264,6 @@
         scroll-behavior: auto !important;
         transition-duration: .001ms !important;
       }
-      .cinema-intro { display: none; }
       .hero-copy > *, .reveal-card { opacity: 1; transform: none; }
       .sway-g1, .sway-g2,
       .hero-subtext-sway, .hero-badge-sway { animation: none !important; }
@@ -321,8 +271,6 @@
   </style>
 </head>
 <body class="font-body antialiased selection:bg-clay/20 selection:text-loam">
-  <div class="cinema-intro" aria-hidden="true"></div>
-
   <!-- Navigation -->
   <header class="sticky top-5 z-40 mx-auto flex w-[min(90rem,calc(100%-2rem))] items-center justify-between rounded-full border border-timber/50 bg-white/65 px-5 py-3 shadow-[0_4px_24px_-8px_rgba(44,44,36,.1)] backdrop-blur-2xl sm:px-6">
     <a href="../index.html" class="flex items-center gap-3 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/60 focus-visible:ring-offset-2">
@@ -423,7 +371,7 @@
             点击任意笔记，即可在当前页面沉浸阅读。
           </h2>
           <p class="mt-6 max-w-2xl text-base leading-[1.75] text-mist/70 font-light">
-            阅读层实时拉取 Markdown 原文并在浏览器端渲染，LaTeX 公式、GFM 表格与论文配图完整保留；右上角提供原文链接与关闭操作，Esc 键可快速退出。
+            阅读层实时拉取 Markdown 原文并在浏览器端渲染，LaTeX 公式、GFM 表格与论文配图完整保留；右上角可跳转到新标签页的全屏阅读模式，Esc 键可快速退出。
           </p>
         </div>
       </div>
@@ -452,7 +400,7 @@
         </div>
         <a id="reader-source" href="#" target="_blank" rel="noopener" class="inline-flex h-10 items-center gap-2 rounded-full border border-timber/50 bg-white/60 px-4 text-[13px] font-semibold text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          查看原文
+          全屏阅读
         </a>
         <button id="reader-close" type="button" class="grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-timber/50 bg-white/60 text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40" aria-label="关闭阅读窗口">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -498,7 +446,7 @@
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               阅读
             </button>
-            <a class="blog-source inline-flex h-8 items-center justify-center rounded-full border border-timber/50 px-2.5 text-grass/60 transition-all duration-300 hover:text-loam hover:border-timber hover:bg-stone/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40" target="_blank" rel="noopener" title="查看原文">
+            <a class="blog-source inline-flex h-8 items-center justify-center rounded-full border border-timber/50 px-2.5 text-grass/60 transition-all duration-300 hover:text-loam hover:border-timber hover:bg-stone/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40" target="_blank" rel="noopener" title="新标签页全屏阅读">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"/></svg>
             </a>
           </div>
@@ -572,6 +520,16 @@
     /* ── Utility ── */
     function repoUrl(path) {
       return basePrefix + String(path || '').replace(/^\.\//, '').replace(/^\//, '');
+    }
+
+    // Full-screen reading page for a note, opened in a new tab
+    function noteUrl(blog) {
+      const params = new URLSearchParams({ file: blog.file });
+      if (blog.title) params.set('title', blog.title);
+      if (blog.category) params.set('category', blog.category);
+      if (blog.date) params.set('date', blog.date);
+      if (blog.source_url) params.set('source', blog.source_url);
+      return `note.html?${params.toString()}`;
     }
 
     function accentFor(index) {
@@ -666,8 +624,7 @@
 
         const readBtn = node.querySelector('.blog-read');
         const sourceLink = node.querySelector('.blog-source');
-        sourceLink.href = blog.source_url || '#';
-        if (!blog.source_url) sourceLink.style.display = 'none';
+        sourceLink.href = noteUrl(blog);
         readBtn.addEventListener('click', (e) => { e.stopPropagation(); openReader(blog); });
         sourceLink.addEventListener('click', (e) => e.stopPropagation());
 
@@ -763,8 +720,7 @@
       readerTitle.textContent = blog.title;
       readerCategory.textContent = blog.category || '未分类';
       readerDate.textContent = blog.date || '';
-      readerSource.href = blog.source_url || '#';
-      readerSource.style.display = blog.source_url ? '' : 'none';
+      readerSource.href = noteUrl(blog);
       readerContent.innerHTML = '<p class="text-grass/50 font-light">正在加载笔记内容…</p>';
       readerScroll.scrollTop = 0;
       reader.classList.remove('hidden');

@@ -70,41 +70,6 @@
     .blob-b { border-radius: 36% 64% 68% 32% / 46% 38% 62% 54%; }
     .blob-c { border-radius: 48% 52% 36% 64% / 58% 44% 56% 42%; }
 
-    /* Cinema intro */
-    .cinema-intro {
-      position: fixed;
-      inset: 0;
-      z-index: 80;
-      pointer-events: none;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 48%, rgba(253,252,248,.04), transparent 22%),
-        linear-gradient(125deg, #1a2415 0%, #3e4d36 42%, #fdfcf8 100%);
-      animation: introFade 3.2s cubic-bezier(.22,1,.36,1) forwards;
-      perspective: 1200px;
-    }
-    .cinema-intro::before,
-    .cinema-intro::after {
-      content: "";
-      position: absolute;
-      inset: -16%;
-      background:
-        radial-gradient(ellipse at 20% 42%, rgba(230,220,205,.32) 0 10%, transparent 30%),
-        radial-gradient(ellipse at 74% 36%, rgba(193,140,93,.28) 0 12%, transparent 32%),
-        radial-gradient(ellipse at 52% 78%, rgba(93,112,82,.4) 0 16%, transparent 40%);
-      filter: blur(20px);
-      transform-origin: 50% 50%;
-      animation: cameraDrift 3.2s cubic-bezier(.22,1,.36,1) forwards;
-    }
-    .cinema-intro::after {
-      background:
-        linear-gradient(90deg, rgba(10,15,8,.68), transparent 18%, transparent 82%, rgba(10,15,8,.64)),
-        repeating-linear-gradient(90deg, transparent 0 78px, rgba(255,255,255,.06) 78px 80px);
-      mix-blend-mode: soft-light;
-      filter: blur(0);
-      animation: gateOpen 3.2s cubic-bezier(.22,1,.36,1) forwards;
-    }
-
     /* Hero stage */
     .hero-stage {
       animation: heroReveal 1.7s .5s cubic-bezier(.22,1,.36,1) both;
@@ -272,20 +237,6 @@
       border-radius: 3px;
     }
 
-    @keyframes introFade {
-      0%, 70% { opacity: 1; }
-      100% { opacity: 0; visibility: hidden; }
-    }
-    @keyframes cameraDrift {
-      0% { transform: translate3d(-10%, 6%, -160px) rotate(-6deg) scale(1.3); }
-      45% { transform: translate3d(4%, -2%, 80px) rotate(1.5deg) scale(1.06); }
-      100% { transform: translate3d(0, 0, 400px) rotate(0deg) scale(1.5); }
-    }
-    @keyframes gateOpen {
-      0% { clip-path: inset(0 0 0 0); opacity: 1; }
-      60% { clip-path: inset(7% 13% 7% 13% round 32px); opacity: .9; }
-      100% { clip-path: inset(48% 50% 48% 50% round 999px); opacity: 0; }
-    }
     @keyframes heroReveal {
       0% { transform: scale(1.1) translateY(28px); filter: blur(16px) saturate(.75); opacity: .12; }
       100% { transform: scale(1) translateY(0); filter: blur(0) saturate(1); opacity: 1; }
@@ -304,7 +255,6 @@
         scroll-behavior: auto !important;
         transition-duration: .001ms !important;
       }
-      .cinema-intro { display: none; }
       .hero-copy > *, .reveal-card { opacity: 1; transform: none; }
       .sway-g1, .sway-g2, .sway-g3, .sway-g4, .sway-g5, .sway-g6, .sway-g7,
       .hero-subtext-sway, .hero-badge-sway { animation: none !important; }
@@ -312,8 +262,6 @@
   </style>
 </head>
 <body class="font-body antialiased selection:bg-clay/20 selection:text-loam">
-  <div class="cinema-intro" aria-hidden="true"></div>
-
   <!-- Navigation -->
   <header class="sticky top-5 z-40 mx-auto flex w-[min(90rem,calc(100%-2rem))] items-center justify-between rounded-full border border-timber/50 bg-white/65 px-5 py-3 shadow-[0_4px_24px_-8px_rgba(44,44,36,.1)] backdrop-blur-2xl sm:px-6">
     <a href="../index.html" class="flex items-center gap-3 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/60 focus-visible:ring-offset-2">

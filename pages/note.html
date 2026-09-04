@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>阅读笔记 · Accumulate PPTs</title>
+  <meta name="description" content="全屏沉浸式阅读 Markdown 论文精读笔记，支持 LaTeX 公式渲染" />
+  <link rel="icon" href="../assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..800,80,1&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+  <script>
+    tailwind = {
+      config: {
+        theme: {
+          extend: {
+            colors: {
+              paper: '#FDFCF8',
+              loam: '#2C2C24',
+              moss: '#5D7052',
+              mist: '#F3F4F1',
+              clay: '#C18C5D',
+              sand: '#E6DCCD',
+              stone: '#F0EBE5',
+              timber: '#DED8CF',
+              grass: '#78786C'
+            },
+            fontFamily: {
+              display: ['Fraunces', 'Georgia', 'serif'],
+              body: ['Nunito', 'system-ui', 'sans-serif']
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root { color-scheme: light; }
+    body {
+      background: #FDFCF8;
+      color: #2C2C24;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Subtle paper grain texture */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 60;
+      opacity: .025;
+      mix-blend-mode: multiply;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(44,44,36,.7) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 70% 20%, rgba(93,112,82,.55) 0 1px, transparent 1.6px),
+        radial-gradient(circle at 45% 75%, rgba(193,140,93,.6) 0 1px, transparent 1.7px);
+      background-size: 40px 40px, 56px 56px, 76px 76px;
+    }
+
+    /* Reading progress bar */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0;
+      background: linear-gradient(90deg, #5D7052, #C18C5D);
+      z-index: 70;
+      transition: width .1s linear;
+    }
+
+    /* ── Markdown typography (prose mapped to site palette) ── */
+    .paper-prose {
+      --tw-prose-body: #2C2C24;
+      --tw-prose-headings: #2C2C24;
+      --tw-prose-lead: #78786C;
+      --tw-prose-links: #5D7052;
+      --tw-prose-bold: #2C2C24;
+      --tw-prose-counters: #78786C;
+      --tw-prose-bullets: #C18C5D;
+      --tw-prose-hr: #DED8CF;
+      --tw-prose-quotes: #5D7052;
+      --tw-prose-quote-borders: #C18C5D;
+      --tw-prose-captions: #78786C;
+      --tw-prose-code: #2C2C24;
+      --tw-prose-pre-code: #F3F4F1;
+      --tw-prose-pre-bg: #2C2C24;
+      --tw-prose-th-borders: #DED8CF;
+      --tw-prose-td-borders: #E6DCCD;
+    }
+    .paper-prose h1, .paper-prose h2, .paper-prose h3, .paper-prose h4 {
+      font-family: 'Fraunces', Georgia, serif;
+      letter-spacing: -0.015em;
+    }
+    .paper-prose h2 {
+      padding-top: 1.25rem;
+      margin-top: 2.75rem;
+      border-top: 1px solid rgba(222, 216, 207, .7);
+    }
+    .paper-prose img {
+      border-radius: 0.75rem;
+      border: 1px solid rgba(222, 216, 207, .6);
+      box-shadow: 0 4px 24px -8px rgba(44,44,36,.12);
+      background: #fff;
+    }
+    .paper-prose table {
+      font-size: .85em;
+    }
+    .paper-prose .katex-display {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: .25rem 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="font-body antialiased selection:bg-clay/20 selection:text-loam">
+  <div id="progress-bar" aria-hidden="true"></div>
+
+  <!-- Top bar -->
+  <header class="sticky top-0 z-40 border-b border-timber/50 bg-white/75 backdrop-blur-2xl">
+    <div class="mx-auto flex w-[min(56rem,calc(100%-2rem))] items-center gap-3 py-3.5">
+      <a href="blogs.html" class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-timber/50 bg-white/60 px-4 text-[13px] font-semibold text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        返回书架
+      </a>
+      <div class="min-w-0 flex-1">
+        <p class="text-[10px] font-bold uppercase tracking-[.2em] text-moss/60">Now Reading</p>
+        <h1 id="note-title" class="truncate font-display text-[15px] font-semibold tracking-[-0.01em] text-loam">阅读笔记</h1>
+      </div>
+      <span id="note-meta" class="hidden shrink-0 items-center gap-2 text-[11px] text-grass/60 sm:flex">
+        <span id="note-category" class="rounded-full bg-moss/10 px-2 py-0.5 font-semibold text-moss"></span>
+        <span id="note-date"></span>
+      </span>
+      <a id="note-source" href="#" target="_blank" rel="noopener" class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-timber/50 bg-white/60 px-4 text-[13px] font-semibold text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="hidden sm:inline">论文出处</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="mx-auto w-[min(56rem,calc(100%-2rem))]">
+    <article id="note-content" class="paper-prose prose prose-neutral mx-auto max-w-none px-1 py-10 sm:px-4 sm:py-14">
+      <p class="text-grass/50 font-light">正在加载笔记内容…</p>
+    </article>
+  </main>
+
+  <footer class="border-t border-timber/40 bg-stone/30 py-10 mt-10">
+    <div class="mx-auto w-[min(56rem,calc(100%-2rem))] flex flex-col items-center justify-between gap-4 sm:flex-row">
+      <p class="text-[13px] text-grass/50 font-light">Accumulate PPTs · 积累每一页思想，照亮每一次讲述</p>
+      <a href="blogs.html" class="text-[13px] text-moss font-semibold hover:text-loam transition-colors">继续阅读其他笔记 →</a>
+    </div>
+  </footer>
+
+  <script>
+    const basePrefix = '../';
+    const noteContent = document.getElementById('note-content');
+    const noteTitle = document.getElementById('note-title');
+    const noteCategory = document.getElementById('note-category');
+    const noteDate = document.getElementById('note-date');
+    const noteSource = document.getElementById('note-source');
+    const progressBar = document.getElementById('progress-bar');
+
+    function repoUrl(path) {
+      return basePrefix + String(path || '').replace(/^\.\//, '').replace(/^\//, '');
+    }
+
+    /* ── Markdown rendering pipeline (shared with blogs.html) ── */
+    function stripFrontMatter(text) {
+      return text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
+    }
+
+    // Pull math segments out before marked runs, so `_` / `*` inside
+    // formulas are never mistaken for emphasis markers.
+    function extractMath(text) {
+      const segments = [];
+      const stash = (m) => {
+        segments.push(m);
+        return `@@MATH${segments.length - 1}@@`;
+      };
+      text = text.replace(/\$\$[\s\S]+?\$\$/g, stash);
+      text = text.replace(/(?<!\$)\$(?!\s)([^\$\n]+?)(?<!\s)\$(?!\$)/g, stash);
+      return { text, segments };
+    }
+
+    function restoreMath(html, segments) {
+      return html.replace(/@@MATH(\d+)@@/g, (_, i) => segments[Number(i)]);
+    }
+
+    function renderMarkdown(mdText) {
+      let body = stripFrontMatter(mdText);
+      const { text, segments } = extractMath(body);
+      const html = restoreMath(marked.parse(text, { gfm: true, breaks: false }), segments);
+      noteContent.innerHTML = html;
+      if (window.renderMathInElement) {
+        renderMathInElement(noteContent, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    /* ── Reading progress bar ── */
+    function updateProgress() {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0;
+      progressBar.style.width = pct + '%';
+    }
+    window.addEventListener('scroll', () => requestAnimationFrame(updateProgress), { passive: true });
+
+    /* ── Load note from ?file=…&title=…&category=…&date=…&source=… ── */
+    async function init() {
+      const params = new URLSearchParams(location.search);
+      const file = params.get('file');
+      const title = params.get('title');
+      const category = params.get('category');
+      const date = params.get('date');
+      const source = params.get('source');
+
+      if (title) {
+        noteTitle.textContent = title;
+        document.title = `${title} · Accumulate PPTs`;
+      }
+      if (category) noteCategory.textContent = category;
+      else noteCategory.closest('#note-meta')?.classList.remove('sm:flex');
+      if (date) noteDate.textContent = date;
+      if (source) noteSource.href = source;
+      else noteSource.style.display = 'none';
+
+      if (!file || !/\.md$/i.test(file) || file.includes('..')) {
+        noteContent.innerHTML = '<p class="text-grass/60 font-light">未指定有效的笔记文件。请从 <a href="blogs.html" class="text-moss font-semibold hover:underline">阅读笔记书架</a> 选择一篇笔记。</p>';
+        return;
+      }
+
+      try {
+        const r = await fetch(repoUrl(file), { cache: 'no-store' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const mdText = await r.text();
+        renderMarkdown(mdText);
+        updateProgress();
+      } catch (err) {
+        noteContent.innerHTML = `<p class="text-grass/60 font-light">笔记内容加载失败（${err.message}）。请返回 <a href="blogs.html" class="text-moss font-semibold hover:underline">阅读笔记书架</a> 重试。</p>`;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
