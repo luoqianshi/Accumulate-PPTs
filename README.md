@@ -10,11 +10,6 @@
 [![Skills](https://img.shields.io/badge/Agent%20Skills-2-purple)](#-能力矩阵)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-贡献)
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
-
-<p align="center">
-  <img src="assets/accmulate-ppts.png" alt="Paper-Master" width="85%">
-</p>
-
 ---
 
 ## 30 秒看懂

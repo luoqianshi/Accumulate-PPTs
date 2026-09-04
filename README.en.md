@@ -11,10 +11,6 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-contact)
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
 
-<p align="center">
-  <img src="assets/accmulate-ppts.png" alt="Paper-Master" width="85%">
-</p>
-
 ---
 
 ## 30-Second Overview
