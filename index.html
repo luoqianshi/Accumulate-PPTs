@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..800,80,1&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoFkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
   <script>
     tailwind = {
       config: {
@@ -36,7 +37,10 @@
       }
     }
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFQjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     :root { color-scheme: light; }
     html { scroll-behavior: smooth; }
@@ -216,6 +220,87 @@
       animation: cardIn .75s cubic-bezier(.22,1,.36,1) forwards;
     }
 
+    /* Featured card */
+    .book-featured .book-inner {
+      min-height: 100%;
+    }
+
+    /* Filter pills */
+    .filter-pill {
+      transition: all .3s cubic-bezier(.22,1,.36,1);
+    }
+    .filter-pill.active {
+      background: #5D7052;
+      color: #F3F4F1;
+      border-color: #5D7052;
+    }
+    .filter-pill:not(.active):hover {
+      background: rgba(93,112,82,.08);
+      border-color: rgba(93,112,82,.3);
+    }
+
+    /* Viewer / Reader */
+    .viewer-open { overflow: hidden; }
+    .viewer-shell {
+      transform: translateY(20px) scale(.985);
+      opacity: 0;
+      transition: transform .5s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+    }
+    .viewer-shell.is-visible {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    /* Reader scroll area */
+    .reader-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+    .reader-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .reader-scroll::-webkit-scrollbar-thumb {
+      background: #DED8CF;
+      border-radius: 4px;
+    }
+
+    /* ── Markdown typography (prose mapped to site palette) ── */
+    .paper-prose {
+      --tw-prose-body: #2C2C24;
+      --tw-prose-headings: #2C2C24;
+      --tw-prose-lead: #78786C;
+      --tw-prose-links: #5D7052;
+      --tw-prose-bold: #2C2C24;
+      --tw-prose-counters: #78786C;
+      --tw-prose-bullets: #C18C5D;
+      --tw-prose-hr: #DED8CF;
+      --tw-prose-quotes: #5D7052;
+      --tw-prose-quote-borders: #C18C5D;
+      --tw-prose-captions: #78786C;
+      --tw-prose-code: #2C2C24;
+      --tw-prose-pre-code: #F3F4F1;
+      --tw-prose-pre-bg: #2C2C24;
+      --tw-prose-th-borders: #DED8CF;
+      --tw-prose-td-borders: #E6DCCD;
+    }
+    .paper-prose h1, .paper-prose h2, .paper-prose h3, .paper-prose h4 {
+      font-family: 'Fraunces', Georgia, serif;
+      letter-spacing: -0.015em;
+    }
+    .paper-prose img {
+      border-radius: 0.75rem;
+      border: 1px solid rgba(222, 216, 207, .6);
+      box-shadow: 0 4px 24px -8px rgba(44,44,36,.12);
+      background: #fff;
+    }
+    .paper-prose table {
+      font-size: .85em;
+    }
+    .paper-prose .katex-display {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: .25rem 0;
+    }
+
     /* Parallax blobs */
     @media (prefers-reduced-motion: no-preference) {
       .parallax-blob {
@@ -266,154 +351,461 @@
 <body class="font-body antialiased selection:bg-clay/20 selection:text-loam">
   <div class="cinema-intro" aria-hidden="true"></div>
 
-  <!-- Navigation -->
-  <header class="sticky top-5 z-40 mx-auto flex w-[min(90rem,calc(100%-2rem))] items-center justify-between rounded-full border border-timber/50 bg-white/65 px-5 py-3 shadow-[0_4px_24px_-8px_rgba(44,44,36,.1)] backdrop-blur-2xl sm:px-6">
-    <a href="index.html" class="flex items-center gap-3 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/60 focus-visible:ring-offset-2">
-      <span class="grid h-10 w-10 place-items-center rounded-full bg-moss text-mist shadow-[0_2px_12px_-2px_rgba(93,112,82,.35)]">
+  <!-- ── Left Sidebar Navigation ── -->
+  <aside class="fixed left-0 top-0 z-40 flex h-full w-16 flex-col border-r border-timber/50 bg-white/55 backdrop-blur-2xl md:w-64">
+    <a href="#home" class="flex items-center justify-center gap-3 px-3 py-5 md:justify-start md:px-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/60">
+      <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-moss text-mist shadow-[0_2px_12px_-2px_rgba(93,112,82,.35)]">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19.5V5.8c0-1.1.9-2 2-2h11.5A2.5 2.5 0 0 1 20 6.3v13.2H7.2A3.2 3.2 0 0 1 4 16.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 8h8M8 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </span>
-      <span>
+      <span class="hidden md:block">
         <span class="block font-display text-[17px] font-semibold leading-none text-loam tracking-[-0.01em]">Accumulate PPTs</span>
         <span class="text-[11px] font-semibold uppercase tracking-[.2em] text-grass/80 mt-0.5 block">Paper Knowledge Base</span>
       </span>
     </a>
-    <nav class="hidden items-center gap-1 text-[13px] font-semibold text-loam/80 md:flex" aria-label="主导航">
-      <a class="rounded-full px-4 py-2 transition-colors duration-300 hover:bg-moss/8 hover:text-loam focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50" href="pages/slides.html">PPT 书架</a>
-      <a class="rounded-full px-4 py-2 transition-colors duration-300 hover:bg-moss/8 hover:text-loam focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50" href="pages/blogs.html">阅读笔记</a>
+
+    <nav class="mt-2 flex flex-col gap-1 px-2 md:px-4" aria-label="主导航">
+      <a href="#home" data-view="home" aria-current="page" class="nav-item flex items-center justify-center gap-3 rounded-xl bg-moss px-3 py-2.5 text-[14px] font-semibold text-mist shadow-[0_2px_12px_-4px_rgba(93,112,82,.4)] transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 md:justify-start">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0"><path d="m3 10.5 9-7.5 9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+        <span class="hidden md:inline">首页</span>
+      </a>
+      <a href="#slides" data-view="slides" class="nav-item flex items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-semibold text-loam/70 transition-colors duration-300 hover:bg-moss/8 hover:text-loam focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 md:justify-start">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" class="shrink-0"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        <span class="hidden md:inline">幻灯片</span>
+      </a>
+      <a href="#blogs" data-view="blogs" class="nav-item flex items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-semibold text-loam/70 transition-colors duration-300 hover:bg-moss/8 hover:text-loam focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 md:justify-start">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span class="hidden md:inline">博客</span>
+      </a>
     </nav>
-    <div class="flex items-center gap-2">
+
+    <div class="mt-auto flex flex-col items-center gap-4 px-3 pb-6 md:items-start md:px-5">
       <a href="https://github.com/luoqianshi/Accumulate-PPTs" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub 仓库" class="grid h-10 w-10 place-items-center rounded-full border border-timber/50 bg-white/60 text-loam transition-all duration-300 hover:bg-stone hover:border-timber hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
       </a>
-      <a href="#entrances" class="rounded-full bg-moss px-5 py-2.5 text-[13px] font-bold text-mist shadow-[0_2px_14px_-3px_rgba(93,112,82,.35)] transition-all duration-300 hover:shadow-[0_4px_20px_-4px_rgba(93,112,82,.45)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">进入书库</a>
     </div>
-  </header>
+  </aside>
 
-  <main id="top" class="relative overflow-hidden">
-    <!-- Hero Section -->
-    <section class="hero-stage relative mx-auto w-[min(90rem,calc(100%-2rem))] py-24 sm:py-32 lg:py-36">
-      <!-- Background ambient blobs -->
-      <div class="parallax-blob absolute -left-32 top-16 h-80 w-80 bg-moss/12 blur-[80px] blob-a" aria-hidden="true" data-speed="0.03"></div>
-      <div class="parallax-blob absolute -right-24 bottom-8 h-[28rem] w-[28rem] bg-clay/14 blur-[90px] blob-b" aria-hidden="true" data-speed="0.05"></div>
-      <div class="parallax-blob absolute left-[40%] top-[60%] h-48 w-48 bg-sand/40 blur-[60px] blob-c" aria-hidden="true" data-speed="0.02"></div>
+  <!-- ── Right Content Area ── -->
+  <main class="relative pl-16 md:pl-64">
 
-      <!-- Hero Copy -->
-      <div class="hero-copy relative z-10 max-w-3xl mx-auto text-center">
-        <p class="hero-badge-sway inline-flex items-center gap-2 rounded-full border border-timber/60 bg-white/50 px-5 py-2 text-[11px] font-bold uppercase tracking-[.22em] text-moss backdrop-blur-sm">
-          <span class="h-1.5 w-1.5 rounded-full bg-moss"></span>
-          PDF Paper → HTML Slide &amp; Reading Note
-        </p>
-        <h1 class="hero-headline mt-8 font-display text-[2.5rem] font-semibold leading-[1.15] tracking-[-0.03em] text-loam sm:text-[3.25rem] lg:text-[4.25rem]">
-          <span class="sway-g1">论文不再困于PDF，</span><br class="hidden sm:block" />
-          <span class="sway-g2">每一页都是可交互的网页</span>
-        </h1>
-        <p class="hero-subtext-sway mt-6 max-w-xl mx-auto text-base leading-[1.8] text-grass/90 font-light sm:text-[1.0625rem]">
-          ——可放映的网页幻灯片，可沉淀的阅读笔记，一座科研人的 AI 原生论文知识库。
-        </p>
-        <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-          <a href="pages/slides.html" class="inline-flex h-13 items-center justify-center rounded-full bg-moss px-8 text-[15px] font-bold text-mist shadow-[0_2px_16px_-4px_rgba(93,112,82,.4)] transition-all duration-300 hover:shadow-[0_6px_28px_-6px_rgba(93,112,82,.5)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
-            PPT 书架
-          </a>
-          <a href="pages/blogs.html" class="inline-flex h-13 items-center justify-center rounded-full border border-clay/70 px-8 text-[15px] font-bold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2 active:scale-[0.98]">
-            阅读笔记
-          </a>
+    <!-- ══ View: Home (Slogan landing) ══ -->
+    <section id="view-home" class="relative overflow-hidden">
+      <!-- Hero Section -->
+      <section class="hero-stage relative mx-auto w-[min(90rem,calc(100%-2rem))] py-24 sm:py-32 lg:py-36">
+        <!-- Background ambient blobs -->
+        <div class="parallax-blob absolute -left-32 top-16 h-80 w-80 bg-moss/12 blur-[80px] blob-a" aria-hidden="true" data-speed="0.03"></div>
+        <div class="parallax-blob absolute -right-24 bottom-8 h-[28rem] w-[28rem] bg-clay/14 blur-[90px] blob-b" aria-hidden="true" data-speed="0.05"></div>
+        <div class="parallax-blob absolute left-[40%] top-[60%] h-48 w-48 bg-sand/40 blur-[60px] blob-c" aria-hidden="true" data-speed="0.02"></div>
+
+        <!-- Hero Copy -->
+        <div class="hero-copy relative z-10 max-w-3xl mx-auto text-center">
+          <p class="hero-badge-sway inline-flex items-center gap-2 rounded-full border border-timber/60 bg-white/50 px-5 py-2 text-[11px] font-bold uppercase tracking-[.22em] text-moss backdrop-blur-sm">
+            <span class="h-1.5 w-1.5 rounded-full bg-moss"></span>
+            PDF Paper → HTML Slide &amp; Reading Note
+          </p>
+          <h1 class="hero-headline mt-8 font-display text-[2.5rem] font-semibold leading-[1.15] tracking-[-0.03em] text-loam sm:text-[3.25rem] lg:text-[4.25rem]">
+            <span class="sway-g1">论文不再困于PDF，</span><br class="hidden sm:block" />
+            <span class="sway-g2">每一页都是可交互的网页</span>
+          </h1>
+          <p class="hero-subtext-sway mt-6 max-w-xl mx-auto text-base leading-[1.8] text-grass/90 font-light sm:text-[1.0625rem]">
+            ——可放映的网页幻灯片，可沉淀的阅读笔记，一座科研人的 AI 原生论文知识库。
+          </p>
+          <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
+            <a href="#slides" class="inline-flex h-13 items-center justify-center rounded-full bg-moss px-8 text-[15px] font-bold text-mist shadow-[0_2px_16px_-4px_rgba(93,112,82,.4)] transition-all duration-300 hover:shadow-[0_6px_28px_-6px_rgba(93,112,82,.5)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
+              PPT 书架
+            </a>
+            <a href="#blogs" class="inline-flex h-13 items-center justify-center rounded-full border border-clay/70 px-8 text-[15px] font-bold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2 active:scale-[0.98]">
+              阅读笔记
+            </a>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <!-- Entrance Cards Section -->
+      <section id="entrances" class="relative mx-auto w-[min(72rem,calc(100%-2rem))] pb-28 pt-8">
+        <div class="mb-12 text-center">
+          <p class="text-[11px] font-bold uppercase tracking-[.22em] text-moss/80">Two Collections</p>
+          <h2 class="mt-4 font-display text-[2.25rem] font-semibold leading-[1.1] tracking-[-0.025em] text-loam md:text-[3rem]">两座馆藏，各入其门</h2>
+        </div>
+
+        <div class="grid gap-6 sm:grid-cols-2">
+          <!-- Entrance: PPT 书架 -->
+          <article class="book-card reveal-card group">
+            <a href="#slides" class="book-inner relative block overflow-hidden rounded-2xl bg-[#FEFEFA] shadow-[0_2px_24px_-6px_rgba(44,44,36,.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50">
+              <div class="book-spine absolute left-0 top-0 bottom-0 w-[6px] rounded-l-2xl opacity-70 z-10" style="background:#5D7052"></div>
+              <div class="book-preview relative h-44 overflow-hidden" style="background:linear-gradient(135deg, #5D705233 0%, #5D705218 50%, #5D705208 100%)">
+                <div class="absolute left-8 top-8 h-28 w-28 rounded-full opacity-20 blur-2xl blob-a" style="background:rgba(255,255,255,.6)"></div>
+                <div class="absolute right-6 bottom-6 h-32 w-32 rounded-full opacity-15 blur-2xl blob-c" style="background:rgba(255,255,255,.4)"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-moss opacity-[.18]">
+                  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                </div>
+                <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FEFEFA] to-transparent"></div>
+                <span id="slides-count" class="absolute top-4 left-4 rounded-full bg-white/80 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[.18em] text-moss backdrop-blur-sm shadow-sm">PPT Slides</span>
+              </div>
+              <div class="relative px-6 pb-6 pt-2 sm:px-7">
+                <h3 class="font-display text-[1.5rem] font-semibold leading-snug tracking-[-0.015em] text-loam">PPT 书架</h3>
+                <p class="mt-3 text-[13px] leading-[1.7] text-grass/70 font-light">
+                  HTML 格式的论文演示文稿，以 3D 书架陈列；点击即可在当前页面嵌入放映，保留原始 PPT 的全部交互逻辑。
+                </p>
+                <div class="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-moss px-5 text-[13px] font-semibold text-mist shadow-[0_2px_12px_-4px_rgba(93,112,82,.35)] transition-all duration-300 group-hover:shadow-[0_4px_20px_-6px_rgba(93,112,82,.45)]">
+                  进入书架
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </div>
+              </div>
+              <div class="book-shine pointer-events-none absolute inset-0 rounded-2xl opacity-0" style="background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.1) 45%, rgba(255,255,255,.03) 50%, transparent 55%)"></div>
+            </a>
+          </article>
+
+          <!-- Entrance: 阅读笔记 -->
+          <article class="book-card reveal-card group" style="animation-delay:120ms">
+            <a href="#blogs" class="book-inner relative block overflow-hidden rounded-2xl bg-[#FEFEFA] shadow-[0_2px_24px_-6px_rgba(44,44,36,.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50">
+              <div class="book-spine absolute left-0 top-0 bottom-0 w-[6px] rounded-l-2xl opacity-70 z-10" style="background:#C18C5D"></div>
+              <div class="book-preview relative h-44 overflow-hidden" style="background:linear-gradient(135deg, #C18C5D33 0%, #C18C5D18 50%, #C18C5D08 100%)">
+                <div class="absolute left-8 top-8 h-28 w-28 rounded-full opacity-20 blur-2xl blob-b" style="background:rgba(255,255,255,.6)"></div>
+                <div class="absolute right-6 bottom-6 h-32 w-32 rounded-full opacity-15 blur-2xl blob-a" style="background:rgba(255,255,255,.4)"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-clay opacity-[.18]">
+                  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 13h6M9 17h4"/></svg>
+                </div>
+                <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FEFEFA] to-transparent"></div>
+                <span id="blogs-count" class="absolute top-4 left-4 rounded-full bg-white/80 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[.18em] text-clay backdrop-blur-sm shadow-sm">Reading Notes</span>
+              </div>
+              <div class="relative px-6 pb-6 pt-2 sm:px-7">
+                <h3 class="font-display text-[1.5rem] font-semibold leading-snug tracking-[-0.015em] text-loam">阅读笔记</h3>
+                <p class="mt-3 text-[13px] leading-[1.7] text-grass/70 font-light">
+                  Markdown 论文精读笔记，全屏浮层沉浸式阅读；完整渲染 LaTeX 公式、表格与论文配图。
+                </p>
+                <div class="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-clay px-5 text-[13px] font-semibold text-white shadow-[0_2px_12px_-4px_rgba(193,140,93,.35)] transition-all duration-300 group-hover:shadow-[0_4px_20px_-6px_rgba(193,140,93,.45)]">
+                  开始阅读
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </div>
+              </div>
+              <div class="book-shine pointer-events-none absolute inset-0 rounded-2xl opacity-0" style="background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.1) 45%, rgba(255,255,255,.03) 50%, transparent 55%)"></div>
+            </a>
+          </article>
+        </div>
+      </section>
     </section>
 
-    <!-- Entrance Cards Section -->
-    <section id="entrances" class="relative mx-auto w-[min(72rem,calc(100%-2rem))] pb-28 pt-8">
-      <div class="mb-12 text-center">
-        <p class="text-[11px] font-bold uppercase tracking-[.22em] text-moss/80">Two Collections</p>
-        <h2 class="mt-4 font-display text-[2.25rem] font-semibold leading-[1.1] tracking-[-0.025em] text-loam md:text-[3rem]">两座馆藏，各入其门</h2>
-      </div>
+    <!-- ══ View: Slides Gallery ══ -->
+    <section id="view-slides" class="relative overflow-hidden" hidden>
+      <section id="gallery" class="relative mx-auto w-[min(90rem,calc(100%-2rem))] pt-16 pb-16 sm:pt-24 sm:pb-24">
+        <!-- Gallery Header + Toolbar -->
+        <div class="mb-12">
+          <div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div class="max-w-2xl">
+              <p class="text-[11px] font-bold uppercase tracking-[.22em] text-moss/80">Bookshelf</p>
+              <h2 class="mt-4 font-display text-[2.75rem] font-semibold leading-[1.1] tracking-[-0.025em] text-loam md:text-[3.5rem]">PPT 书架</h2>
+              <p class="mt-4 text-[14px] leading-[1.8] text-grass/80 font-light">HTML 格式的论文演示文稿，以 3D 书架陈列；点击即可在当前页面嵌入放映。</p>
+            </div>
+            <div class="rounded-full border border-timber/50 bg-white/50 px-5 py-2.5 text-[13px] font-semibold text-grass/70 shadow-[0_2px_12px_-4px_rgba(44,44,36,.06)] backdrop-blur-sm whitespace-nowrap">
+              <span id="deck-count">0</span> 份已收录
+            </div>
+          </div>
 
-      <div class="grid gap-6 sm:grid-cols-2">
-        <!-- Entrance: PPT 书架 -->
-        <article class="book-card reveal-card group">
-          <a href="pages/slides.html" class="book-inner relative block overflow-hidden rounded-2xl bg-[#FEFEFA] shadow-[0_2px_24px_-6px_rgba(44,44,36,.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50">
-            <div class="book-spine absolute left-0 top-0 bottom-0 w-[6px] rounded-l-2xl opacity-70 z-10" style="background:#5D7052"></div>
-            <div class="book-preview relative h-44 overflow-hidden" style="background:linear-gradient(135deg, #5D705233 0%, #5D705218 50%, #5D705208 100%)">
-              <div class="absolute left-8 top-8 h-28 w-28 rounded-full opacity-20 blur-2xl blob-a" style="background:rgba(255,255,255,.6)"></div>
-              <div class="absolute right-6 bottom-6 h-32 w-32 rounded-full opacity-15 blur-2xl blob-c" style="background:rgba(255,255,255,.4)"></div>
-              <div class="absolute inset-0 flex items-center justify-center text-moss opacity-[.18]">
-                <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-              </div>
-              <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FEFEFA] to-transparent"></div>
-              <span id="slides-count" class="absolute top-4 left-4 rounded-full bg-white/80 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[.18em] text-moss backdrop-blur-sm shadow-sm">PPT Slides</span>
+          <!-- Search & Filter Toolbar -->
+          <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div class="relative flex-1 max-w-md">
+              <svg class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-grass/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="slides-search-input" type="text" placeholder="搜索标题或描述..." class="w-full rounded-full border border-timber/50 bg-white/60 py-3 pl-11 pr-5 text-[14px] text-loam placeholder:text-grass/40 backdrop-blur-sm focus:outline-none focus:border-moss/40 transition-all duration-300">
             </div>
-            <div class="relative px-6 pb-6 pt-2 sm:px-7">
-              <h3 class="font-display text-[1.5rem] font-semibold leading-snug tracking-[-0.015em] text-loam">PPT 书架</h3>
-              <p class="mt-3 text-[13px] leading-[1.7] text-grass/70 font-light">
-                HTML 格式的论文演示文稿，以 3D 书架陈列；点击即可在当前页面嵌入放映，保留原始 PPT 的全部交互逻辑。
-              </p>
-              <div class="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-moss px-5 text-[13px] font-semibold text-mist shadow-[0_2px_12px_-4px_rgba(93,112,82,.35)] transition-all duration-300 group-hover:shadow-[0_4px_20px_-6px_rgba(93,112,82,.45)]">
-                进入书架
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </div>
+            <div id="slides-filter-pills" class="flex flex-wrap gap-2">
+              <!-- Pills rendered by JS -->
             </div>
-            <div class="book-shine pointer-events-none absolute inset-0 rounded-2xl opacity-0" style="background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.1) 45%, rgba(255,255,255,.03) 50%, transparent 55%)"></div>
-          </a>
-        </article>
+          </div>
+        </div>
 
-        <!-- Entrance: 阅读笔记 -->
-        <article class="book-card reveal-card group" style="animation-delay:120ms">
-          <a href="pages/blogs.html" class="book-inner relative block overflow-hidden rounded-2xl bg-[#FEFEFA] shadow-[0_2px_24px_-6px_rgba(44,44,36,.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50">
-            <div class="book-spine absolute left-0 top-0 bottom-0 w-[6px] rounded-l-2xl opacity-70 z-10" style="background:#C18C5D"></div>
-            <div class="book-preview relative h-44 overflow-hidden" style="background:linear-gradient(135deg, #C18C5D33 0%, #C18C5D18 50%, #C18C5D08 100%)">
-              <div class="absolute left-8 top-8 h-28 w-28 rounded-full opacity-20 blur-2xl blob-b" style="background:rgba(255,255,255,.6)"></div>
-              <div class="absolute right-6 bottom-6 h-32 w-32 rounded-full opacity-15 blur-2xl blob-a" style="background:rgba(255,255,255,.4)"></div>
-              <div class="absolute inset-0 flex items-center justify-center text-clay opacity-[.18]">
-                <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 13h6M9 17h4"/></svg>
-              </div>
-              <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FEFEFA] to-transparent"></div>
-              <span id="blogs-count" class="absolute top-4 left-4 rounded-full bg-white/80 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[.18em] text-clay backdrop-blur-sm shadow-sm">Reading Notes</span>
+        <!-- Bookshelf Grid -->
+        <div id="deck-grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-live="polite"></div>
+        <div id="load-sentinel" style="min-height:1px"></div>
+        <div id="slides-empty-state" class="hidden py-20 text-center">
+          <div class="mx-auto w-16 h-16 rounded-full bg-stone/50 flex items-center justify-center mb-4">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#78786C" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+          <p class="text-grass/50 font-light text-[15px]">没有找到匹配的演示文稿</p>
+        </div>
+        <div class="mt-14 flex justify-center">
+          <button id="load-more" type="button" class="hidden h-12 cursor-pointer rounded-full border border-clay/60 px-8 text-[14px] font-bold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2 active:scale-[0.98]">
+            加载更多
+          </button>
+        </div>
+      </section>
+    </section>
+
+    <!-- ══ View: Blogs Gallery ══ -->
+    <section id="view-blogs" class="relative overflow-hidden" hidden>
+      <section class="relative mx-auto w-[min(90rem,calc(100%-2rem))] pt-16 pb-16 sm:pt-24 sm:pb-24">
+        <div class="mb-12">
+          <div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div class="max-w-2xl">
+              <p class="text-[11px] font-bold uppercase tracking-[.22em] text-moss/80">Notes Shelf</p>
+              <h2 class="mt-4 font-display text-[2.75rem] font-semibold leading-[1.1] tracking-[-0.025em] text-loam md:text-[3.5rem]">阅读笔记</h2>
+              <p class="mt-4 text-[14px] leading-[1.8] text-grass/80 font-light">Markdown 论文精读笔记，全屏浮层沉浸式阅读；公式、表格与配图，一页之内完整呈现。</p>
             </div>
-            <div class="relative px-6 pb-6 pt-2 sm:px-7">
-              <h3 class="font-display text-[1.5rem] font-semibold leading-snug tracking-[-0.015em] text-loam">阅读笔记</h3>
-              <p class="mt-3 text-[13px] leading-[1.7] text-grass/70 font-light">
-                Markdown 论文精读笔记，全屏浮层沉浸式阅读；完整渲染 LaTeX 公式、表格与论文配图。
-              </p>
-              <div class="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-clay px-5 text-[13px] font-semibold text-white shadow-[0_2px_12px_-4px_rgba(193,140,93,.35)] transition-all duration-300 group-hover:shadow-[0_4px_20px_-6px_rgba(193,140,93,.45)]">
-                开始阅读
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </div>
+            <div class="rounded-full border border-timber/50 bg-white/50 px-5 py-2.5 text-[13px] font-semibold text-grass/70 shadow-[0_2px_12px_-4px_rgba(44,44,36,.06)] backdrop-blur-sm whitespace-nowrap">
+              <span id="blog-count">0</span> 篇已收录
             </div>
-            <div class="book-shine pointer-events-none absolute inset-0 rounded-2xl opacity-0" style="background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.1) 45%, rgba(255,255,255,.03) 50%, transparent 55%)"></div>
-          </a>
-        </article>
-      </div>
+          </div>
+
+          <!-- Search & Filter Toolbar -->
+          <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div class="relative flex-1 max-w-md">
+              <svg class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-grass/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="blogs-search-input" type="text" placeholder="搜索标题..." class="w-full rounded-full border border-timber/50 bg-white/60 py-3 pl-11 pr-5 text-[14px] text-loam placeholder:text-grass/40 backdrop-blur-sm focus:outline-none focus:border-moss/40 transition-all duration-300">
+            </div>
+            <div id="blogs-filter-pills" class="flex flex-wrap gap-2">
+              <!-- Pills rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes Grid -->
+        <div id="blog-grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-live="polite"></div>
+        <div id="blogs-empty-state" class="hidden py-20 text-center">
+          <div class="mx-auto w-16 h-16 rounded-full bg-stone/50 flex items-center justify-center mb-4">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#78786C" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+          <p class="text-grass/50 font-light text-[15px]">没有找到匹配的笔记</p>
+        </div>
+      </section>
     </section>
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-timber/40 bg-stone/30 py-10">
-    <div class="mx-auto w-[min(90rem,calc(100%-2rem))] flex flex-col items-center justify-between gap-4 sm:flex-row">
-      <p class="text-[13px] text-grass/50 font-light">Accumulate PPTs · 积累每一页思想，照亮每一次讲述</p>
-      <p class="text-[13px] text-grass/40 font-light">Crafted with care · Built to last</p>
+  <!-- Viewer Modal (slides) -->
+  <section id="viewer" class="fixed inset-0 z-50 hidden bg-loam/60 p-3 backdrop-blur-xl sm:p-6" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="viewer-title">
+    <div class="viewer-shell flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-timber/40 bg-paper shadow-[0_24px_80px_-24px_rgba(44,44,36,.25)] sm:rounded-[2rem]">
+      <div class="flex flex-wrap items-center gap-3 border-b border-timber/40 bg-white/60 px-5 py-3.5 backdrop-blur-xl sm:px-6">
+        <div class="min-w-0 flex-1">
+          <p class="text-[10px] font-bold uppercase tracking-[.2em] text-moss/60">Now Presenting</p>
+          <h2 id="viewer-title" class="truncate font-display text-lg font-semibold tracking-[-0.01em] text-loam sm:text-xl">HTML PPT</h2>
+        </div>
+        <a id="viewer-open-new" href="#" target="_blank" rel="noopener" class="inline-flex h-10 items-center gap-2 rounded-full border border-timber/50 bg-white/60 px-4 text-[13px] font-semibold text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          新窗口
+        </a>
+        <button id="viewer-fullscreen" type="button" class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-moss px-4 text-[13px] font-semibold text-mist shadow-[0_2px_12px_-4px_rgba(93,112,82,.4)] transition-all duration-300 hover:shadow-[0_4px_20px_-6px_rgba(93,112,82,.5)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          全屏
+        </button>
+        <button id="viewer-close" type="button" class="grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-timber/50 bg-white/60 text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40" aria-label="关闭放映窗口">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <iframe id="viewer-frame" title="HTML PPT iframe 放映窗口" class="h-full w-full flex-1 bg-white" allow="fullscreen; autoplay; clipboard-read; clipboard-write" allowfullscreen loading="lazy"></iframe>
     </div>
-  </footer>
+  </section>
+
+  <!-- Reader Modal (blogs) -->
+  <section id="reader" class="fixed inset-0 z-50 hidden bg-loam/60 p-3 backdrop-blur-xl sm:p-6" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="reader-title">
+    <div class="viewer-shell flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-timber/40 bg-paper shadow-[0_24px_80px_-24px_rgba(44,44,36,.25)] sm:rounded-[2rem]">
+      <div class="flex flex-wrap items-center gap-3 border-b border-timber/40 bg-white/60 px-5 py-3.5 backdrop-blur-xl sm:px-6">
+        <div class="min-w-0 flex-1">
+          <p class="text-[10px] font-bold uppercase tracking-[.2em] text-moss/60">Now Reading</p>
+          <h2 id="reader-title" class="truncate font-display text-lg font-semibold tracking-[-0.01em] text-loam sm:text-xl">阅读笔记</h2>
+          <p class="mt-0.5 flex items-center gap-2 text-[11px] text-grass/60">
+            <span id="reader-category" class="rounded-full bg-moss/10 px-2 py-0.5 font-semibold text-moss"></span>
+            <span id="reader-date"></span>
+          </p>
+        </div>
+        <a id="reader-source" href="#" target="_blank" rel="noopener" class="inline-flex h-10 items-center gap-2 rounded-full border border-timber/50 bg-white/60 px-4 text-[13px] font-semibold text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          全屏阅读
+        </a>
+        <button id="reader-close" type="button" class="grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-timber/50 bg-white/60 text-loam transition-all duration-300 hover:bg-stone focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40" aria-label="关闭阅读窗口">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="reader-scroll" class="reader-scroll flex-1 overflow-y-auto bg-paper">
+        <article id="reader-content" class="paper-prose prose mx-auto max-w-3xl px-6 py-10 sm:px-10"></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deck Card Template -->
+  <template id="deck-card-template">
+    <article class="book-card reveal-card group" data-kind="" data-title="" data-desc="">
+      <div class="book-inner relative overflow-hidden rounded-2xl bg-[#FEFEFA] shadow-[0_2px_20px_-6px_rgba(44,44,36,.08)] cursor-pointer">
+        <!-- Spine edge -->
+        <div class="book-spine absolute left-0 top-0 bottom-0 w-[5px] rounded-l-2xl opacity-70 z-10"></div>
+
+        <!-- Cover preview area -->
+        <div class="book-preview relative h-40 overflow-hidden">
+          <div class="book-cover-bg absolute inset-0"></div>
+          <!-- Thumbnail image -->
+          <img class="book-thumbnail absolute inset-0 w-full h-full object-cover" src="" alt="" loading="lazy" style="display:none;" />
+          <!-- Decorative shapes -->
+          <div class="absolute left-5 top-5 h-20 w-20 rounded-full opacity-20 blur-xl blob-a" style="background:rgba(255,255,255,.6)"></div>
+          <div class="absolute right-4 bottom-4 h-24 w-24 rounded-full opacity-15 blur-2xl blob-b" style="background:rgba(255,255,255,.4)"></div>
+          <!-- Fallback presentation icon -->
+          <div class="book-fallback absolute inset-0 flex items-center justify-center opacity-10">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <!-- Gradient fade to content -->
+          <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FEFEFA] to-transparent"></div>
+          <!-- Badges -->
+          <span class="deck-index absolute top-3 left-4 rounded-full bg-white/75 px-3 py-1 text-[10px] font-bold uppercase tracking-[.18em] text-moss/80 backdrop-blur-sm shadow-sm"></span>
+          <span class="deck-kind absolute top-3 right-3 rounded-full bg-white/75 px-3 py-1 text-[10px] font-semibold text-grass/70 backdrop-blur-sm shadow-sm"></span>
+        </div>
+
+        <!-- Cover content -->
+        <div class="relative px-5 pb-5 pt-1">
+          <h3 class="deck-title font-display text-[1.0625rem] font-semibold leading-snug tracking-[-0.01em] text-loam line-clamp-2 min-h-[2.6em]"></h3>
+          <p class="deck-description mt-2 text-[12px] leading-[1.65] text-grass/65 font-light line-clamp-2"></p>
+          <div class="mt-4 flex items-center gap-2.5">
+            <button type="button" class="deck-play inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full bg-moss px-3.5 text-[11px] font-semibold text-mist shadow-[0_2px_10px_-3px_rgba(93,112,82,.3)] transition-all duration-300 hover:shadow-[0_4px_14px_-4px_rgba(93,112,82,.4)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z"/></svg>
+              放映
+            </button>
+            <a class="deck-link inline-flex h-8 items-center justify-center rounded-full border border-timber/50 px-2.5 text-grass/60 transition-all duration-300 hover:text-loam hover:border-timber hover:bg-stone/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40" target="_blank" rel="noopener" title="在新标签页打开">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 3D Shine overlay -->
+        <div class="book-shine pointer-events-none absolute inset-0 rounded-2xl opacity-0" style="background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.12) 45%, rgba(255,255,255,.04) 50%, transparent 55%)"></div>
+      </div>
+    </article>
+  </template>
+
+  <!-- Featured Deck Card Template (first card, larger) -->
+  <template id="deck-featured-template">
+    <article class="book-card book-featured reveal-card group sm:col-span-2 lg:col-span-2" data-kind="" data-title="" data-desc="">
+      <div class="book-inner relative overflow-hidden rounded-2xl bg-[#FEFEFA] shadow-[0_2px_24px_-6px_rgba(44,44,36,.1)] cursor-pointer">
+        <!-- Spine edge -->
+        <div class="book-spine absolute left-0 top-0 bottom-0 w-[6px] rounded-l-2xl opacity-70 z-10"></div>
+
+        <div class="flex flex-col sm:flex-row">
+          <!-- Cover preview area (wider for featured) -->
+          <div class="book-preview relative sm:w-2/5 h-44 sm:h-auto sm:min-h-[16rem] overflow-hidden flex-shrink-0">
+            <div class="book-cover-bg absolute inset-0"></div>
+            <!-- Thumbnail image -->
+            <img class="book-thumbnail absolute inset-0 w-full h-full object-cover" src="" alt="" loading="lazy" style="display:none;" />
+            <div class="absolute left-8 top-8 h-28 w-28 rounded-full opacity-20 blur-2xl blob-a" style="background:rgba(255,255,255,.6)"></div>
+            <div class="absolute right-6 bottom-6 h-32 w-32 rounded-full opacity-15 blur-2xl blob-c" style="background:rgba(255,255,255,.4)"></div>
+            <!-- Decorative grid pattern -->
+            <div class="book-fallback absolute inset-0 flex items-center justify-center opacity-[.07]">
+              <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=".8" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            </div>
+            <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FEFEFA] to-transparent sm:hidden"></div>
+            <!-- Featured badge -->
+            <span class="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[.18em] text-moss backdrop-blur-sm shadow-sm">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Featured
+            </span>
+            <span class="deck-kind absolute top-4 right-4 rounded-full bg-white/80 px-3 py-1 text-[10px] font-semibold text-grass/70 backdrop-blur-sm shadow-sm"></span>
+          </div>
+
+          <!-- Content area (wider for featured) -->
+          <div class="relative flex-1 px-6 py-5 sm:px-7 sm:py-6">
+            <span class="deck-index text-[10px] font-bold uppercase tracking-[.18em] text-moss/60"></span>
+            <h3 class="deck-title mt-2 font-display text-[1.375rem] font-semibold leading-snug tracking-[-0.015em] text-loam sm:text-[1.5rem]"></h3>
+            <p class="deck-description mt-3 text-[13px] leading-[1.7] text-grass/70 font-light line-clamp-3 sm:line-clamp-4"></p>
+            <div class="mt-5 flex items-center gap-3">
+              <button type="button" class="deck-play inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-moss px-5 text-[13px] font-semibold text-mist shadow-[0_2px_12px_-4px_rgba(93,112,82,.35)] transition-all duration-300 hover:shadow-[0_4px_20px_-6px_rgba(93,112,82,.45)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z"/></svg>
+                嵌入放映
+              </button>
+              <a class="deck-link inline-flex h-10 items-center gap-2 rounded-full border border-clay/60 px-5 text-[13px] font-semibold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2" target="_blank" rel="noopener">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"/></svg>
+                打开原页
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Shine overlay -->
+        <div class="book-shine pointer-events-none absolute inset-0 rounded-2xl opacity-0" style="background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.1) 45%, rgba(255,255,255,.03) 50%, transparent 55%)"></div>
+      </div>
+    </article>
+  </template>
+
+  <!-- Blog Card Template -->
+  <template id="blog-card-template">
+    <article class="book-card reveal-card group" data-kind="" data-title="">
+      <div class="book-inner relative overflow-hidden rounded-2xl bg-[#FEFEFA] shadow-[0_2px_20px_-6px_rgba(44,44,36,.08)] cursor-pointer">
+        <!-- Spine edge -->
+        <div class="book-spine absolute left-0 top-0 bottom-0 w-[5px] rounded-l-2xl opacity-70 z-10"></div>
+
+        <!-- Cover preview area -->
+        <div class="book-preview relative h-40 overflow-hidden">
+          <div class="book-cover-bg absolute inset-0"></div>
+          <!-- Thumbnail image -->
+          <img class="blog-thumbnail absolute inset-0 w-full h-full object-cover" src="" alt="" loading="lazy" style="display:none;" />
+          <!-- Decorative shapes -->
+          <div class="absolute left-5 top-5 h-20 w-20 rounded-full opacity-20 blur-xl blob-a" style="background:rgba(255,255,255,.6)"></div>
+          <div class="absolute right-4 bottom-4 h-24 w-24 rounded-full opacity-15 blur-2xl blob-b" style="background:rgba(255,255,255,.4)"></div>
+          <!-- Fallback note icon -->
+          <div class="book-fallback absolute inset-0 flex items-center justify-center opacity-10">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 13h6M9 17h4"/></svg>
+          </div>
+          <!-- Gradient fade to content -->
+          <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FEFEFA] to-transparent"></div>
+          <!-- Badges -->
+          <span class="blog-date absolute top-3 left-4 rounded-full bg-white/75 px-3 py-1 text-[10px] font-bold tracking-[.12em] text-moss/80 backdrop-blur-sm shadow-sm"></span>
+          <span class="blog-category absolute top-3 right-3 rounded-full bg-white/75 px-3 py-1 text-[10px] font-semibold text-grass/70 backdrop-blur-sm shadow-sm"></span>
+        </div>
+
+        <!-- Cover content -->
+        <div class="relative px-5 pb-5 pt-1">
+          <h3 class="blog-title font-display text-[1.0625rem] font-semibold leading-snug tracking-[-0.01em] text-loam line-clamp-2 min-h-[2.6em]"></h3>
+          <div class="mt-4 flex items-center gap-2.5">
+            <button type="button" class="blog-read inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full bg-moss px-3.5 text-[11px] font-semibold text-mist shadow-[0_2px_10px_-3px_rgba(93,112,82,.3)] transition-all duration-300 hover:shadow-[0_4px_14px_-4px_rgba(93,112,82,.4)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              阅读
+            </button>
+            <a class="blog-source inline-flex h-8 items-center justify-center rounded-full border border-timber/50 px-2.5 text-grass/60 transition-all duration-300 hover:text-loam hover:border-timber hover:bg-stone/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40" target="_blank" rel="noopener" title="新标签页全屏阅读">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 3D Shine overlay -->
+        <div class="book-shine pointer-events-none absolute inset-0 rounded-2xl opacity-0" style="background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.12) 45%, rgba(255,255,255,.04) 50%, transparent 55%)"></div>
+      </div>
+    </article>
+  </template>
 
   <script>
-    /* ── Collection counts (silent fallback: keep default badge text) ── */
-    async function updateCount(url, key, elId, suffix) {
-      try {
-        const r = await fetch(`${url}?v=${Date.now()}`, { cache: 'no-store' });
-        if (!r.ok) return;
-        const data = await r.json();
-        const list = Array.isArray(data) ? data : data[key];
-        if (!Array.isArray(list)) return;
-        const el = document.getElementById(elId);
-        if (el) el.textContent = `${list.length} ${suffix}`;
-      } catch { /* keep default */ }
+    /* ══════════ Hash Router (sidebar view switching) ══════════ */
+    const VIEWS = ['home', 'slides', 'blogs'];
+    const VIEW_TITLES = {
+      home: 'Accumulate PPTs · 论文知识库门户',
+      slides: 'PPT 书架 · Accumulate PPTs',
+      blogs: '阅读笔记 · Accumulate PPTs'
+    };
+
+    function currentView() {
+      const h = location.hash.replace('#', '');
+      return VIEWS.includes(h) ? h : 'home';
     }
 
-    /* ── 3D Tilt Effect ── */
-    function init3DTilt() {
+    function activateView(view) {
+      VIEWS.forEach(v => {
+        document.getElementById('view-' + v).hidden = (v !== view);
+      });
+      document.querySelectorAll('.nav-item').forEach(a => {
+        const active = a.dataset.view === view;
+        a.classList.toggle('bg-moss', active);
+        a.classList.toggle('text-mist', active);
+        a.classList.toggle('shadow-[0_2px_12px_-4px_rgba(93,112,82,.4)]', active);
+        a.classList.toggle('text-loam/70', !active);
+        a.classList.toggle('hover:bg-moss/8', !active);
+        a.classList.toggle('hover:text-loam', !active);
+        if (active) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+      document.title = VIEW_TITLES[view];
+      window.scrollTo(0, 0);
+    }
+
+    window.addEventListener('hashchange', () => activateView(currentView()));
+
+    /* ══════════ Shared: 3D Tilt Effect ══════════ */
+    function init3DTilt(root = document) {
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) return;
 
-      document.querySelectorAll('.book-card:not([data-tilt])').forEach(card => {
+      root.querySelectorAll('.book-card:not([data-tilt])').forEach(card => {
         card.dataset.tilt = '1';
         const inner = card.querySelector('.book-inner');
         const shine = card.querySelector('.book-shine');
@@ -446,7 +838,560 @@
       });
     }
 
-    // Parallax scroll for blobs
+    /* ══════════ Home: collection counts (silent fallback) ══════════ */
+    async function updateCount(url, key, elId, suffix) {
+      try {
+        const r = await fetch(`${url}?v=${Date.now()}`, { cache: 'no-store' });
+        if (!r.ok) return;
+        const data = await r.json();
+        const list = Array.isArray(data) ? data : data[key];
+        if (!Array.isArray(list)) return;
+        const el = document.getElementById(elId);
+        if (el) el.textContent = `${list.length} ${suffix}`;
+      } catch { /* keep default */ }
+    }
+
+    /* ══════════ Slides Gallery ══════════ */
+    (() => {
+      const embeddedDecks = [
+        {
+          title: 'Maize Tassels Detection: A Benchmark of the State of the Art',
+          file: 'paper-slides/maize_tassels_presentation.html',
+          description: '玉米雄穗检测研究演示，聚焦遥感/视觉检测方法与基准对比。',
+          kind: '期刊/会议',
+          accent: 'rgba(93,112,82,.2)'
+        },
+        {
+          title: '低空航拍可见光图像快速检测甘蔗幼苗群体数量',
+          file: 'paper-slides/sugarcane_thesis_presentation.html',
+          description: '面向低空航拍可见光图像的甘蔗幼苗群体数量检测论文汇报。',
+          kind: '学位论文',
+          accent: 'rgba(193,140,93,.22)'
+        }
+      ];
+
+      const PAGE_SIZE = 30;
+      const basePrefix = '';
+      const slideDirectory = 'paper-slides/';
+      const manifestUrl = 'slides-manifest.json';
+      let decks = [];
+      let loaded = 0;
+      let activeFilter = 'all';
+      let searchQuery = '';
+
+      const grid = document.getElementById('deck-grid');
+      const template = document.getElementById('deck-card-template');
+      const featuredTemplate = document.getElementById('deck-featured-template');
+      const deckCount = document.getElementById('deck-count');
+      const loadMore = document.getElementById('load-more');
+      const sentinel = document.getElementById('load-sentinel');
+      const viewer = document.getElementById('viewer');
+      const viewerShell = viewer.querySelector('.viewer-shell');
+      const viewerTitle = document.getElementById('viewer-title');
+      const viewerFrame = document.getElementById('viewer-frame');
+      const viewerOpenNew = document.getElementById('viewer-open-new');
+      const viewerFullscreen = document.getElementById('viewer-fullscreen');
+      const viewerClose = document.getElementById('viewer-close');
+      const searchInput = document.getElementById('slides-search-input');
+      const filterPillsContainer = document.getElementById('slides-filter-pills');
+      const emptyState = document.getElementById('slides-empty-state');
+
+      /* ── Utility ── */
+      function titleFromFile(file) {
+        return decodeURIComponent(file.split('/').pop().replace(/\.html$/i, '').replace(/[-_]+/g, ' ')).replace(/\b\w/g, c => c.toUpperCase());
+      }
+
+      function normalizeFilePath(file) {
+        const n = file.replace(/^\.\//, '').replace(/^\//, '');
+        return n.startsWith(slideDirectory) ? n : `${slideDirectory}${n}`;
+      }
+
+      function repoUrl(path) {
+        return basePrefix + path.replace(/^\.\//, '').replace(/^\//, '');
+      }
+
+      function accentToSpineColor(accent) {
+        if (accent.includes('93,112,82')) return '#5D7052';
+        if (accent.includes('193,140,93')) return '#C18C5D';
+        if (accent.includes('97,145,211')) return '#6191D3';
+        if (accent.includes('57,102,162')) return '#3966A2';
+        return '#5D7052';
+      }
+
+      function accentToCoverGradient(accent) {
+        const spine = accentToSpineColor(accent);
+        return `linear-gradient(135deg, ${spine}33 0%, ${spine}18 50%, ${spine}08 100%)`;
+      }
+
+      function deckFromPath(file, index, metadata = {}) {
+        const normalizedFile = normalizeFilePath(file);
+        const existing = embeddedDecks.find(d => d.file === normalizedFile);
+        return {
+          title: metadata.title || existing?.title || titleFromFile(normalizedFile),
+          file: normalizedFile,
+          description: metadata.description || existing?.description || '从 paper-slides 目录发现的 HTML 格式 PPT，可直接嵌入放映或打开原页。',
+          kind: metadata.kind || existing?.kind || '期刊/会议',
+          accent: metadata.accent || existing?.accent || (index % 2 === 0 ? 'rgba(93,112,82,.2)' : 'rgba(193,140,93,.22)'),
+          thumbnail: metadata.thumbnail || existing?.thumbnail || ''
+        };
+      }
+
+      /* ── Discovery ── */
+      async function fetchManifestDecks() {
+        const r = await fetch(`${manifestUrl}?v=${Date.now()}`, { cache: 'no-store' });
+        if (!r.ok) throw new Error('Manifest unavailable');
+        const data = await r.json();
+        const slides = Array.isArray(data) ? data : data.slides;
+        if (!Array.isArray(slides) || !slides.length) throw new Error('Manifest empty');
+        return slides.filter(s => s && s.file).map((s, i) => deckFromPath(s.file, i, s));
+      }
+
+      async function fetchDirectoryDecks() {
+        const r = await fetch(repoUrl(slideDirectory), { cache: 'no-store' });
+        if (!r.ok) throw new Error('Directory listing unavailable');
+        const html = await r.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const dirUrl = new URL(slideDirectory, location.href);
+        const files = [...doc.querySelectorAll('a')]
+          .map(a => a.getAttribute('href')).filter(Boolean)
+          .map(h => new URL(h, dirUrl).pathname)
+          .map(p => p.split('/').pop())
+          .filter(n => /\.html$/i.test(n))
+          .filter((n, i, a) => a.indexOf(n) === i)
+          .sort((a, b) => a.localeCompare(b, 'zh-CN'))
+          .map(n => `${slideDirectory}${n}`);
+        if (!files.length) throw new Error('No HTML slides found');
+        return files.map(deckFromPath);
+      }
+
+      async function discoverDecks() {
+        try { return await fetchManifestDecks(); }
+        catch { try { return await fetchDirectoryDecks(); } catch { return embeddedDecks; } }
+      }
+
+      /* ── Filter Pills ── */
+      function buildFilterPills() {
+        const kinds = ['all', ...new Set(decks.map(d => d.kind))];
+        filterPillsContainer.innerHTML = '';
+        kinds.forEach(kind => {
+          const btn = document.createElement('button');
+          btn.className = `filter-pill rounded-full border px-4 py-2 text-[12px] font-semibold transition-all duration-300 cursor-pointer ${kind === activeFilter ? 'active bg-moss text-mist border-moss' : 'border-timber/50 text-grass/70 bg-white/40 hover:bg-moss/5'}`;
+          btn.dataset.kind = kind;
+          btn.textContent = kind === 'all' ? '全部' : kind;
+          btn.addEventListener('click', () => {
+            activeFilter = kind;
+            buildFilterPills();
+            filterCards();
+          });
+          filterPillsContainer.appendChild(btn);
+        });
+      }
+
+      /* ── Filtering ─ */
+      function filterCards() {
+        const cards = grid.querySelectorAll('.book-card');
+        let visible = 0;
+        cards.forEach(card => {
+          const title = (card.dataset.title || '').toLowerCase();
+          const desc = (card.dataset.desc || '').toLowerCase();
+          const kind = card.dataset.kind || '';
+          const matchSearch = !searchQuery || title.includes(searchQuery) || desc.includes(searchQuery);
+          const matchFilter = activeFilter === 'all' || kind === activeFilter;
+          const show = matchSearch && matchFilter;
+          card.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+        emptyState.classList.toggle('hidden', visible > 0);
+      }
+
+      /* ── Rendering ── */
+      function renderNext() {
+        const nextDecks = decks.slice(loaded, loaded + PAGE_SIZE);
+        nextDecks.forEach((deck, offset) => {
+          const absoluteIndex = loaded + offset;
+          const isFeatured = absoluteIndex === 0;
+          const tpl = isFeatured ? featuredTemplate : template;
+          const node = tpl.content.firstElementChild.cloneNode(true);
+
+          node.dataset.kind = deck.kind;
+          node.dataset.title = deck.title;
+          node.dataset.desc = deck.description;
+
+          node.style.animationDelay = `${Math.min(offset * 70, 560)}ms`;
+
+          const spineColor = accentToSpineColor(deck.accent);
+          const coverGradient = accentToCoverGradient(deck.accent);
+
+          node.querySelector('.book-spine').style.background = spineColor;
+          node.querySelector('.book-cover-bg').style.background = coverGradient;
+          node.querySelector('.deck-index').textContent = isFeatured ? `No. 01` : `No. ${String(absoluteIndex + 1).padStart(2, '0')}`;
+          node.querySelector('.deck-kind').textContent = deck.kind;
+          node.querySelector('.deck-title').textContent = deck.title;
+          node.querySelector('.deck-description').textContent = deck.description;
+
+          const thumbImg = node.querySelector('.book-thumbnail');
+          const fallback = node.querySelector('.book-fallback');
+          if (deck.thumbnail && thumbImg) {
+            thumbImg.src = repoUrl(deck.thumbnail);
+            thumbImg.style.display = '';
+            if (fallback) fallback.style.display = 'none';
+          }
+
+          const playBtn = node.querySelector('.deck-play');
+          const link = node.querySelector('.deck-link');
+          link.href = repoUrl(deck.file);
+          playBtn.addEventListener('click', (e) => { e.stopPropagation(); openViewer(deck); });
+          link.addEventListener('click', (e) => e.stopPropagation());
+
+          // Click entire card to open viewer
+          const inner = node.querySelector('.book-inner');
+          inner.addEventListener('click', () => openViewer(deck));
+
+          grid.appendChild(node);
+        });
+        loaded += nextDecks.length;
+        deckCount.textContent = String(decks.length);
+        loadMore.classList.toggle('hidden', loaded >= decks.length);
+        init3DTilt(grid);
+      }
+
+      /* ── Viewer ── */
+      function openViewer(deck) {
+        viewerTitle.textContent = deck.title;
+        viewerFrame.src = repoUrl(deck.file);
+        viewerOpenNew.href = repoUrl(deck.file);
+        viewer.classList.remove('hidden');
+        viewer.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('viewer-open');
+        requestAnimationFrame(() => viewerShell.classList.add('is-visible'));
+        viewerClose.focus({ preventScroll: true });
+      }
+
+      function closeViewer() {
+        viewerShell.classList.remove('is-visible');
+        setTimeout(() => {
+          viewer.classList.add('hidden');
+          viewer.setAttribute('aria-hidden', 'true');
+          viewerFrame.src = 'about:blank';
+          document.body.classList.remove('viewer-open');
+        }, 280);
+      }
+
+      async function enterFullscreen() {
+        const target = viewerFrame;
+        const request = target.requestFullscreen || target.webkitRequestFullscreen || target.msRequestFullscreen;
+        if (request) {
+          await request.call(target);
+        } else {
+          window.open(viewerFrame.src, '_blank', 'noopener');
+        }
+      }
+
+      /* ── Event Listeners ── */
+      viewerClose.addEventListener('click', closeViewer);
+      viewerFullscreen.addEventListener('click', enterFullscreen);
+      viewer.addEventListener('click', (e) => { if (e.target === viewer) closeViewer(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !viewer.classList.contains('hidden')) closeViewer(); });
+
+      loadMore.addEventListener('click', renderNext);
+
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        filterCards();
+      });
+
+      // IntersectionObserver for infinite scroll
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          if (entries.some(entry => entry.isIntersecting) && loaded < decks.length) renderNext();
+        }, { rootMargin: '480px 0px' });
+        observer.observe(sentinel);
+      }
+
+      /* ── Init ── */
+      async function initGallery() {
+        decks = await discoverDecks();
+        buildFilterPills();
+        renderNext();
+      }
+
+      initGallery();
+    })();
+
+    /* ══════════ Blogs Gallery ══════════ */
+    (() => {
+      const embeddedBlogs = [
+        {
+          title: '5%>100%: Breaking Performance Shackles of Full Fine-Tuning on Visual Recognition Tasks',
+          file: 'paper-blogs/Mona.md',
+          category: '目标检测',
+          date: '2026-09-02',
+          source_url: 'https://github.com/Leiyi-Hu/mona',
+          thumbnail: 'assets/paper-imgs/Mona/mona_fig1_comparison.png'
+        },
+        {
+          title: 'VarifocalNet: An IoU-aware Dense Object Detector',
+          file: 'paper-blogs/VarifocalNet.md',
+          category: '目标检测',
+          date: '2026-09-02',
+          source_url: 'https://github.com/hyz-xmaster/VarifocalNet',
+          thumbnail: 'assets/paper-imgs/VarifocalNet/vfnet_fig1_iacs.png'
+        },
+        {
+          title: 'DySample：Learning to Upsample by Learning to Sample',
+          file: 'paper-blogs/DySample.md',
+          category: '上采样',
+          date: '2026-08-30',
+          source_url: 'https://arxiv.org/abs/2308.15085',
+          thumbnail: 'assets/paper-imgs/DySample/dysample_fig1.png'
+        },
+        {
+          title: 'YOLO-PEFT: Parameter-Efficient Fine-Tuning on YOLO Family',
+          file: 'paper-blogs/YOLO-PEFT.md',
+          category: '目标检测',
+          date: '2026-08-30',
+          source_url: 'https://arxiv.org/abs/2608.07051',
+          thumbnail: 'assets/paper-imgs/YOLO-PEFT/yolopeft_fig1_overview.png'
+        }
+      ];
+
+      const basePrefix = '';
+      const manifestUrl = 'blogs-manifest.json';
+      let blogs = [];
+      let activeFilter = 'all';
+      let searchQuery = '';
+
+      const grid = document.getElementById('blog-grid');
+      const template = document.getElementById('blog-card-template');
+      const blogCount = document.getElementById('blog-count');
+      const reader = document.getElementById('reader');
+      const readerShell = reader.querySelector('.viewer-shell');
+      const readerTitle = document.getElementById('reader-title');
+      const readerCategory = document.getElementById('reader-category');
+      const readerDate = document.getElementById('reader-date');
+      const readerSource = document.getElementById('reader-source');
+      const readerClose = document.getElementById('reader-close');
+      const readerScroll = document.getElementById('reader-scroll');
+      const readerContent = document.getElementById('reader-content');
+      const searchInput = document.getElementById('blogs-search-input');
+      const filterPillsContainer = document.getElementById('blogs-filter-pills');
+      const emptyState = document.getElementById('blogs-empty-state');
+
+      /* ── Utility ── */
+      function repoUrl(path) {
+        return basePrefix + String(path || '').replace(/^\.\//, '').replace(/^\//, '');
+      }
+
+      // Full-screen reading page for a note, opened in a new tab
+      function noteUrl(blog) {
+        const params = new URLSearchParams({ file: blog.file });
+        if (blog.title) params.set('title', blog.title);
+        if (blog.category) params.set('category', blog.category);
+        if (blog.date) params.set('date', blog.date);
+        if (blog.source_url) params.set('source', blog.source_url);
+        return `pages/note.html?${params.toString()}`;
+      }
+
+      function accentFor(index) {
+        return index % 2 === 0 ? 'rgba(93,112,82,.2)' : 'rgba(193,140,93,.22)';
+      }
+
+      function accentToSpineColor(accent) {
+        if (accent.includes('93,112,82')) return '#5D7052';
+        if (accent.includes('193,140,93')) return '#C18C5D';
+        return '#5D7052';
+      }
+
+      function accentToCoverGradient(accent) {
+        const spine = accentToSpineColor(accent);
+        return `linear-gradient(135deg, ${spine}33 0%, ${spine}18 50%, ${spine}08 100%)`;
+      }
+
+      /* ── Discovery ── */
+      async function fetchManifestBlogs() {
+        const r = await fetch(`${manifestUrl}?v=${Date.now()}`, { cache: 'no-store' });
+        if (!r.ok) throw new Error('Manifest unavailable');
+        const data = await r.json();
+        const list = Array.isArray(data) ? data : data.blogs;
+        if (!Array.isArray(list) || !list.length) throw new Error('Manifest empty');
+        return list.filter(b => b && b.file);
+      }
+
+      async function discoverBlogs() {
+        try { return await fetchManifestBlogs(); }
+        catch { return embeddedBlogs; }
+      }
+
+      /* ── Filter Pills ── */
+      function buildFilterPills() {
+        const kinds = ['all', ...new Set(blogs.map(b => b.category || '未分类'))];
+        filterPillsContainer.innerHTML = '';
+        kinds.forEach(kind => {
+          const btn = document.createElement('button');
+          btn.className = `filter-pill rounded-full border px-4 py-2 text-[12px] font-semibold transition-all duration-300 cursor-pointer ${kind === activeFilter ? 'active bg-moss text-mist border-moss' : 'border-timber/50 text-grass/70 bg-white/40 hover:bg-moss/5'}`;
+          btn.dataset.kind = kind;
+          btn.textContent = kind === 'all' ? '全部' : kind;
+          btn.addEventListener('click', () => {
+            activeFilter = kind;
+            buildFilterPills();
+            filterCards();
+          });
+          filterPillsContainer.appendChild(btn);
+        });
+      }
+
+      /* ── Filtering ── */
+      function filterCards() {
+        const cards = grid.querySelectorAll('.book-card');
+        let visible = 0;
+        cards.forEach(card => {
+          const title = (card.dataset.title || '').toLowerCase();
+          const kind = card.dataset.kind || '';
+          const matchSearch = !searchQuery || title.includes(searchQuery);
+          const matchFilter = activeFilter === 'all' || kind === activeFilter;
+          const show = matchSearch && matchFilter;
+          card.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+        emptyState.classList.toggle('hidden', visible > 0);
+      }
+
+      /* ── Rendering ── */
+      function renderAll() {
+        grid.innerHTML = '';
+        blogs.forEach((blog, index) => {
+          const node = template.content.firstElementChild.cloneNode(true);
+          const accent = accentFor(index);
+
+          node.dataset.kind = blog.category || '未分类';
+          node.dataset.title = blog.title;
+          node.style.animationDelay = `${Math.min(index * 70, 560)}ms`;
+
+          node.querySelector('.book-spine').style.background = accentToSpineColor(accent);
+          node.querySelector('.book-cover-bg').style.background = accentToCoverGradient(accent);
+          node.querySelector('.blog-date').textContent = blog.date || '';
+          node.querySelector('.blog-category').textContent = blog.category || '未分类';
+          node.querySelector('.blog-title').textContent = blog.title;
+
+          const thumbImg = node.querySelector('.blog-thumbnail');
+          const fallback = node.querySelector('.book-fallback');
+          if (blog.thumbnail && thumbImg) {
+            thumbImg.src = repoUrl(blog.thumbnail);
+            thumbImg.alt = blog.title;
+            thumbImg.style.display = '';
+            if (fallback) fallback.style.display = 'none';
+          }
+
+          const readBtn = node.querySelector('.blog-read');
+          const sourceLink = node.querySelector('.blog-source');
+          sourceLink.href = noteUrl(blog);
+          readBtn.addEventListener('click', (e) => { e.stopPropagation(); openReader(blog); });
+          sourceLink.addEventListener('click', (e) => e.stopPropagation());
+
+          const inner = node.querySelector('.book-inner');
+          inner.addEventListener('click', () => openReader(blog));
+
+          grid.appendChild(node);
+        });
+        blogCount.textContent = String(blogs.length);
+        init3DTilt(grid);
+      }
+
+      /* ── Markdown rendering pipeline ── */
+      function stripFrontMatter(text) {
+        return text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
+      }
+
+      // Pull math segments out before marked runs, so `_` / `*` inside
+      // formulas are never mistaken for emphasis markers.
+      function extractMath(text) {
+        const segments = [];
+        const stash = (m) => {
+          segments.push(m);
+          return `@@MATH${segments.length - 1}@@`;
+        };
+        text = text.replace(/\$\$[\s\S]+?\$\$/g, stash);
+        text = text.replace(/(?<!\$)\$(?!\s)([^\$\n]+?)(?<!\s)\$(?!\$)/g, stash);
+        return { text, segments };
+      }
+
+      function restoreMath(html, segments) {
+        return html.replace(/@@MATH(\d+)@@/g, (_, i) => segments[Number(i)]);
+      }
+
+      function renderMarkdown(mdText) {
+        let body = stripFrontMatter(mdText);
+        // Drop the duplicate top-level H1 — the reader header already shows the title
+        body = body.replace(/^#\s+[^\n]+\n+/, '');
+        const { text, segments } = extractMath(body);
+        const html = restoreMath(marked.parse(text, { gfm: true, breaks: false }), segments);
+        readerContent.innerHTML = html;
+        if (window.renderMathInElement) {
+          renderMathInElement(readerContent, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$$', display: false }
+            ],
+            throwOnError: false
+          });
+        }
+      }
+
+      /* ── Reader ─ */
+      async function openReader(blog) {
+        readerTitle.textContent = blog.title;
+        readerCategory.textContent = blog.category || '未分类';
+        readerDate.textContent = blog.date || '';
+        readerSource.href = noteUrl(blog);
+        readerContent.innerHTML = '<p class="text-grass/50 font-light">正在加载笔记内容…</p>';
+        readerScroll.scrollTop = 0;
+        reader.classList.remove('hidden');
+        reader.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('viewer-open');
+        requestAnimationFrame(() => readerShell.classList.add('is-visible'));
+        readerClose.focus({ preventScroll: true });
+
+        try {
+          const r = await fetch(repoUrl(blog.file), { cache: 'no-store' });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const mdText = await r.text();
+          renderMarkdown(mdText);
+        } catch (err) {
+          readerContent.innerHTML = `<p class="text-grass/60 font-light">笔记内容加载失败（${err.message}）。可尝试通过右上角「查看原文」访问论文出处。</p>`;
+        }
+      }
+
+      function closeReader() {
+        readerShell.classList.remove('is-visible');
+        setTimeout(() => {
+          reader.classList.add('hidden');
+          reader.setAttribute('aria-hidden', 'true');
+          readerContent.innerHTML = '';
+          document.body.classList.remove('viewer-open');
+        }, 280);
+      }
+
+      /* ── Event Listeners ── */
+      readerClose.addEventListener('click', closeReader);
+      reader.addEventListener('click', (e) => { if (e.target === reader) closeReader(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !reader.classList.contains('hidden')) closeReader(); });
+
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        filterCards();
+      });
+
+      /* ── Init ── */
+      async function initGallery() {
+        blogs = await discoverBlogs();
+        buildFilterPills();
+        renderAll();
+      }
+
+      initGallery();
+    })();
+
+    /* ══════════ Global: parallax blobs + sway activation + init ══════════ */
     if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
       let ticking = false;
       const blobs = document.querySelectorAll('.parallax-blob');
@@ -465,10 +1410,10 @@
       }, { passive: true });
     }
 
-    /* ── Init ── */
     updateCount('slides-manifest.json', 'slides', 'slides-count', '份幻灯片');
     updateCount('blogs-manifest.json', 'blogs', 'blogs-count', '篇笔记');
-    init3DTilt();
+    init3DTilt(document.getElementById('view-home'));
+    activateView(currentView());
     setTimeout(() => {
       document.querySelector('.hero-headline')?.classList.add('sway-active');
       document.querySelector('.hero-subtext-sway')?.classList.add('sway-active');
