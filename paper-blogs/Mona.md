@@ -1,6 +1,6 @@
 ---
 title: "5%>100%: Breaking Performance Shackles of Full Fine-Tuning on Visual Recognition Tasks"
-category: 目标检测
+category: 模型微调
 date: 2026-09-02
 source_url: https://github.com/Leiyi-Hu/mona
 ---

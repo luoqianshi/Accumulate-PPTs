@@ -1,6 +1,6 @@
 ---
 title: "YOLO-PEFT: Parameter-Efficient Fine-Tuning on YOLO Family"
-category: 目标检测
+category: 模型微调
 date: 2026-08-30
 source_url: https://arxiv.org/abs/2608.07051
 ---

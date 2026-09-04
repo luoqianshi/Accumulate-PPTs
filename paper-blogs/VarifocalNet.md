@@ -1,6 +1,6 @@
 ---
 title: "VarifocalNet: An IoU-aware Dense Object Detector"
-category: 目标检测
+category: 损失函数
 date: 2026-09-02
 source_url: https://github.com/hyz-xmaster/VarifocalNet
 ---
