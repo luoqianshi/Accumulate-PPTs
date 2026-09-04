@@ -1,4 +1,4 @@
-# Accumulate-PPTs
+# Paper-Master
 
 🌐 [中文](#) · [English](README.en.md)
 
@@ -6,20 +6,20 @@
 > *嵌入各类 AI 编程工具 / AI 办公工具的科研人 AI 原生论文知识库:喂给 AI 一篇论文,它同时替你写好博客笔记、做组会 PPT,并把知识长期攒成个人知识库。*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Accumulate-PPTs/)
+[![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Paper-Master/)
 [![Skills](https://img.shields.io/badge/Agent%20Skills-2-purple)](#-能力矩阵)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-贡献)
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
 
 <p align="center">
-  <img src="assets/accmulate-ppts.png" alt="Accumulate-PPTs" width="85%">
+  <img src="assets/accmulate-ppts.png" alt="Paper-Master" width="85%">
 </p>
 
 ---
 
 ## 30 秒看懂
 
-`Accumulate-PPTs` 是面向科研人的 **AI 原生论文知识库**,可嵌入 Claude Code / TRAE / CodeBuddy 等各类 AI 编程工具与 AI 办公工具:把「读一篇论文」这件事沉淀成两种可长期复用的产物——一篇结构化的**中文阅读笔记(博客)**,和一份能直接放映的**单文件 HTML PPT**。两条路径都由 AI Agent 通过 2 个 SKILL 自动完成:你把 PDF 丢进 `pdf-papers/`,它替你写好笔记、做好 PPT,并把它们归档进一个可版本管理、可一键部署到 GitHub Pages 的电子书柜里。
+`Paper-Master` 是面向科研人的 **AI 原生论文知识库**,可嵌入 Claude Code / TRAE / CodeBuddy 等各类 AI 编程工具与 AI 办公工具:把「读一篇论文」这件事沉淀成两种可长期复用的产物——一篇结构化的**中文阅读笔记(博客)**,和一份能直接放映的**单文件 HTML PPT**。两条路径都由 AI Agent 通过 2 个 SKILL 自动完成:你把 PDF 丢进 `pdf-papers/`,它替你写好笔记、做好 PPT,并把它们归档进一个可版本管理、可一键部署到 GitHub Pages 的电子书柜里。
 
 - 想把论文读透、沉淀成博客笔记 → 用 `lzk-paper-reading`
 - 想把论文做成组会 / 答辩汇报 PPT → 用 `html-paper-slides`
@@ -31,8 +31,8 @@
 ## 立即试用
 
 ```bash
-git clone https://github.com/luoqianshi/Accumulate-PPTs.git
-cd Accumulate-PPTs
+git clone https://github.com/luoqianshi/Paper-Master.git
+cd Paper-Master
 ```
 
 用 Claude Code / TRAE / CodeBuddy 等任意支持 Skills 的 AI 编程工具 / AI 办公工具打开,然后把下面任意一句发给 Agent:
@@ -145,7 +145,7 @@ cd Accumulate-PPTs
   </tr>
 </table>
 
-> 在线画廊:https://luoqianshi.github.io/Accumulate-PPTs/
+> 在线画廊:https://luoqianshi.github.io/Paper-Master/
 
 ---
 
@@ -188,7 +188,7 @@ cd Accumulate-PPTs
 ## 项目结构
 
 ```
-Accumulate-PPTs/
+Paper-Master/
 ├── index.html            # 门户首页:导航至 PPT 书架与阅读笔记(由 GitHub Pages 自动部署)
 ├── pages/                # 独立功能页
 │   ├── slides.html       #   PPT 书架页(3D 书架 + iframe 嵌入放映)
@@ -234,8 +234,8 @@ Accumulate-PPTs/
 ### 1. 准备环境
 
 ```bash
-git clone https://github.com/luoqianshi/Accumulate-PPTs.git
-cd Accumulate-PPTs
+git clone https://github.com/luoqianshi/Paper-Master.git
+cd Paper-Master
 ```
 
 - 删除 `paper-slides/` 目录下的所有 `.html` 文件、`paper-blogs/` 下的笔记与 `assets/paper-imgs/` 下的配图(以上为作者个人知识库数据)
@@ -291,7 +291,7 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 ## 与同类方案对比
 
-| 维度 | PowerPoint | Gamma | Zotero / Note | **Accumulate-PPTs** |
+| 维度 | PowerPoint | Gamma | Zotero / Note | **Paper-Master** |
 |------|-----------|-------|---------------|---------------------|
 | 上手成本 | 中等(需学排版) | 低(网页拖拽) | 中(手动整理) | **一句话**(对 Agent 说话) |
 | 论文配图自动提取 | 不支持 | 不支持 | 部分(手动) | **支持**(`pdf_extractor.py`) |
@@ -302,7 +302,7 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 | 部署成本 | Microsoft 365 | 订阅 | 客户端 | **GitHub Pages 免费** |
 | 商用 License | 订阅制 | 订阅制 | 免费/付费 | **MIT 完全开源** |
 
-> **定位金句**:Zotero 帮你存论文,Gamma 帮你做 PPT,Accumulate-PPTs 帮你把"读过的一篇论文"同时沉淀成**能检索的笔记**和**能放映的 PPT**,并攒成一个嵌入 AI 编程 / 办公工具、长期生长的科研人 AI 原生知识库。
+> **定位金句**:Zotero 帮你存论文,Gamma 帮你做 PPT,Paper-Master 帮你把"读过的一篇论文"同时沉淀成**能检索的笔记**和**能放映的 PPT**,并攒成一个嵌入 AI 编程 / 办公工具、长期生长的科研人 AI 原生知识库。
 
 ---
 
@@ -341,7 +341,7 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 | 平台 | 账号 / 链接 |
 |------|------------|
 | GitHub | [@luoqianshi](https://github.com/luoqianshi) |
-| 在线画廊 | [luoqianshi.github.io/Accumulate-PPTs](https://luoqianshi.github.io/Accumulate-PPTs/) |
+| 在线画廊 | [luoqianshi.github.io/Paper-Master](https://luoqianshi.github.io/Paper-Master/) |
 
 ---
 
@@ -349,8 +349,8 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 如果这个仓库对你有帮助,欢迎点一个 Star 支持我们继续迭代:
 
-<a href="https://star-history.com/#luoqianshi/Accumulate-PPTs&Date">
-  <img src="https://api.star-history.com/svg?repos=luoqianshi/Accumulate-PPTs&type=Date" alt="Star History Chart" width="600">
+<a href="https://star-history.com/#luoqianshi/Paper-Master&Date">
+  <img src="https://api.star-history.com/svg?repos=luoqianshi/Paper-Master&type=Date" alt="Star History Chart" width="600">
 </a>
 
 ---

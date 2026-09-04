@@ -1,4 +1,4 @@
-# Accumulate-PPTs
+# Paper-Master
 
 🌐 [中文](README.md) · [English](#)
 
@@ -6,20 +6,20 @@
 > *嵌入各类 AI 编程工具 / AI 办公工具的科研人 AI 原生论文知识库:喂给 AI 一篇论文,它同时替你写好博客笔记、做组会 PPT,并把知识长期攒成个人知识库。*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Accumulate-PPTs/)
+[![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Paper-Master/)
 [![Skills](https://img.shields.io/badge/Agent%20Skills-2-purple)](#-skill-matrix)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-contact)
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
 
 <p align="center">
-  <img src="assets/accmulate-ppts.png" alt="Accumulate-PPTs" width="85%">
+  <img src="assets/accmulate-ppts.png" alt="Paper-Master" width="85%">
 </p>
 
 ---
 
 ## 30-Second Overview
 
-`Accumulate-PPTs` is an **AI-native paper knowledge base for researchers**, designed to embed into AI coding tools / AI office tools such as Claude Code / TRAE / CodeBuddy. It turns "reading one paper" into two long-lived, reusable assets — a structured **Chinese reading note (blog post)** and a **single-file HTML deck** you can present directly. Both paths are automated by an AI Agent through 2 SKILLs: drop the PDF into `pdf-papers/`, and it writes the note, builds the deck, and archives both into a version-controllable e-bookshelf you can deploy to GitHub Pages in one click.
+`Paper-Master` is an **AI-native paper knowledge base for researchers**, designed to embed into AI coding tools / AI office tools such as Claude Code / TRAE / CodeBuddy. It turns "reading one paper" into two long-lived, reusable assets — a structured **Chinese reading note (blog post)** and a **single-file HTML deck** you can present directly. Both paths are automated by an AI Agent through 2 SKILLs: drop the PDF into `pdf-papers/`, and it writes the note, builds the deck, and archives both into a version-controllable e-bookshelf you can deploy to GitHub Pages in one click.
 
 - Read a paper deeply & distill it into a blog note → `lzk-paper-reading`
 - Turn a paper into a group-meeting / defense deck → `html-paper-slides`
@@ -31,8 +31,8 @@
 ## Quick Start
 
 ```bash
-git clone https://github.com/luoqianshi/Accumulate-PPTs.git
-cd Accumulate-PPTs
+git clone https://github.com/luoqianshi/Paper-Master.git
+cd Paper-Master
 ```
 
 Open the project in any AI coding tool / AI office tool that supports Skills (Claude Code / TRAE / CodeBuddy), and send the Agent either prompt:
@@ -145,7 +145,7 @@ The 8 decks below were all generated with `html-paper-slides` assisted by an AI 
   </tr>
 </table>
 
-> Online gallery: https://luoqianshi.github.io/Accumulate-PPTs/
+> Online gallery: https://luoqianshi.github.io/Paper-Master/
 
 ---
 
@@ -188,7 +188,7 @@ Before moving to the next stage, confirm:
 ## Project Structure
 
 ```
-Accumulate-PPTs/
+Paper-Master/
 ├── index.html            # Portal homepage linking to the slides bookshelf and reading notes (auto-deployed via GitHub Pages)
 ├── pages/                # Standalone feature pages
 │   ├── slides.html       #   Slides bookshelf (3D shelf + iframe embedded playback)
@@ -234,8 +234,8 @@ Accumulate-PPTs/
 ### 1. Prepare the environment
 
 ```bash
-git clone https://github.com/luoqianshi/Accumulate-PPTs.git
-cd Accumulate-PPTs
+git clone https://github.com/luoqianshi/Paper-Master.git
+cd Paper-Master
 ```
 
 - Delete all `.html` files in `paper-slides/`, all notes in `ingest/`, and all per-paper figure folders in `assets/paper-imgs/` (these are the author's personal knowledge-base data)
@@ -291,7 +291,7 @@ After that, the new HTML PPT will appear in the `index.html` gallery with its **
 
 ## Comparison with Alternatives
 
-| Dimension | PowerPoint | Gamma | Zotero / Note | **Accumulate-PPTs** |
+| Dimension | PowerPoint | Gamma | Zotero / Note | **Paper-Master** |
 |-----------|-----------|-------|---------------|---------------------|
 | Onboarding cost | Medium (need to learn layout) | Low (web drag-and-drop) | Medium (manual organizing) | **One sentence** (talk to the Agent) |
 | Automatic paper figure extraction | Not supported | Not supported | Partial (manual) | **Supported** (`pdf_extractor.py`) |
@@ -302,7 +302,7 @@ After that, the new HTML PPT will appear in the `index.html` gallery with its **
 | Deployment cost | Microsoft 365 | Subscription | Client | **GitHub Pages free** |
 | Commercial License | Subscription | Subscription | Free/Paid | **MIT open source** |
 
-> **Positioning tagline**: Zotero stores your papers, Gamma makes your slides, Accumulate-PPTs turns "a paper you've read" into **both a searchable note and a playable deck**, and stacks them into a long-growing, AI-native research knowledge base that embeds into your AI coding / office tools.
+> **Positioning tagline**: Zotero stores your papers, Gamma makes your slides, Paper-Master turns "a paper you've read" into **both a searchable note and a playable deck**, and stacks them into a long-growing, AI-native research knowledge base that embeds into your AI coding / office tools.
 
 ---
 
@@ -342,7 +342,7 @@ Stars, forks, issues, and PRs are welcome. If you want to discuss graduate studi
 | Platform | Account / Link |
 |----------|----------------|
 | GitHub | [@luoqianshi](https://github.com/luoqianshi) |
-| Online Gallery | [luoqianshi.github.io/Accumulate-PPTs](https://luoqianshi.github.io/Accumulate-PPTs/) |
+| Online Gallery | [luoqianshi.github.io/Paper-Master](https://luoqianshi.github.io/Paper-Master/) |
 
 ---
 
@@ -350,8 +350,8 @@ Stars, forks, issues, and PRs are welcome. If you want to discuss graduate studi
 
 If this repository helps you, please consider giving a Star to support our continued iteration:
 
-<a href="https://star-history.com/#luoqianshi/Accumulate-PPTs&Date">
-  <img src="https://api.star-history.com/svg?repos=luoqianshi/Accumulate-PPTs&type=Date" alt="Star History Chart" width="600">
+<a href="https://star-history.com/#luoqianshi/Paper-Master&Date">
+  <img src="https://api.star-history.com/svg?repos=luoqianshi/Paper-Master&type=Date" alt="Star History Chart" width="600">
 </a>
 
 ---
