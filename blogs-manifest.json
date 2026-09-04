@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-09-04T02:50:28.649244+08:00",
+  "blogs": [
+    {
+      "title": "5%>100%: Breaking Performance Shackles of Full Fine-Tuning on Visual Recognition Tasks",
+      "file": "paper-blogs/Mona.md",
+      "category": "目标检测",
+      "date": "2026-09-02",
+      "source_url": "https://github.com/Leiyi-Hu/mona",
+      "thumbnail": "assets/paper-imgs/Mona/mona_fig1_comparison.png"
+    },
+    {
+      "title": "VarifocalNet: An IoU-aware Dense Object Detector",
+      "file": "paper-blogs/VarifocalNet.md",
+      "category": "目标检测",
+      "date": "2026-09-02",
+      "source_url": "https://github.com/hyz-xmaster/VarifocalNet",
+      "thumbnail": "assets/paper-imgs/VarifocalNet/vfnet_fig1_iacs.png"
+    },
+    {
+      "title": "DySample：Learning to Upsample by Learning to Sample",
+      "file": "paper-blogs/DySample.md",
+      "category": "上采样",
+      "date": "2026-08-30",
+      "source_url": "https://arxiv.org/abs/2308.15085",
+      "thumbnail": "assets/paper-imgs/DySample/dysample_fig1.png"
+    },
+    {
+      "title": "YOLO-PEFT: Parameter-Efficient Fine-Tuning on YOLO Family",
+      "file": "paper-blogs/YOLO-PEFT.md",
+      "category": "目标检测",
+      "date": "2026-08-30",
+      "source_url": "https://arxiv.org/abs/2608.07051",
+      "thumbnail": "assets/paper-imgs/YOLO-PEFT/yolopeft_fig1_overview.png"
+    }
+  ]
+}

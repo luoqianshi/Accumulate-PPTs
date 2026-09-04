@@ -189,8 +189,12 @@ cd Accumulate-PPTs
 
 ```
 Accumulate-PPTs/
-├── index.html            # HTML Slides Gallery 电子书柜首页(由 GitHub Pages 自动部署)
+├── index.html            # 门户首页:导航至 PPT 书架与阅读笔记(由 GitHub Pages 自动部署)
+├── pages/                # 独立功能页
+│   ├── slides.html       #   PPT 书架页(3D 书架 + iframe 嵌入放映)
+│   └── blogs.html        #   阅读笔记页(Markdown 渲染 + LaTeX 公式 + 全屏阅读浮层)
 ├── slides-manifest.json  # paper-slides 演示文稿清单
+├── blogs-manifest.json   # paper-blogs 阅读笔记清单(部署时由 GitHub Actions 自动生成)
 ├── README.md             # 中文 README(默认)
 ├── README.en.md          # 英文 README
 ├── LICENSE               # MIT 协议

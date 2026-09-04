@@ -61,6 +61,53 @@ jobs:
               encoding="utf-8"
           )
 
+      - name: Generate blogs manifest
+        shell: python
+        run: |
+          import datetime
+          import json
+          import pathlib
+          import re
+
+          root = pathlib.Path.cwd()
+          blogs_dir = root / "paper-blogs"
+          fm_pattern = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.S)
+          img_pattern = re.compile(r"!\[[^\]]*\]\(([^)\s]+)")
+
+          def fm_value(fm, key):
+              match = re.search(rf"^{key}:\s*(.+?)\s*$", fm, re.M)
+              return match.group(1).strip('"').strip("'") if match else ""
+
+          blogs = []
+          for path in sorted(blogs_dir.glob("*.md")):
+              text = path.read_text(encoding="utf-8")
+              match = fm_pattern.match(text)
+              if not match:
+                  print(f"skip {path.name}: no front matter")
+                  continue
+              fm = match.group(1)
+              body = text[match.end():]
+              img = img_pattern.search(body)
+              thumbnail = re.sub(r"^\.\./", "", img.group(1)) if img else ""
+              blogs.append({
+                  "title": fm_value(fm, "title"),
+                  "file": path.relative_to(root).as_posix(),
+                  "category": fm_value(fm, "category"),
+                  "date": fm_value(fm, "date"),
+                  "source_url": fm_value(fm, "source_url"),
+                  "thumbnail": thumbnail
+              })
+
+          blogs.sort(key=lambda item: item["date"], reverse=True)
+          manifest = {
+              "generatedAt": datetime.datetime.now(datetime.UTC).isoformat(),
+              "blogs": blogs
+          }
+          (root / "blogs-manifest.json").write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8"
+          )
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
