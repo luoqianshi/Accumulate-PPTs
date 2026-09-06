@@ -12,6 +12,15 @@
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
 ---
 
+## 致谢
+
+- [html-presentation](https://github.com/juanjuanjie/html-presentation) —— 原始 HTML 幻灯片模板与播放引擎参考仓库
+- 博客园「乌漆WhiteMoon」Paper Reading 专栏 —— `lzk-paper-reading` 笔记范式的蒸馏来源([技能来源](https://www.cnblogs.com/linfangnan/p/17636482.html))
+- [Claude Code](https://claude.com/claude-code) · [CodeBuddy](https://www.codebuddy.ai/) · [TRAE](https://www.trae.ai/) —— AI Agent 平台
+- 所有开源论文作者与开源社区
+
+---
+
 ## 30 秒看懂
 
 `Paper-Master` 是面向科研人的 **AI 原生论文知识库**,可嵌入 Claude Code / TRAE / CodeBuddy 等各类 AI 编程工具与 AI 办公工具:把「读一篇论文」这件事沉淀成两种可长期复用的产物——一篇结构化的**中文阅读笔记(博客)**,和一份能直接放映的**单文件 HTML PPT**。两条路径都由 AI Agent 通过 2 个 SKILL 自动完成:你把 PDF 丢进 `pdf-papers/`,它替你写好笔记、做好 PPT,并把它们归档进一个可版本管理、可一键部署到 GitHub Pages 的电子书柜里。
@@ -317,15 +326,6 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 本项目以 **MIT 协议**完全开源,个人和商用均免费,无需事先授权。
 详见 [LICENSE](LICENSE) 文件。
----
-
-## 致谢
-
-- [html-presentation](https://github.com/juanjuanjie/html-presentation) —— 原始 HTML 幻灯片模板与播放引擎参考仓库
-- 博客园「乌漆WhiteMoon」Paper Reading 专栏 —— `lzk-paper-reading` 笔记范式的蒸馏来源
-- [Claude Code](https://claude.com/claude-code) · [CodeBuddy](https://www.codebuddy.ai/) · [TRAE](https://www.trae.ai/) —— AI Agent 平台
-- 所有开源论文作者与开源社区
-
 ---
 
 ## 联系方式

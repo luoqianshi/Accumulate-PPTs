@@ -13,6 +13,15 @@
 
 ---
 
+## Acknowledgements
+
+- [html-presentation](https://github.com/juanjuanjie/html-presentation) — original HTML slide template and playback engine reference
+- The Cnblogs "乌漆WhiteMoon" Paper Reading column — the distillation source of the `lzk-paper-reading` note paradigm ([skill source](https://www.cnblogs.com/linfangnan/p/17636482.html))
+- [Claude Code](https://claude.com/claude-code) · [CodeBuddy](https://www.codebuddy.ai/) · [TRAE](https://www.trae.ai/) — AI Agent platforms
+- All open-source paper authors and the open-source community
+
+---
+
 ## 30-Second Overview
 
 `Paper-Master` is an **AI-native paper knowledge base for researchers**, designed to embed into AI coding tools / AI office tools such as Claude Code / TRAE / CodeBuddy. It turns "reading one paper" into two long-lived, reusable assets — a structured **Chinese reading note (blog post)** and a **single-file HTML deck** you can present directly. Both paths are automated by an AI Agent through 2 SKILLs: drop the PDF into `pdf-papers/`, and it writes the note, builds the deck, and archives both into a version-controllable e-bookshelf you can deploy to GitHub Pages in one click.
@@ -318,15 +327,6 @@ We pursue an 80-point stable, usable experience rather than 100-point perfection
 
 This project is fully open-sourced under the **MIT License**, free for personal and commercial use, no prior authorization required.
 See the [LICENSE](LICENSE) file for details.
-
----
-
-## Acknowledgements
-
-- [html-presentation](https://github.com/juanjuanjie/html-presentation) — original HTML slide template and playback engine reference
-- The Cnblogs "乌漆WhiteMoon" Paper Reading column — the distillation source of the `lzk-paper-reading` note paradigm
-- [Claude Code](https://claude.com/claude-code) · [CodeBuddy](https://www.codebuddy.ai/) · [TRAE](https://www.trae.ai/) — AI Agent platforms
-- All open-source paper authors and the open-source community
 
 ---
 
