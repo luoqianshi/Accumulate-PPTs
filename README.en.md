@@ -306,13 +306,6 @@ We pursue an 80-point stable, usable experience rather than 100-point perfection
 
 ---
 
-## License
-
-This project is fully open-sourced under the **MIT License**, free for personal and commercial use, no prior authorization required.
-See the [LICENSE](LICENSE) file for details.
-
----
-
 ## Contact
 
 Stars, forks, issues, and PRs are welcome. If you want to discuss graduate studies / paper reading / Agent workflows, find me via:
