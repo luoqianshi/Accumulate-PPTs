@@ -16,7 +16,7 @@
 ## Acknowledgements
 
 - [html-presentation](https://github.com/juanjuanjie/html-presentation) — original HTML slide template and playback engine reference
-- The Cnblogs "乌漆WhiteMoon" Paper Reading column — the distillation source of the `lzk-paper-reading` note paradigm ([skill source](https://www.cnblogs.com/linfangnan/p/17636482.html))
+- The Cnblogs ["乌漆WhiteMoon" Paper Reading column](https://www.cnblogs.com/linfangnan/p/17636482.html) — the distillation source of the `lzk-paper-reading` note paradigm
 - [Claude Code](https://claude.com/claude-code) · [CodeBuddy](https://www.codebuddy.ai/) · [TRAE](https://www.trae.ai/) — AI Agent platforms
 - All open-source paper authors and the open-source community
 
