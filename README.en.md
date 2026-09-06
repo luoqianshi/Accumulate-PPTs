@@ -7,7 +7,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Paper-Master/)
-[![Skills](https://img.shields.io/badge/Agent%20Skills-2-purple)](#-skill-matrix)
+[![Skills](https://img.shields.io/badge/Agent%20Skills-3-purple)](#-skill-matrix)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-contact)
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
 
@@ -24,10 +24,11 @@
 
 ## 30-Second Overview
 
-`Paper-Master` is an **AI-native paper knowledge base for researchers**, designed to embed into AI coding tools / AI office tools such as Claude Code / TRAE / CodeBuddy. It turns "reading one paper" into two long-lived, reusable assets — a structured **Chinese reading note (blog post)** and a **single-file HTML deck** you can present directly. Both paths are automated by an AI Agent through 2 SKILLs: drop the PDF into `pdf-papers/`, and it writes the note, builds the deck, and archives both into a version-controllable e-bookshelf you can deploy to GitHub Pages in one click.
+`Paper-Master` is an **AI-native paper knowledge base for researchers**, designed to embed into AI coding tools / AI office tools such as Claude Code / TRAE / CodeBuddy. It turns "reading one paper" into two long-lived, reusable assets — a structured **Chinese reading note (blog post)** and a **single-file HTML deck** you can present directly. The whole flow is automated by an AI Agent through 3 SKILLs: drop the PDF into `pdf-papers/`, and it writes the note, builds the deck — directly from the PDF, or by converting the finished reading note — and archives both into a version-controllable e-bookshelf you can deploy to GitHub Pages in one click.
 
 - Read a paper deeply & distill it into a blog note → `lzk-paper-reading`
-- Turn a paper into a group-meeting / defense deck → `html-paper-slides`
+- Have a PDF and want a group-meeting / defense deck right away → `html-paper-slides`
+- Already have a reading note and want to turn it into a deck → `blog-to-slides`
 
 **The essential difference from generic PPT tools**: what we deliver is not "one-off slides" but **two searchable assets in a knowledge base** — Markdown notes (diff-able, full-text searchable, re-processable) + offline single-file HTML decks (playable via `file://`, embeddable in your homepage). Every paper you read keeps stacking up in this bookshelf.
 
@@ -47,7 +48,7 @@ Open the project in any AI coding tool / AI office tool that supports Skills (Cl
 ```markdown
 Please use the lzk-paper-reading skill (skills\lzk-paper-reading\SKILL.md)
 to write a Chinese paper-reading note for ./pdf-papers/my-paper.pdf.
-The final .md file should be saved in the ingest directory,
+The final .md file should be saved in the paper-blogs directory,
 with extracted figures archived under assets/paper-imgs (one folder per paper title).
 ```
 
@@ -59,23 +60,34 @@ to make an HTML paper-presentation PPT for ./pdf-papers/my-paper.pdf.
 The final file should be saved in the paper-slides directory.
 ```
 
-A few minutes later, a structured Chinese note appears in `ingest/`, or a browser-playable single-file HTML deck appears in `paper-slides/` — the latter is auto-listed in the gallery at `index.html`.
+**Turn an existing note into an HTML deck (no PDF needed):**
+
+```markdown
+Please use the blog-to-slides skill (.trae\skills\blog-to-slides\SKILL.md)
+to make an HTML paper-presentation PPT for paper-blogs/my-paper.md
+(a Chinese reading note). The final file should be saved in the
+paper-slides directory.
+```
+
+A few minutes later, a structured Chinese note appears in `paper-blogs/`, or a browser-playable single-file HTML deck appears in `paper-slides/` — the latter is auto-listed in the gallery at `index.html`.
 
 ---
 
 ## Skill Matrix
 
-The repository ships with 2 SKILLs, covering the two core ways of distilling "reading a paper":
+The repository ships with 3 SKILLs, covering the core ways of distilling "reading a paper":
 
 | SKILL | Typical Scenario | Input | Output | Typical Time |
 |------|------------------|-------|--------|--------------|
-| [`lzk-paper-reading`](skills/lzk-paper-reading/SKILL.md) | Paper deep-reading · Blog note · Knowledge distillation | A PDF / arXiv link / title | Structured Chinese Markdown note (`ingest/`) + figure library (`assets/paper-imgs/`) | 5–12 min |
+| [`lzk-paper-reading`](skills/lzk-paper-reading/SKILL.md) | Paper deep-reading · Blog note · Knowledge distillation | A PDF / arXiv link / title | Structured Chinese Markdown note (`paper-blogs/`) + figure library (`assets/paper-imgs/`) | 5–12 min |
 | [`html-paper-slides`](skills/html-paper-slides/SKILL.md) | Group meeting · Thesis defense · Research progress report | One PDF paper | Single-file HTML deck + thumbnail | 8–15 min |
+| [`blog-to-slides`](.trae/skills/blog-to-slides/SKILL.md) | Note-to-deck · Fast group-meeting draft | A finished Chinese reading note (`paper-blogs/*.md`) + extracted figures | Single-file HTML deck + thumbnail | 5–10 min |
 
 - **`lzk-paper-reading`** produces a Chinese note on a fixed five-section skeleton (Motivation / Contributions / Method / Experiments / Strengths & Innovations) + a paper-info table + a disclaimer. It enforces the formula pattern "lead-in sentence → LaTeX → where-explanation", the "2–3 sentences + 1 figure" experiment rhythm, and gates output with `scripts/new_note.py` (scaffold) and `scripts/check_note.py` (validator).
 - **`html-paper-slides`** generates Apple-style / Notion-style single-file HTML decks: zero external dependencies, `file://` open, keyboard navigation, fade-in animations, CSS-Grid responsive layout. Deploy with one click to GitHub Pages / Vercel / Netlify.
+- **`blog-to-slides`** takes a Chinese reading note produced by `lzk-paper-reading` as its **single source of truth** and reuses the figures already extracted under `assets/paper-imgs/` — no PDF needed: it maps the five-section note onto a single-file HTML deck (Cover → Overview → Introduction → Method → Experiments → Summary & Discussion), typesets formulas with HTML/CSS, references figures by relative path without copying, and stays dependency-free under `file://`.
 
-> Both skills share the same "paper understanding" layer: `pdf_extractor.py` first pulls transparent-background figures from the PDF and archives them per paper title under `assets/paper-imgs/<paper-title>/`; the figures then feed the note flow and the deck flow. One paper can produce "note + deck" in a single pass.
+> `lzk-paper-reading` and `html-paper-slides` share the same "paper understanding" layer: `pdf_extractor.py` first pulls transparent-background figures from the PDF and archives them per paper title under `assets/paper-imgs/<paper-title>/`; the figures then feed the note flow and the deck flow. `blog-to-slides` adds a third path — it consumes the note flow's outputs (note + figures) directly and turns an existing note into a deck without ever touching the PDF. One paper can produce "note + deck" in a single pass.
 
 ---
 
@@ -154,13 +166,13 @@ The 8 decks below were all generated with `html-paper-slides` assisted by an AI 
 
 ---
 
-## Core Workflow: pdf-papers → ingest → paper-slides
+## Core Workflow: pdf-papers → paper-blogs → paper-slides
 
 The repository's differentiator is unifying "paper reading" into one **reproducible, version-controlled** three-stage pipeline, where a single paper can yield both a "note" and a "deck":
 
 ```
 ┌────────────┐    ┌────────────┐    ┌──────────────────────────┐
-│ pdf-papers │ →  │   ingest   │ →  │      paper-slides        │
+│ pdf-papers │ →  │   paper-blogs   │ →  │      paper-slides        │
 │  Original  │    │  Chinese   │    │  ┌────────────────────┐  │
 │  PDFs only │    │  MD notes  │    │  │ single-file deck   │  │
 └────────────┘    └────────────┘    │  └────────────────────┘  │
@@ -171,18 +183,18 @@ The repository's differentiator is unifying "paper reading" into one **reproduci
 ### 1. `pdf-papers/` — Original Paper PDF Archive
 Store only the original papers, in PDF format — no supplementary materials, web links, or temporary excerpts. Don't polish; just keep sources traceable with clear file names (the paper title is recommended), so later steps can build the per-paper figure folder by title.
 
-### 2. `ingest/` — Chinese Reading Notes (MD Blogs)
+### 2. `paper-blogs/` — Chinese Reading Notes (MD Blogs)
 The output layer of the `lzk-paper-reading` skill: each PDF paper maps to one structured Chinese Markdown reading note (blog post), organized on a fixed five-section skeleton + paper-info table + disclaimer, distilling *research problem & motivation, core contributions, method framework, key modules, experimental setup, core metrics, ablation conclusions, visualization evidence, limitations,* and a *narrative thread*. Notes are the knowledge base's *searchable text assets*: diff-able, full-text searchable, re-processable.
 
 Paper figures are centralized: key screenshots extracted by `pdf_extractor.py` go into a folder named after the paper title, under `assets/paper-imgs/<paper-title>/`, shared by both the note flow and the deck flow.
 
 ### 3. `paper-slides/` — HTML Decks
-Produced by `html-paper-slides` — single-file decks built on the reading note in `ingest/` and the figures in `assets/paper-imgs/`, compressed into a 13–22 page presentation structure. Keep a clear chapter flow: **Cover → Abstract → Introduction → Method → Experiments → Ablation → Conclusion & Outlook**, reinforced with cards, flow diagrams, comparison tables, metric highlights, and navigation controls. After ingestion, **always update `slides-manifest.json`** so `index.html` can render title, path, description, kind, and accent correctly. Then run `python skills/html-paper-slides/scripts/generate-thumbnails.py` to generate real cover thumbnails for the gallery cards.
+Produced by `html-paper-slides` (PDF input) or `blog-to-slides` (reading-note input from `paper-blogs/`, no PDF needed) — single-file decks built on the same paper's reading note and the figures in `assets/paper-imgs/`, compressed into a 13–22 page presentation structure. Keep a clear chapter flow: **Cover → Abstract → Introduction → Method → Experiments → Ablation → Conclusion & Outlook**, reinforced with cards, flow diagrams, comparison tables, metric highlights, and navigation controls. After a deck is added, **always update `slides-manifest.json`** so `index.html` can render title, path, description, kind, and accent correctly. Then run `python skills/html-paper-slides/scripts/generate-thumbnails.py` to generate real cover thumbnails for the gallery cards.
 
 ### Quality Checklist
 Before moving to the next stage, confirm:
 - `pdf-papers/` can be traced back to the original source (PDF only, trackable names)
-- Notes in `ingest/` pass the `check_note.py` gate (skeleton / spacing / banned phrases / strengths section / no fabrication) and support an 8–15 page report
+- Notes in `paper-blogs/` pass the `check_note.py` gate (skeleton / spacing / banned phrases / strengths section / no fabrication) and support an 8–15 page report
 - Figures are archived per paper under `assets/paper-imgs/<paper-title>/`
 - The HTML deck opens as a single file, supports keyboard navigation, and has clear visual hierarchy
 - `slides-manifest.json` covers all HTML files in `paper-slides/`
@@ -220,6 +232,13 @@ Paper-Master/
 │       │   └── generate-thumbnails.py  # Generate first-screen thumbnails
 │       └── templates/
 │           └── presentation.html  # Paper-presentation HTML slide template
+├── .trae/skills/         # TRAE skills dir: hosts lzk-paper-reading / html-paper-slides / blog-to-slides
+│   └── blog-to-slides/           # Reading note → HTML deck (no PDF needed)
+│       ├── SKILL.md
+│       ├── scripts/
+│       │   └── generate-thumbnails.py  # Generate first-screen thumbnails
+│       └── templates/
+│           └── presentation.html  # Paper-presentation HTML slide template
 ├── assets/               # Shared static assets
 │   ├── paper-imgs/       # Paper figure library: one folder per paper title
 │   │   └── <paper-title>/ # key figures extracted from that paper
@@ -228,7 +247,7 @@ Paper-Master/
 │   ├── accmulate-ppts.png
 │   └── favicon.png
 ├── pdf-papers/           # Original paper PDFs only (gitignored)
-└── ingest/               # Chinese reading notes (.md blogs) from lzk-paper-reading (gitignored)
+└── paper-blogs/               # Chinese reading notes (.md blogs) from lzk-paper-reading (gitignored)
 ```
 
 ---
@@ -242,7 +261,7 @@ git clone https://github.com/luoqianshi/Paper-Master.git
 cd Paper-Master
 ```
 
-- Delete all `.html` files in `paper-slides/`, all notes in `ingest/`, and all per-paper figure folders in `assets/paper-imgs/` (these are the author's personal knowledge-base data)
+- Delete all `.html` files in `paper-slides/`, all notes in `paper-blogs/`, and all per-paper figure folders in `assets/paper-imgs/` (these are the author's personal knowledge-base data)
 - Clear the `slides` array in `slides-manifest.json`
 - (Optional) Install thumbnail dependencies: `pip install playwright && playwright install chromium`
 - (Optional) Install PDF-extraction dependencies: `pip install pymupdf Pillow`
@@ -256,7 +275,7 @@ Open the project in an AI coding tool / AI office tool such as `Claude Code` / `
 ```markdown
 Please use the lzk-paper-reading skill (skills\lzk-paper-reading\SKILL.md)
 to write a Chinese paper-reading note for [path to your PDF paper].
-The final .md file should be saved in the ingest directory,
+The final .md file should be saved in the paper-blogs directory,
 with extracted figures archived under assets/paper-imgs (one folder per paper title).
 ```
 
@@ -268,7 +287,16 @@ to make an HTML paper-presentation PPT for [path to your PDF paper].
 The final file should be saved in the paper-slides directory.
 ```
 
-> For the same paper, you can run the note flow first to read it deeply, then the deck flow to present it — both share the notes in `ingest/` and the figures in `assets/paper-imgs/`.
+**Note-to-deck scenario (input: an existing reading note, no PDF needed):**
+
+```markdown
+Please use the blog-to-slides skill (.trae\skills\blog-to-slides\SKILL.md)
+to make an HTML paper-presentation PPT for [path to a Chinese reading
+note .md file under paper-blogs/]. The final file should be saved in
+the paper-slides directory.
+```
+
+> For the same paper, you can run the note flow first to read it deeply, then the deck flow to present it (`html-paper-slides` reads the PDF directly, `blog-to-slides` reads the note) — both share the notes in `paper-blogs/` and the figures in `assets/paper-imgs/`.
 
 ### 3. Generate thumbnails and auto-include in the gallery
 
@@ -327,4 +355,4 @@ If this repository helps you, please consider giving a Star to support our conti
 
 ---
 
-*Last Updated: 2026-09-04 · v1.1 · AI-native paper knowledge base for researchers · 2 SKILLs · 8 paper decks collected*
+*Last Updated: 2026-09-06 · v1.2 · AI-native paper knowledge base for researchers · 3 SKILLs · 8 paper decks collected*

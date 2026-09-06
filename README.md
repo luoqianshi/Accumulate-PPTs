@@ -7,7 +7,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-success)](https://luoqianshi.github.io/Paper-Master/)
-[![Skills](https://img.shields.io/badge/Agent%20Skills-2-purple)](#-能力矩阵)
+[![Skills](https://img.shields.io/badge/Agent%20Skills-3-purple)](#-能力矩阵)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-贡献)
 [![Made with HTML](https://img.shields.io/badge/Made%20with-HTML5%20%2B%20Vanilla%20JS-orange)]()
 ---
@@ -23,10 +23,11 @@
 
 ## 30 秒看懂
 
-`Paper-Master` 是面向科研人的 **AI 原生论文知识库**,可嵌入 Claude Code / TRAE / CodeBuddy 等各类 AI 编程工具与 AI 办公工具:把「读一篇论文」这件事沉淀成两种可长期复用的产物——一篇结构化的**中文阅读笔记(博客)**,和一份能直接放映的**单文件 HTML PPT**。两条路径都由 AI Agent 通过 2 个 SKILL 自动完成:你把 PDF 丢进 `pdf-papers/`,它替你写好笔记、做好 PPT,并把它们归档进一个可版本管理、可一键部署到 GitHub Pages 的电子书柜里。
+`Paper-Master` 是面向科研人的 **AI 原生论文知识库**,可嵌入 Claude Code / TRAE / CodeBuddy 等各类 AI 编程工具与 AI 办公工具:把「读一篇论文」这件事沉淀成两种可长期复用的产物——一篇结构化的**中文阅读笔记(博客)**,和一份能直接放映的**单文件 HTML PPT**。整个流程由 AI Agent 通过 3 个 SKILL 自动完成:你把 PDF 丢进 `pdf-papers/`,它替你写好笔记、做好 PPT——PPT 既可直接从 PDF 生成,也能用写好的阅读笔记一键转化——并把它们归档进一个可版本管理、可一键部署到 GitHub Pages 的电子书柜里。
 
 - 想把论文读透、沉淀成博客笔记 → 用 `lzk-paper-reading`
-- 想把论文做成组会 / 答辩汇报 PPT → 用 `html-paper-slides`
+- 手头有 PDF,想直接做成组会 / 答辩汇报 PPT → 用 `html-paper-slides`
+- 已有阅读笔记,想把笔记快速转成汇报 PPT → 用 `blog-to-slides`
 
 **和普通 PPT 工具的本质差异**:这里交付的不是"一次性幻灯片",而是**知识库里的两个可检索资产**——Markdown 笔记(可 diff、可全文搜索、可再加工)+ 离线单文件 HTML PPT(可 `file://` 放映、可嵌入个人主页)。读过的每一篇,都会在这个书柜里越攒越厚。
 
@@ -58,23 +59,33 @@ cd Paper-Master
 最终文件存放在 paper-slides 目录下。
 ```
 
+**已有阅读笔记,转成 HTML 汇报 PPT(无需 PDF):**
+
+```markdown
+请你使用 blog-to-slides 技能(.trae\skills\blog-to-slides\SKILL.md),
+帮我为 paper-blogs/my-paper.md 这篇中文阅读笔记制作一份 HTML 格式的
+论文汇报 PPT,最终文件存放在 paper-slides 目录下。
+```
+
 几分钟后,`paper-blogs/` 下会出现一篇结构化中文阅读笔记,或 `paper-slides/` 下会出现一份可浏览器放映的单文件 HTML 演示文稿,后者还会通过 `index.html` 自动收录进电子书柜画廊。
 
 ---
 
 ## 能力矩阵
 
-仓库内置 2 个 SKILL,覆盖「读论文」最核心的两种沉淀方式:
+仓库内置 3 个 SKILL,覆盖「读论文」最核心的沉淀方式:
 
 | SKILL | 典型场景 | 输入 | 交付物 | 典型耗时 |
 |------|----------|------|--------|----------|
 | [`lzk-paper-reading`](skills/lzk-paper-reading/SKILL.md) | 论文精读 · 博客笔记 · 知识沉淀 | 一篇 PDF / arXiv 链接 / 标题 | 结构化中文 Markdown 笔记(`paper-blogs/`)+ 配图库(`assets/paper-imgs/`) | 5–12 min |
 | [`html-paper-slides`](skills/html-paper-slides/SKILL.md) | 组会汇报 · 答辩演练 · 研究进展展示 | 一篇 PDF 论文 | 单文件 HTML deck + 首屏缩略图 | 8–15 min |
+| [`blog-to-slides`](.trae/skills/blog-to-slides/SKILL.md) | 笔记转 PPT · 组会汇报快速成稿 | 一份已产出的中文阅读笔记(`paper-blogs/*.md`)+ 已提取配图 | 单文件 HTML deck + 首屏缩略图 | 5–10 min |
 
 - **`lzk-paper-reading`** 按固定五节骨架(研究动机 / 文章贡献 / 本文方法 / 实验结果 / 优点和创新点)+ 论文概况表 + 免责声明产出中文笔记,强制执行公式"铺垫句→LaTeX→其中解释"三段式、"2-3 句 + 1 图"实验节奏,并用 `scripts/new_note.py` 起稿、`scripts/check_note.py` 门禁验收。
 - **`html-paper-slides`** 生成苹果风 / Notion 风的单文件 HTML 演示文稿:无外部依赖、可直接 `open file://` 播放、键盘翻页、淡入动画、CSS Grid 响应式排版,适合 GitHub Pages / Vercel / Netlify 一键部署。
+- **`blog-to-slides`** 以 `lzk-paper-reading` 产出的中文阅读笔记为**唯一信息源**,复用 `assets/paper-imgs/` 已提取配图,无需 PDF:把五节骨架笔记映射为「首页 → 概述 → 引言 → 方法 → 实验 → 总结与讨论」的单文件 HTML deck,公式用 HTML/CSS 排版、图片以相对路径直接引用(不复制图片),保持 `file://` 协议下零外部依赖。
 
-> 两个技能共享同一套"论文理解"能力:先用 `pdf_extractor.py` 从 PDF 提取透明背景原图,按论文标题统一归档到 `assets/paper-imgs/<论文标题>/`,再分别喂给笔记流与 PPT 流。同一篇论文,可以一次生成"笔记 + PPT"两份资产。
+> `lzk-paper-reading` 与 `html-paper-slides` 共享同一套"论文理解"能力:先用 `pdf_extractor.py` 从 PDF 提取透明背景原图,按论文标题统一归档到 `assets/paper-imgs/<论文标题>/`,再分别喂给笔记流与 PPT 流;`blog-to-slides` 则补上第三条路径——直接以上一条流产出的笔记与配图为输入,把已有笔记快速转成 PPT,全程无需再读 PDF。同一篇论文,可以一次生成"笔记 + PPT"两份资产。
 
 ---
 
@@ -176,7 +187,7 @@ cd Paper-Master
 论文配图统一入库:由 `pdf_extractor.py` 提取的重要截图,按**论文标题**创建文件夹,存入 `assets/paper-imgs/<论文标题>/`,供笔记与 PPT 两条流共用。
 
 ### 3. `paper-slides/` —— HTML 汇报 PPT
-由 `html-paper-slides` 产出,单文件演示文稿,基于 `paper-blogs/` 中同一篇论文的阅读笔记与 `assets/paper-imgs/` 配图,按分页规划压缩成 13–22 页的讲述结构。章节流为**封面 → 摘要 → 引言 → 方法 → 实验 → 消融 → 结论与展望**,通过卡片、流程图、对比表、指标高亮、导航控件强化阅读节奏。成品入库后,**必须同步更新 `slides-manifest.json`**,确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。随后运行 `python skills/html-paper-slides/scripts/generate-thumbnails.py` 生成首屏缩略图,画廊卡片便会直接展示真实幻灯片封面。
+由 `html-paper-slides`(输入 PDF)或 `blog-to-slides`(输入 `paper-blogs/` 中同一篇论文的阅读笔记,无需 PDF)产出,单文件演示文稿,基于 `paper-blogs/` 中的阅读笔记与 `assets/paper-imgs/` 配图,按分页规划压缩成 13–22 页的讲述结构。章节流为**封面 → 摘要 → 引言 → 方法 → 实验 → 消融 → 结论与展望**,通过卡片、流程图、对比表、指标高亮、导航控件强化阅读节奏。成品入库后,**必须同步更新 `slides-manifest.json`**,确保 `index.html` 画廊可以正确展示标题、路径、简介、类型与主题色。随后运行 `python skills/html-paper-slides/scripts/generate-thumbnails.py` 生成首屏缩略图,画廊卡片便会直接展示真实幻灯片封面。
 
 ### 质量检查清单
 在进入下一阶段前建议确认:
@@ -216,6 +227,13 @@ Paper-Master/
 │       ├── SKILL.md
 │       ├── scripts/
 │       │   ├── pdf_extractor.py   # 从论文 PDF 中提取核心配图(两条流共用)
+│       │   └── generate-thumbnails.py  # 为 HTML 幻灯片生成首屏缩略图
+│       └── templates/
+│           └── presentation.html  # 论文汇报场景专用 HTML 幻灯片模板
+├── .trae/skills/         # TRAE 技能目录:收录 lzk-paper-reading / html-paper-slides / blog-to-slides
+│   └── blog-to-slides/           # 阅读笔记 → HTML 汇报 PPT(输入笔记,无需 PDF)
+│       ├── SKILL.md
+│       ├── scripts/
 │       │   └── generate-thumbnails.py  # 为 HTML 幻灯片生成首屏缩略图
 │       └── templates/
 │           └── presentation.html  # 论文汇报场景专用 HTML 幻灯片模板
@@ -267,7 +285,15 @@ cd Paper-Master
 HTML 格式的 PPT,最终文件存放在 paper-slides 目录下。
 ```
 
-> 同一篇论文,你可以先跑笔记流把内容读透,再跑 PPT 流生成汇报,两条流共享 `paper-blogs/` 里的阅读笔记与 `assets/paper-imgs/` 里的配图。
+**笔记转 PPT 场景(输入已有阅读笔记,无需 PDF):**
+
+```markdown
+请你使用 blog-to-slides 技能(.trae\skills\blog-to-slides\SKILL.md),
+帮我为 [给定 paper-blogs 目录下中文阅读笔记的 .md 文件路径] 制作一份
+HTML 格式的论文汇报 PPT,最终文件存放在 paper-slides 目录下。
+```
+
+> 同一篇论文,你可以先跑笔记流把内容读透,再跑 PPT 流生成汇报(`html-paper-slides` 直接读 PDF,`blog-to-slides` 直接读笔记),两条流共享 `paper-blogs/` 里的阅读笔记与 `assets/paper-imgs/` 里的配图。
 
 ### 3. 生成缩略图,自动收录到电子书柜
 
@@ -326,4 +352,4 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 ---
 
-*Last Updated: 2026-09-04 · v1.1 · 科研人的 AI 原生论文知识库 · 2 个 SKILL · 累计收录论文演示 8 份*
+*Last Updated: 2026-09-06 · v1.2 · 科研人的 AI 原生论文知识库 · 3 个 SKILL · 累计收录论文演示 8 份*
