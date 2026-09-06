@@ -253,6 +253,22 @@
       border-color: rgba(93,112,82,.3);
     }
 
+    /* ── Hero acknowledgements credits ── */
+    .ack-credits a {
+      color: #5D7052;
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-color: rgba(93,112,82,.28);
+      text-underline-offset: 2px;
+      transition: text-decoration-color .25s ease;
+    }
+    .ack-credits a:hover { text-decoration-color: rgba(93,112,82,.85); }
+    .ack-credits code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .92em;
+      color: #78786C;
+    }
+
     /* Viewer / Reader */
     .viewer-open { overflow: hidden; }
     .viewer-shell {
@@ -428,10 +444,28 @@
           <p class="hero-subtext-sway mt-6 max-w-xl mx-auto text-base leading-[1.8] text-grass/90 font-light sm:text-[1.0625rem]">
             ——可放映的网页幻灯片，可沉淀的阅读笔记，一座科研人的 AI 原生论文知识库。
           </p>
-          <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
+          <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center sm:gap-8">
             <a href="#slides" class="inline-flex h-13 items-center justify-center rounded-full bg-moss px-8 text-[15px] font-bold text-mist shadow-[0_2px_16px_-4px_rgba(93,112,82,.4)] transition-all duration-300 hover:shadow-[0_6px_28px_-6px_rgba(93,112,82,.5)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
               PPT 书架
             </a>
+            <div class="ack-credits w-full max-w-[340px] self-center rounded-2xl border border-timber/50 bg-white/45 px-6 py-5 text-center backdrop-blur-sm sm:w-auto sm:max-w-[280px]">
+              <p class="mb-2.5 text-[10px] font-bold uppercase tracking-[.22em] text-moss/80">致谢 · Acknowledgements</p>
+              <ul class="space-y-1.5 text-[11px] leading-[1.75] font-light text-grass/75">
+                <li>
+                  <a href="https://github.com/juanjuanjie/html-presentation" target="_blank" rel="noopener">html-presentation</a>
+                  —— 原始 HTML 幻灯片模板与播放引擎参考仓库
+                </li>
+                <li>
+                  <a href="https://www.cnblogs.com/linfangnan/p/17636482.html" target="_blank" rel="noopener">博客园「乌漆WhiteMoon」Paper Reading 专栏</a>
+                  —— <code>lzk-paper-reading</code> 笔记范式的蒸馏来源
+                </li>
+                <li>
+                  <a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a> · <a href="https://www.trae.cn/" target="_blank" rel="noopener">TRAE</a> · <a href="https://www.codebuddy.cn/" target="_blank" rel="noopener">CodeBuddy</a>
+                  —— AI Agent 平台
+                </li>
+                <li>所有开源论文作者与开源社区</li>
+              </ul>
+            </div>
             <a href="#blogs" class="inline-flex h-13 items-center justify-center rounded-full border border-clay/70 px-8 text-[15px] font-bold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2 active:scale-[0.98]">
               阅读笔记
             </a>

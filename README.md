@@ -292,23 +292,6 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 ---
 
-## 与同类方案对比
-
-| 维度 | PowerPoint | Gamma | Zotero / Note | **Paper-Master** |
-|------|-----------|-------|---------------|---------------------|
-| 上手成本 | 中等(需学排版) | 低(网页拖拽) | 中(手动整理) | **一句话**(对 Agent 说话) |
-| 论文配图自动提取 | 不支持 | 不支持 | 部分(手动) | **支持**(`pdf_extractor.py`) |
-| 结构化中文阅读笔记 | 不支持 | 不支持 | 需手写 | **支持**(`lzk-paper-reading` 五节骨架) |
-| AI Agent 工作流 | 需手动配合 | 半自动 | 不支持 | **原生支持** |
-| 离线单文件 | `.pptx` | 仅网页 | 仅 App 内 | **单文件 HTML** |
-| 版本管理 / 复现 | 一般 | 困难 | 一般 | **Git 友好(笔记 + PPT 均可 diff)** |
-| 部署成本 | Microsoft 365 | 订阅 | 客户端 | **GitHub Pages 免费** |
-| 商用 License | 订阅制 | 订阅制 | 免费/付费 | **MIT 完全开源** |
-
-> **定位金句**:Zotero 帮你存论文,Gamma 帮你做 PPT,Paper-Master 帮你把"读过的一篇论文"同时沉淀成**能检索的笔记**和**能放映的 PPT**,并攒成一个嵌入 AI 编程 / 办公工具、长期生长的科研人 AI 原生知识库。
-
----
-
 ## Limitations · 当前局限
 
 我们追求 80 分的稳定可用,而非 100 分的完美:
