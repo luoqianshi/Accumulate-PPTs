@@ -16,7 +16,7 @@
 ## Acknowledgements
 
 - [html-presentation](https://github.com/juanjuanjie/html-presentation) — original HTML slide template and playback engine reference
-- The Cnblogs "乌漆WhiteMoon" Paper Reading column — the distillation source of the `lzk-paper-reading` note paradigm ([skill source](https://www.cnblogs.com/linfangnan/p/17636482.html))
+- The Cnblogs ["乌漆WhiteMoon" Paper Reading column](https://www.cnblogs.com/linfangnan/p/17636482.html) — the distillation source of the `lzk-paper-reading` note paradigm
 - [Claude Code](https://claude.com/claude-code) · [CodeBuddy](https://www.codebuddy.ai/) · [TRAE](https://www.trae.ai/) — AI Agent platforms
 - All open-source paper authors and the open-source community
 
@@ -303,13 +303,6 @@ We pursue an 80-point stable, usable experience rather than 100-point perfection
 4. **Note paradigm has domain skew**: the `lzk-paper-reading` corpus is mostly tabular-data ML; for vision/detection papers, switch the experiments-section style per `references/research/domain-transfer.md`
 5. **No direct generation from LaTeX source**: if you need LaTeX fidelity, please use Beamer; this repository focuses on "start with PDF / Markdown"
 6. **Thumbnails depend on Playwright**: the first run requires `pip install playwright && playwright install chromium`; headless server environments need `--with-deps`
-
----
-
-## License
-
-This project is fully open-sourced under the **MIT License**, free for personal and commercial use, no prior authorization required.
-See the [LICENSE](LICENSE) file for details.
 
 ---
 

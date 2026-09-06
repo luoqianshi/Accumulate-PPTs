@@ -305,12 +305,6 @@ python skills/html-paper-slides/scripts/generate-thumbnails.py
 
 ---
 
-## License
-
-本项目以 **MIT 协议**完全开源,个人和商用均免费,无需事先授权。
-详见 [LICENSE](LICENSE) 文件。
----
-
 ## 联系方式
 
 欢迎 Star、Fork、提 Issue 与 PR。如希望交流研究生学习 / 论文阅读 / Agent 工作流,可通过以下渠道找到我:
