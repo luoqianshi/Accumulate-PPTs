@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../assets/favicon.png" type="image/png" />
+<title>YOLO-PEFT: Parameter-Efficient Fine-Tuning on YOLO Family</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #ffffff;
+  --text: #000000;
+  --title: #3966A2;
+  --accent: #132843;
+  --dim: #6191D3;
+  --card-bg: #f7f9fc;
+  --border: #e2e8f0;
+  --radius: 12px;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  height: 100vh;
+  cursor: default;
+  user-select: none;
+}
+
+/* ═══════════ SLIDE ENGINE ═══════════ */
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh 7vw;
+  background: var(--bg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(60px) scale(0.97);
+  transition: opacity 0.6s cubic-bezier(.4,0,.2,1),
+              transform 0.6s cubic-bezier(.4,0,.2,1),
+              visibility 0.6s;
+  will-change: opacity, transform;
+}
+
+.slide.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) scale(1) !important;
+}
+
+.slide.exit-up {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-60px) scale(0.97);
+}
+
+/* ═══════════ CONTROLS / PROGRESS / DOTS / HINT ═══════════ */
+.controls {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 8px 20px;
+}
+.controls button {
+  background: none;
+  border: none;
+  color: var(--title);
+  font-size: 18px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+}
+.controls button:hover { background: rgba(57,102,162,0.08); color: var(--accent); }
+.controls button:disabled { opacity: 0.25; cursor: default; }
+.controls button:disabled:hover { background: none; }
+.controls .counter {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  min-width: 52px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+}
+
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--title), var(--accent));
+  z-index: 100;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  border-radius: 0 1px 1px 0;
+}
+
+.dots {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d3dce8;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+.dot.active { background: var(--title); transform: scale(1.6); }
+.dot:hover { background: var(--dim); }
+
+.hint {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #999;
+  z-index: 90;
+  opacity: 1;
+  transition: opacity 1s;
+  pointer-events: none;
+}
+.hint.hidden { opacity: 0; }
+
+/* ═══════════ TYPOGRAPHY ═══════════ */
+.slide-label {
+  font-size: clamp(11px, 1.1vw, 14px);
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-size: clamp(32px, 4.5vw, 58px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text);
+  letter-spacing: -1.5px;
+}
+h1 .highlight { color: var(--title); }
+h1 .accent { color: var(--accent); }
+
+h2 {
+  font-size: clamp(24px, 2.9vw, 40px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--title);
+  letter-spacing: -1px;
+}
+
+h3 {
+  font-size: clamp(16px, 1.7vw, 24px);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: clamp(16px, 1.7vw, 22px);
+  font-weight: 400;
+  color: #555;
+  line-height: 1.55;
+  margin-top: 16px;
+  max-width: 780px;
+}
+
+.body-text {
+  font-size: clamp(14px, 1.4vw, 19px);
+  font-weight: 400;
+  color: #333;
+  line-height: 1.65;
+}
+
+.small-text {
+  font-size: clamp(12px, 1.1vw, 15px);
+  color: #777;
+  line-height: 1.5;
+}
+
+.divider {
+  width: 48px;
+  height: 3px;
+  background: var(--title);
+  border-radius: 2px;
+  margin: 16px 0;
+}
+.divider-accent { background: var(--accent); }
+
+/* ═══════════ BADGE / COVER ═══════════ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(57,102,162,0.08);
+  border: 1px solid rgba(57,102,162,0.15);
+  border-radius: 100px;
+  padding: 8px 16px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--title);
+  letter-spacing: 0.06em;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  width: fit-content;
+}
+.badge .dot-yellow {
+  width: 7px; height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.badge .dot-gray {
+  width: 4px; height: 4px;
+  background: rgba(57,102,162,0.3);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cover-meta {
+  margin-top: 32px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.cover-tag {
+  font-size: clamp(11px, 1vw, 14px);
+  font-weight: 500;
+  color: var(--dim);
+  background: rgba(57,102,162,0.06);
+  border: 1px solid rgba(57,102,162,0.12);
+  padding: 5px 14px;
+  border-radius: 100px;
+}
+
+.contributors {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.contributors .author {
+  font-size: clamp(14px, 1.4vw, 19px);
+  color: #444;
+  font-weight: 500;
+}
+.contributors .affil {
+  font-size: clamp(12px, 1.1vw, 15px);
+  color: #888;
+  font-weight: 400;
+}
+
+/* ═══════════ CARDS ═══════════ */
+.card-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+  flex: 0;
+}
+.card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.card-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(16px, 2vw, 26px);
+  display: flex;
+  flex-direction: column;
+}
+.card .card-num {
+  font-size: clamp(26px, 3vw, 42px);
+  font-weight: 800;
+  color: var(--title);
+  opacity: 0.25;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.card h3 { font-size: clamp(14px, 1.5vw, 20px); margin-bottom: 8px; color: var(--accent); }
+.card .body-text { font-size: clamp(12px, 1.2vw, 16px); }
+
+/* ═══════════ HIGHLIGHT BAR ═══════════ */
+.highlight-bar {
+  background: rgba(57,102,162,0.06);
+  border-left: 3px solid var(--dim);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: clamp(12px, 1.6vw, 20px) clamp(16px, 2vw, 26px);
+  margin-top: 14px;
+}
+.highlight-bar p {
+  font-size: clamp(14px, 1.4vw, 19px);
+  color: var(--text);
+  line-height: 1.6;
+}
+.highlight-bar .accent-word {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ═══════════ BULLET LIST ═══════════ */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 12px;
+}
+.bullet-list li {
+  font-size: clamp(13px, 1.35vw, 18px);
+  color: #333;
+  line-height: 1.65;
+  padding: 4px 0 4px 22px;
+  position: relative;
+}
+.bullet-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--title);
+}
+.bullet-list li .em { color: var(--accent); font-weight: 600; }
+.bullet-list.tight li { padding: 2px 0 2px 20px; line-height: 1.55; font-size: clamp(12px, 1.25vw, 17px); }
+
+/* ═══════════ QUOTE BLOCK ═══════════ */
+.quote-block {
+  border-left: 3px solid var(--accent);
+  padding: 14px 22px;
+  background: rgba(19,40,67,0.03);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 14px 0;
+}
+.quote-block p {
+  font-size: clamp(14px, 1.4vw, 19px);
+  font-weight: 500;
+  color: var(--accent);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ═══════════ VS COLUMNS ═══════════ */
+.vs-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 16px;
+}
+.vs-col {
+  flex: 1;
+  border-radius: var(--radius);
+  padding: clamp(14px, 1.7vw, 22px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.vs-col.left-col { background: rgba(239,68,68,0.04); border: 1px solid rgba(239,68,68,0.15); }
+.vs-col.right-col { background: rgba(34,197,94,0.04); border: 1px solid rgba(34,197,94,0.15); }
+.vs-col .vs-tag {
+  display: inline-block;
+  font-size: clamp(10px, 0.9vw, 12px);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+.vs-col.left-col .vs-tag { background: rgba(239,68,68,0.1); color: #b91c1c; }
+.vs-col.right-col .vs-tag { background: rgba(34,197,94,0.1); color: #15803d; }
+.vs-col h3 { font-size: clamp(15px, 1.5vw, 21px); margin-bottom: 10px; }
+.vs-col ul { list-style: none; padding: 0; }
+.vs-col ul li {
+  font-size: clamp(12px, 1.15vw, 16px);
+  color: #333;
+  line-height: 1.55;
+  padding: 3px 0 3px 20px;
+  position: relative;
+}
+.vs-col ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.vs-col.left-col ul li::before { background: #ef4444; }
+.vs-col.right-col ul li::before { background: #22c55e; }
+
+/* ═══════════ STEPS ═══════════ */
+.steps {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  align-items: stretch;
+}
+.step {
+  flex: 1;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(12px, 1.6vw, 22px) clamp(10px, 1.3vw, 18px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.step .step-num {
+  font-size: clamp(10px, 0.9vw, 13px);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.step h3 { font-size: clamp(12px, 1.25vw, 17px); margin-bottom: 4px; }
+.step .small-text { font-size: clamp(11px, 1vw, 14px); }
+.step-arrow {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  color: #b8c4d4;
+  flex-shrink: 0;
+}
+
+/* ═══════════ FORMULA BOX (深色公式盒) ═══════════ */
+.prompt-box {
+  background: var(--accent);
+  border-radius: var(--radius);
+  padding: clamp(14px, 1.8vw, 24px) clamp(18px, 2.2vw, 30px);
+  margin-top: 16px;
+}
+.prompt-box .prompt-label {
+  font-size: clamp(9px, 0.85vw, 12px);
+  font-weight: 600;
+  color: #9db8d9;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.prompt-box p {
+  font-size: clamp(13px, 1.3vw, 17px);
+  color: #dce6f2;
+  line-height: 1.6;
+}
+.prompt-box p em { color: #ffffff; font-style: normal; font-weight: 600; }
+.prompt-box .formula {
+  font-size: clamp(17px, 2.1vw, 28px);
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.55;
+  letter-spacing: 0.5px;
+}
+.prompt-box .formula i { color: #a8c6ec; font-style: italic; }
+.prompt-box .formula sub, .prompt-box .formula sup { font-size: 62%; }
+.prompt-box .formula-note {
+  font-size: clamp(11px, 1.05vw, 14px);
+  color: #9db8d9;
+  margin-top: 6px;
+}
+.fx-inline {
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.fx-inline i { font-style: italic; }
+.fx-inline sub, .fx-inline sup { font-size: 68%; }
+
+/* ═══════════ GLOW ═══════════ */
+.glow {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.10;
+  pointer-events: none;
+}
+.glow-blue { background: var(--title); }
+.glow-navy { background: var(--accent); }
+.glow.tl { top: -100px; left: -100px; }
+.glow.tr { top: -120px; right: -120px; }
+.glow.br { bottom: -120px; right: -100px; }
+.glow.bl { bottom: -120px; left: -100px; }
+.glow.sm { width: 280px; height: 280px; }
+
+/* ═══════════ FIGURE ═══════════ */
+.figure-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 14px;
+  min-width: 0;
+}
+.figure-box img {
+  max-width: 100%;
+  max-height: 42vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(19,40,67,0.08);
+}
+.figure-caption {
+  text-align: center;
+  font-size: clamp(10px, 0.95vw, 13px);
+  color: #8a94a3;
+  margin-top: 8px;
+  line-height: 1.55;
+  max-width: 920px;
+}
+.figure-caption .cap-em { color: var(--title); font-weight: 600; }
+
+/* 左右分栏（左文右图） */
+.split {
+  display: flex;
+  gap: clamp(20px, 3vw, 44px);
+  align-items: center;
+  margin-top: 16px;
+  min-height: 0;
+}
+.split .col-text { flex: 1.1; min-width: 0; }
+.split .col-fig { flex: 1; min-width: 0; }
+.split .col-text-wide { flex: 1.3; min-width: 0; }
+.split .col-fig-narrow { flex: 0.85; min-width: 0; }
+.split .figure-box { margin-top: 0; }
+.split .figure-caption { margin-top: 10px; }
+
+/* ═══════════ DATA TABLE ═══════════ */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(11px, 1vw, 14px);
+  margin-top: 14px;
+}
+.data-table th {
+  text-align: left;
+  padding: 8px 10px;
+  background: #eaf1f9;
+  color: var(--title);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  font-size: clamp(10px, 0.9vw, 13px);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  color: #333;
+}
+.data-table tbody tr:nth-child(even) { background: #f7f9fc; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .best-cell { font-weight: 700; color: var(--title); white-space: nowrap; }
+.data-table td.task-cell { font-weight: 500; color: var(--accent); }
+.data-table td.sym-cell { font-weight: 600; color: var(--accent); white-space: nowrap; }
+
+/* ═══════════ STAT GRID ═══════════ */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 18px;
+}
+.stat {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(12px, 1.5vw, 20px);
+  text-align: center;
+}
+.stat .stat-num {
+  font-size: clamp(20px, 2.4vw, 34px);
+  font-weight: 800;
+  color: var(--title);
+  line-height: 1.2;
+}
+.stat .stat-num.bad { color: #b91c1c; }
+.stat .stat-num.good { color: #15803d; }
+.stat .stat-label {
+  font-size: clamp(10px, 0.95vw, 13px);
+  color: #777;
+  margin-top: 6px;
+  line-height: 1.45;
+}
+
+/* ═══════════ END CARD ═══════════ */
+.end-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.end-card h2 { font-size: clamp(30px, 3.5vw, 50px); margin-bottom: 12px; }
+.end-card .divider { margin: 16px auto; }
+.end-card .subtitle { max-width: 600px; text-align: center; margin: 0 auto; }
+.end-card .cover-meta { margin-top: 28px; justify-content: center; }
+
+/* ═══════════ ANIMATIONS ═══════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide.active .anim { animation: fadeUp 0.5s ease both; }
+.slide.active .anim:nth-child(1) { animation-delay: 0.08s; }
+.slide.active .anim:nth-child(2) { animation-delay: 0.16s; }
+.slide.active .anim:nth-child(3) { animation-delay: 0.24s; }
+.slide.active .anim:nth-child(4) { animation-delay: 0.32s; }
+.slide.active .anim:nth-child(5) { animation-delay: 0.40s; }
+.slide.active .anim:nth-child(6) { animation-delay: 0.48s; }
+.slide.active .anim:nth-child(7) { animation-delay: 0.56s; }
+.slide.active .anim:nth-child(8) { animation-delay: 0.64s; }
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 900px) {
+  .slide { padding: 4vh 5vw; }
+  .card-grid.cols-2, .card-grid.cols-3, .card-grid.cols-4 { grid-template-columns: 1fr; }
+  .vs-row { flex-direction: column; gap: 12px; }
+  .steps { flex-direction: column; }
+  .step-arrow { transform: rotate(90deg); }
+  .dots { display: none; }
+  .split { flex-direction: column; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="dots" id="dots"></div>
+<div class="hint" id="hint">← → 键盘 / 触摸滑动 翻页</div>
+
+<div class="deck" id="deck">
+
+<!-- ═══════════ Slide 1: 封面 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue tl"></div>
+  <div class="glow glow-navy br"></div>
+  <div class="anim badge">
+    <span class="dot-yellow"></span>
+    Paper Reading · 模型微调
+    <span class="dot-gray"></span>
+    arXiv 2026
+  </div>
+  <div class="anim">
+    <h1>
+      <span class="highlight">YOLO-PEFT:</span><br>
+      <span class="accent">Parameter-Efficient Fine-Tuning</span><br>
+      on YOLO Family
+    </h1>
+  </div>
+  <p class="anim subtitle">把 adapter 放置建模为「训练前可审计、可拒绝」的约束规划问题 —— 面向异构检测器家族的结构感知 PEFT 框架</p>
+  <div class="anim contributors">
+    <span class="author">Xu Lin · Wen Jie Nie · Jinlong Peng · Weifu Fu · Yue Xiao Ma · Xiawu Zheng · Yong Liu</span>
+    <span class="affil">Tencent · Xiamen University（厦门大学）</span>
+  </div>
+  <div class="anim cover-meta">
+    <span class="cover-tag">arXiv:2608.07051</span>
+    <span class="cover-tag">arXiv 预印本 · 2026</span>
+    <span class="cover-tag">论文代码 github.com/Tencent/YOLO-Master</span>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 2: 概述 · 核心贡献 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue tr sm"></div>
+  <div class="anim slide-label">Overview · Contributions</div>
+  <div class="anim"><h2>核心贡献</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <span class="card-num">01</span>
+      <h3>放置 = 可审计的约束规划</h3>
+      <p class="body-text">不再提出新的低秩参数化，而是把 <b>adapter 放置</b>建模为约束规划问题：先解析出带算子角色与语义角色的类型化图，再用<b>有界的十维架构指纹</b>刻画检测器结构</p>
+    </div>
+    <div class="card">
+      <span class="card-num">02</span>
+      <h3>固定顺序约束 + 预算秩分配</h3>
+      <p class="body-text">按固定顺序施加<span class="em">算子有效性、检测语义、图接口、架构策略与预算可行性</span>约束，在幸存目标上求解预算感知的秩分配，并在校准覆盖内估计失败风险</p>
+    </div>
+    <div class="card">
+      <span class="card-num">03</span>
+      <h3>统一运行时 + Refuse 机制</h3>
+      <p class="body-text">被接受的方案落入<b>训练-保存-合并-导出</b>统一运行时；约束无可行交集或校准预测到灾难性退化时返回 <span class="em">Refuse</span>，并把 <b>Full-SFT 作为一等回退结果</b></p>
+    </div>
+    <div class="card">
+      <span class="card-num">04</span>
+      <h3>实验：适配器超越全量微调</h3>
+      <p class="body-text">VOC 官方协议下，规划器选出的 RS-LoRA 在 YOLO11s / YOLO12s 达到 <span class="em">0.7138 / 0.7307</span> mAP50-95，均超过 Full-SFT 的 <span class="em">0.6428 / 0.6662</span>；RT-DETR-L 上七种 LoRA 族配置全部触发校准拒绝</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 3: 研究动机（上） ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Motivation · 1/2</div>
+  <div class="anim"><h2>研究动机：部署需要持续再适应，但 PEFT 迁移有风险</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim highlight-bar">
+    <p>目标检测模型的规模化部署是<span class="accent-word">对同一套预训练权重的持续再适应过程</span>：新的类别词表、领域、传感器、时延目标和硬件后端都要求反复微调——全量微调需要为每个部署变体复制完整的训练状态与检查点，PEFT 因此成为降低适配与分发成本的重要手段</p>
+  </div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>⚠ 异构的检测器计算图</h3>
+      <p class="body-text">现代检测器交错出现<b>稠密卷积、分组卷积与深度可分离卷积</b>，还包含与损失耦合的 <span class="em">DFL 投影</span>、可变形注意力、文本-图像融合与 MoE 路由</p>
+    </div>
+    <div class="card">
+      <h3>⚠ 为同构 Transformer 设计的 PEFT</h3>
+      <p class="body-text">大致同构的 Transformer 栈上的 PEFT 方法<b>并不能安全迁移</b>到异构检测器上：不加甄别地插入 LoRA 可能引发<span class="em">优化失败或严重的 mAP 退化</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 4: 研究动机（下）· 四个缺口 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-navy bl sm"></div>
+  <div class="anim slide-label">Motivation · 2/2</div>
+  <div class="anim"><h2>现有方案留下的四个缺口</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <span class="card-num">G1</span>
+      <h3>无放置前检查</h3>
+      <p class="body-text">通用 PEFT 接口按<b>模块名称或类型</b>选择目标，训练前不检查算子契约、检测语义、图接口与放置风险</p>
+    </div>
+    <div class="card">
+      <span class="card-num">G2</span>
+      <h3>专用方法缺统一抽象</h3>
+      <p class="body-text">SpotPatch、LoRA-Det、YOLO-IOD 等检测器专用方法证明了<b>选择性适配</b>的价值，但放置策略绑定在特定检测器、任务或组件上，缺乏跨越卷积、Transformer、多模态与 MoE 图的统一抽象</p>
+    </div>
+    <div class="card">
+      <span class="card-num">G3</span>
+      <h3>无端到端部署契约</h3>
+      <p class="body-text">放置本身不提供覆盖<b>训练、adapter-only 检查点、合并与 ONNX/TensorRT 导出</b>的契约，部署兼容性依赖方法特定的集成</p>
+    </div>
+    <div class="card">
+      <span class="card-num">G4</span>
+      <h3>无校准机制</h3>
+      <p class="body-text">已有接口没有校准机制在高风险的<b>架构-adapter 组合</b>进入完整训练之前识别它们，失败主要依靠代价高昂的试错来发现</p>
+    </div>
+  </div>
+  <div class="anim quote-block">
+    <p>暂未有工作在异构检测器家族上，给出一个训练前可审计、可拒绝的 adapter 放置规划框架。</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 5: 方法总览（fig1） ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method · Pipeline</div>
+  <div class="anim"><h2>四阶段流水线：解析 → 规划 → 训练 → 部署</h2></div>
+  <div class="anim figure-box"><img src="../assets/paper-imgs/YOLO-PEFT/yolopeft_fig1_overview.png" alt="YOLO-PEFT 系统总览"></div>
+  <div class="anim figure-caption">图中的四列分别对应<span class="cap-em">解析、规划、训练与部署</span>四个阶段；被标记为 <span class="cap-em">unsafe</span> 的深度卷积与 DFL 投影在规划阶段即被排除，无法通过适配器进入训练</div>
+  <div class="anim card-grid cols-4">
+    <div class="card"><h3>① 解析</h3><p class="body-text">解析检测器为带算子角色与语义角色的类型化图</p></div>
+    <div class="card"><h3>② 规划</h3><p class="body-text">求解约束合法的放置，预算感知秩分配</p></div>
+    <div class="card"><h3>③ 训练</h3><p class="body-text">把方案降级到 YOLO 运行时，应用兼容训练策略</p></div>
+    <div class="card"><h3>④ 部署</h3><p class="body-text">合并、移除包装、ONNX/TensorRT 导出</p></div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 6: 问题形式化与放置定义 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue tr sm"></div>
+  <div class="anim slide-label">Method · Formalization</div>
+  <div class="anim"><h2>问题形式化：把放置定义成带约束的决策问题</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim prompt-box">
+    <div class="prompt-label">Placement Definition</div>
+    <p class="formula">π : <i>V</i><sub>cand</sub> → {0} ∪ <i>K</i>&nbsp;&nbsp;&nbsp;&nbsp;<i>P</i>(<i>G</i>, <i>R</i>, <i>B</i>) = (<i>d</i>, π, <i>J</i>),&nbsp;&nbsp;<i>d</i> ∈ {Accept, Refuse}</p>
+    <p class="formula-note">π(i)=0 表示第 i 层保持冻结；π(i)=r ∈ K 表示给该层分配一个秩为 r 的 adapter。G 为检测器对应的有向无环图，R 为 PEFT 请求，B 为 adapter 参数预算，J 为有序拒绝日志</p>
+  </div>
+  <div class="anim split">
+    <div class="col-text">
+      <ul class="bullet-list tight">
+        <li>直观上，合法方案必须同时满足<span class="em">算子有效性、检测头语义安全、图接口兼容、参数预算可行与部署兼容</span>五类约束</li>
+        <li>这一设计使<b>接受与拒绝都可审计</b>：被接受的方案同样记录被排除的模块</li>
+        <li>拒绝则至少返回一个终结原因码，从而区分<span class="em">「不支持」与「预测不准」</span>，避免同一个 Refuse 掩盖不同成因</li>
+      </ul>
+    </div>
+    <div class="col-fig">
+      <table class="data-table">
+        <thead><tr><th>符号</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="sym-cell">G=(V,E)</td><td>检测器对应的有向无环图</td></tr>
+          <tr><td class="sym-cell">R=(p,T,L,K)</td><td>PEFT 请求：变体、可选目标集、可选层区间、允许秩集合</td></tr>
+          <tr><td class="sym-cell">B</td><td>adapter 参数预算</td></tr>
+          <tr><td class="sym-cell">z<sub>i</sub>=(o<sub>i</sub>,s<sub>i</sub>,q<sub>i</sub>,h<sub>i</sub>)</td><td>模块 i 的算子、语义、图接口与部署元数据</td></tr>
+          <tr><td class="sym-cell">φ(G)</td><td>检测器的十维架构指纹</td></tr>
+          <tr><td class="sym-cell">J</td><td>有序拒绝日志</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 7: 角色感知图解析与架构指纹 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method · Parsing &amp; Fingerprint</div>
+  <div class="anim"><h2>角色感知的图解析与十维架构指纹</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>双重角色：同一个 Conv2d 命运不同</h3>
+      <p class="body-text">同一个 Conv2d 可能属于<b>骨干块、特征金字塔融合、回归头或固定的 DFL 投影</b>——仅凭 Python 类型不足以判定它是否为安全目标</p>
+      <ul class="bullet-list tight">
+        <li><span class="em">算子角色</span>＝计算契约：稠密卷积接受普通低秩因子；分组卷积要求组内局部因子；深度卷积不能接受跨通道混合的更新；归一化、激活与未知算子保守处理</li>
+        <li><span class="em">语义角色</span>＝检测器含义：固定 DFL 投影、几何敏感的回归路径与 MoE 路由被排除——微小更新就可能改变校准好的分箱或专家分配</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>有界十维架构指纹 φ(G)</h3>
+      <p class="body-text">支撑架构级风险分析，五个核心维度为：</p>
+      <div class="prompt-box" style="margin-top:10px;">
+        <p class="formula">φ<sub>core</sub> = (φ<sub>attn</sub>, φ<sub>text</sub>, φ<sub>moe</sub>, φ<sub>dw</sub>, φ<sub>conv</sub>)</p>
+        <p class="formula-note">φ<sub>attn</sub> = |attention| / |V<sub>role</sub>| 度量注意力模块相对占比，φ<sub>dw</sub> 同理度量深度卷积占比；其余三维度量文本融合、MoE 专家与稠密/分组卷积占比</p>
+      </div>
+      <ul class="bullet-list tight" style="margin-top:10px;">
+        <li>另外五维编码<b>深度、宽度、头参数比、残差密度与归一化类型</b></li>
+        <li>解析器能识别 <span class="em">YOLO12 Area-Attention、RT-DETR 可变形注意力、YOLO-World 文本融合与 MoE 路由</span>；未知模块一律获得 unknown 角色且不被适配</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 8: 约束接口与硬约束过滤（tab2） ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method · Constraints</div>
+  <div class="anim"><h2>约束接口与硬约束过滤</h2></div>
+  <div class="anim split">
+    <div class="col-text-wide">
+      <ul class="bullet-list tight">
+        <li>按固定顺序施加约束：<span class="em">过滤算子 → 过滤语义 → 应用架构策略 → 分配秩 → 校验可靠性</span>；有效性检查先于效率优化</li>
+        <li>先移除<b>深度卷积、归一化/激活与未知算子</b>；对分组数为 G 的分组卷积，总秩按 <span class="fx-inline"><i>r</i> = Σ<sub>g=1..G</sub> <i>r</i><sub>g</sub></span> 分配，均衡分配取 <span class="fx-inline"><i>r</i><sub>g</sub> = <i>r</i>/G</span>，因此要求 <span class="fx-inline">G ∣ r</span></li>
+        <li>随后移除<b>固定 DFL 投影、MoE 路由与几何敏感的回归路径</b></li>
+        <li>用户指定的目标集 T 与层区间 L 只在强制过滤之后做交集——<span class="em">显式请求无法重新启用不安全模块</span></li>
+      </ul>
+      <div class="anim highlight-bar" style="margin-top:14px;">
+        <p>表中每一行约束都<span class="accent-word">消费特定的元信息、执行确定性的接受规则</span>，失败时返回明确的原因码：分组卷积秩不可整除返回 <b>E-GROUP-RANK</b>、固定 DFL 返回 <b>E-DFL-FIXED</b></p>
+      </div>
+    </div>
+    <div class="col-fig">
+      <div class="figure-box"><img src="../assets/paper-imgs/YOLO-PEFT/yolopeft_tab2_constraints.png" alt="约束接口"></div>
+      <div class="figure-caption">六类约束的正式接口，每类输入元信息、输出接受决策或原因码</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 9: 架构条件策略与端到端示例 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue tl sm"></div>
+  <div class="anim slide-label">Method · Architecture-Conditioned Policy</div>
+  <div class="anim"><h2>架构条件策略与端到端示例</h2></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>家族级策略（只对已校准家族生效）</h3>
+      <ul class="bullet-list tight">
+        <li>RT-DETR-L（<span class="fx-inline">φ<sub>attn</sub> &gt; 0.7</span>）：拒绝校准阈值以下的<b>全部 LoRA 族配置</b></li>
+        <li>注意力占比高的 YOLO12：DoRA 被<b>转换为 LoRA</b> 并启用安全注意力训练</li>
+        <li>YOLO-World：文本融合请求可从 LoRA <b>路由到 LoHa</b></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>模块级规则（保守）</h3>
+      <ul class="bullet-list tight">
+        <li>YOLO12 排除 <span class="fx-inline">attn.{qkv, proj, pe}</span> 与 Area-Attention 内部 MLP 卷积</li>
+        <li>RT-DETR 排除网格初始化的 <span class="fx-inline">sampling_offsets</span> 与零初始化的 <span class="fx-inline">attention_weights</span></li>
+        <li><span class="fx-inline">*.dfl.*</span> 投影<b>永远冻结</b></li>
+      </ul>
+    </div>
+  </div>
+  <div class="anim steps">
+    <div class="step"><span class="step-num">STEP 01</span><h3>算子过滤</h3><p class="small-text">去掉缺乏通道保持适配器的深度卷积宿主</p></div>
+    <div class="step-arrow">→</div>
+    <div class="step"><span class="step-num">STEP 02</span><h3>语义过滤</h3><p class="small-text">去掉 *.dfl.* 与几何敏感的回归节点</p></div>
+    <div class="step-arrow">→</div>
+    <div class="step"><span class="step-num">STEP 03</span><h3>YOLO12 策略</h3><p class="small-text">再去掉注意力内部结构</p></div>
+    <div class="step-arrow">→</div>
+    <div class="step"><span class="step-num">STEP 04</span><h3>图接口检查</h3><p class="small-text">保留形状保持的骨干/颈部宿主</p></div>
+    <div class="step-arrow">→</div>
+    <div class="step"><span class="step-num">STEP 05</span><h3>预算求解</h3><p class="small-text">给幸存稠密卷积分配 r=16 直到预算用尽</p></div>
+  </div>
+  <div class="anim highlight-bar">
+    <p>以 YOLO12s 上的 rank-16 RS-LoRA 请求为例：最终目标集<span class="accent-word">完全由图角色与约束生成，而不是一份隐藏的手写列表</span>——改变用户区间或预算只会改变最后的交集与秩分配，强制排除项始终不变</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 10: 预算化秩分配与可靠性校准 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method · Rank Allocation &amp; Calibration</div>
+  <div class="anim"><h2>预算化秩分配与可靠性校准</h2></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>预算约束下的效用最大化</h3>
+      <div class="prompt-box" style="margin-top:8px;">
+        <p class="formula">max<sub>π</sub> Σ<sub>i∈V<sub>cand</sub></sub> <i>u</i>(i, π(i); p, φ)<br>s.t.&nbsp;&nbsp;Σ<sub>i</sub> <i>c<sub>p</sub></i>(i, π(i)) ≤ <i>B</i></p>
+        <p class="formula-note">c<sub>linear</sub> = br(d<sub>in</sub>+d<sub>out</sub>)；c<sub>conv</sub> = br(C<sub>in</sub>k<sub>h</sub>k<sub>w</sub>+C<sub>out</sub>)；rule-only 模式 u = u<sub>op</sub>+u<sub>sem</sub>+u<sub>range</sub>+u<sub>rank</sub> − λc<sub>p</sub>，效用非正的候选对直接丢弃</p>
+      </div>
+      <p class="body-text" style="margin-top:10px;">例：<span class="fx-inline">C<sub>in</sub>=C<sub>out</sub>=256</span>、3×3 稠密卷积宿主、FP16（b=2）、r=16 → <span class="fx-inline">c<sub>conv</sub> = 2×16×(256×9+256) = 81920 字节</span>。单个卷积宿主的秩成本与输入通道数和核面积线性相关，规划器据此决定把 adapter 装到哪几层</p>
+    </div>
+    <div class="card">
+      <h3>校准模式：预测 ΔmAP</h3>
+      <div class="prompt-box" style="margin-top:8px;">
+        <p class="formula">ΔmAP ≈ β<sub>0</sub> + β<sub>1</sub>φ<sub>attn</sub> + β<sub>2</sub>φ<sub>text</sub> + β<sub>3</sub>φ<sub>dw</sub> + β<sub>4</sub>ξ<sub>p</sub></p>
+        <p class="formula-note">β₀ 为截距，β₁–β₃ 为注意力、文本融合与深度卷积占比系数，ξ<sub>p</sub> 为标准矩阵上拟合的变体系数</p>
+      </div>
+      <ul class="bullet-list tight" style="margin-top:10px;">
+        <li>预测值用于审计，低于 <span class="em">−0.05 灾难阈值</span>时触发拒绝</li>
+        <li><b>rule-only 仍是默认模式</b>；LOVO 评估只覆盖已观测架构，不外推到未见家族</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 11: YOLO 兼容运行时与导出契约 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-navy tr sm"></div>
+  <div class="anim slide-label">Method · Runtime &amp; Export Contract</div>
+  <div class="anim"><h2>YOLO 兼容运行时与导出契约</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>四个不变量</h3>
+      <ul class="bullet-list tight">
+        <li><span class="em">I1</span> 基座检查点加载方式不变</li>
+        <li><span class="em">I2</span> adapter 检查点只存 adapter 张量与运行时元数据</li>
+        <li><span class="em">I3</span> 合并后恢复普通 YOLO 模块</li>
+        <li><span class="em">I4</span> ONNX 与 TensorRT 导出器看到导出兼容的图</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>双后端 · 同一接口与生命周期</h3>
+      <p class="body-text"><b>HuggingFace PEFT</b> 处理 <span class="em">LoRA、RS-LoRA、DoRA、LoHa、LoKr、AdaLoRA、IA3、OFT、BOFT 与 HRA</span> 十种变体；更窄的<b>仓内后端</b>在 PEFT 不可用时提供纯卷积 LoRA</p>
+      <p class="body-text" style="margin-top:6px;">共享生命周期：优化器构建前安装 → 冻结基座训练 → 只保存 adapter 状态 → 加载到兼容基座 → 合并 → 移除包装再导出；<span class="em">adapter 未合并期间卷积融合被禁用</span></p>
+    </div>
+  </div>
+  <div class="anim prompt-box">
+    <div class="prompt-label">Grouped-Conv Merge Equivalence</div>
+    <p class="formula">Δ<i>W</i><sub>g</sub> = <i>B</i><sub>g</sub><i>A</i><sub>g</sub><sup>⊤</sup>&nbsp;&nbsp;重塑到宿主核对应分区&nbsp;&nbsp;→&nbsp;&nbsp;<i>W</i><sub>0</sub> ← <i>W</i><sub>0</sub> + <i>s</i>Δ<i>W</i></p>
+    <p class="formula-note">每个组内更新被独立构造，移除包装后卷积输出与包装模块等价至浮点容差——保证规划器输出的方案在部署侧真实可用</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 12: 训练策略 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Method · Training Strategies</div>
+  <div class="anim"><h2>四个可选训练策略（不改变放置）</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <span class="card-num">S1</span>
+      <h3>层级学习率衰减</h3>
+      <p class="body-text"><span class="fx-inline">η<sub>ℓ</sub> = η<sub>0</sub> ρ<sup>d<sub>ℓ</sub></sup></span>，其中 <span class="fx-inline">ρ = 0.85</span>、d<sub>ℓ</sub> 为归一化深度——使<b>早期特征提取器收到的更新更小</b></p>
+    </div>
+    <div class="card">
+      <span class="card-num">S2</span>
+      <h3>Alpha Warmup</h3>
+      <p class="body-text">LoRA 缩放 <span class="fx-inline">α/r</span> 从零经<b>余弦调度</b>升到目标值，避免满强度的随机 adapter 在训练初期扰动注意力密集的检测器；YOLO12 护栏要求<span class="em">至少三个 warmup epoch</span></p>
+    </div>
+    <div class="card">
+      <span class="card-num">S3</span>
+      <h3>正交正则</h3>
+      <p class="body-text">每隔 N 个 batch 加入 <span class="fx-inline">λ<sub>ortho</sub>(‖A<sup>⊤</sup>A − I‖<sub>F</sub> + ‖B<sup>⊤</sup>B − I‖<sub>F</sub>)</span>，<span class="fx-inline">λ<sub>ortho</sub> = 0.5</span>；A、B 为 LoRA 两个低秩因子，<b>分块计算</b>限制多个 adapter 同时激活时的内存开销</p>
+    </div>
+    <div class="card">
+      <span class="card-num">S4</span>
+      <h3>动态 Dropout</h3>
+      <p class="body-text">前 <span class="em">30%</span> 的 epoch 结束后，把 adapter dropout 率从 <b>0 线性升至 0.15</b>——早期保留梯度信号、后期施加正则</p>
+    </div>
+  </div>
+  <div class="anim highlight-bar">
+    <p>各策略可通过 <span class="accent-word">LoRAConfig 独立启用</span>，完整的分量消融在补充材料中报告</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 13: 实验设置 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments · Setup</div>
+  <div class="anim"><h2>实验设置：官方 VOC 协议 · 五种异构架构</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <h3>数据与训练配置</h3>
+      <ul class="bullet-list tight">
+        <li><span class="em">VOC2007 trainval（5,011 图）+ VOC2012 trainval（11,540 图）</span>组成 16,551 图训练集，官方 VOC2007 test（4,952 图）用于测试</li>
+        <li>核心 s 规模：<b>600-epoch 上限、640×640 输入</b>；14 变体 × 5 架构诊断扫描：300 epoch、320×320</li>
+        <li>PEFT 默认 <span class="fx-inline">r = 16、α = 32</span>、dropout 0.05，并开启 <b>RS-LoRA 缩放</b></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>覆盖五种异构检测器架构</h3>
+      <ul class="bullet-list tight">
+        <li>CNN 检测器：<b>YOLOv8 / YOLO11</b></li>
+        <li>注意力增强：<b>YOLO12</b></li>
+        <li>文本融合：<b>YOLO-World</b></li>
+        <li>Transformer 检测器：<b>RT-DETR-L</b></li>
+        <li>核心配置在 seeds {0, 28, 42} 上复跑<span class="em">样本标准差 ≤ 0.006 mAP50:95 且排序不变</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 14: PEFT 测量矩阵（tab1） ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments · Main Matrix</div>
+  <div class="anim"><h2>PEFT 测量矩阵：适配器整体超越全量微调</h2></div>
+  <div class="anim figure-box"><img src="../assets/paper-imgs/YOLO-PEFT/yolopeft_tab1_matrix.png" alt="PEFT-on-YOLO 测量矩阵"></div>
+  <div class="anim figure-caption">YOLO11s 与 YOLO12s 的 Full-SFT 锚点分别为 <span class="cap-em">0.6428 与 0.6662</span>，规划器选出的 RS-LoRA 达到 <span class="cap-em">0.7138 与 0.7307</span>，最强的 HRA 在 YOLO12s 上达到 <span class="cap-em">0.7453</span></div>
+  <div class="anim stat-grid">
+    <div class="stat"><div class="stat-num good">0.7138</div><div class="stat-label">RS-LoRA @ YOLO11s<br>（Full-SFT 0.6428）</div></div>
+    <div class="stat"><div class="stat-num good">0.7307</div><div class="stat-label">RS-LoRA @ YOLO12s<br>（Full-SFT 0.6662）</div></div>
+    <div class="stat"><div class="stat-num bad">0.7094</div><div class="stat-label">no-rs 消融 @ YOLO12s<br>（掉回无 RS 水平）</div></div>
+    <div class="stat"><div class="stat-num bad">0.6112</div><div class="stat-label">LoRA+DoRA 不带 rs<br>（崩溃）</div></div>
+  </div>
+  <div class="anim highlight-bar">
+    <p><span class="accent-word">RS 缩放是注意力增强架构上防止灾难的关键训练先验</span></p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 15: 架构条件行为与校准拒绝（fig3） ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments · Stability</div>
+  <div class="anim"><h2>灾难率随注意力占比上升 → 校准拒绝</h2></div>
+  <div class="anim figure-box"><img src="../assets/paper-imgs/YOLO-PEFT/yolopeft_fig3_stability.png" alt="架构条件 PEFT 行为热图"></div>
+  <div class="anim figure-caption">五架构诊断扫描热图：红色单元表示灾难配置（Δ &lt; −0.05），<span class="cap-em">灾难率随 φ<sub>attn</sub> 上升</span>——CNN-only 的 YOLO11n 上标准变体 10 次运行零崩溃，YOLO12n 升至 6/7，RT-DETR-L 达到 7/7</div>
+  <div class="anim card-grid cols-3">
+    <div class="card"><h3>排序不稳定</h3><p class="body-text">成对 <b>Kendall-τ</b> 分析显示变体排序跨家族减弱或反转——<span class="em">评估的家族内不存在通用的 PEFT 排序</span></p></div>
+    <div class="card"><h3>YOLO-World 机制</h3><p class="body-text">图像与文本分支<b>梯度范数相差数量级</b>，DoRA 的幅度分解放大失配，15 个 epoch 内损失发散（Δ = −0.292）</p></div>
+    <div class="card"><h3>拒绝的价值</h3><p class="body-text">RT-DETR-L 七个配置全部低于阈值，<span class="em">返回最不坏的 adapter 也只是错误接受</span>——拒绝避免了七次完整的训练尝试</p></div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 16: 效率审计（fig2） ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue tr sm"></div>
+  <div class="anim slide-label">Experiments · Efficiency</div>
+  <div class="anim"><h2>效率审计：显存省 43.9%，时间换 1.72 倍</h2></div>
+  <div class="anim figure-box"><img src="../assets/paper-imgs/YOLO-PEFT/yolopeft_fig2_efficiency.png" alt="受控效率审计"></div>
+  <div class="anim figure-caption">受控 YOLO11 系统审计：LoRA 的峰值训练显存从 <span class="cap-em">28.57 GB 降到 16.03 GB（降低 43.9%）</span>，但训练时长从 <span class="cap-em">118.2 s 增加到 203.8 s（1.72 倍）</span>，其他 PEFT 变体也都慢于 Full-SFT</div>
+  <div class="anim highlight-bar">
+    <p>显存的节省以<span class="accent-word">优化时间</span>换来——论文据此把<span class="accent-word">显存、时间与合并/未合并行为</span>作为三个独立资源轴分开报告</p>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 17: 规划器约束消融（tab11） ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments · Ablation</div>
+  <div class="anim"><h2>规划器约束消融与秩敏感性</h2></div>
+  <div class="anim split">
+    <div class="col-fig">
+      <div class="figure-box"><img src="../assets/paper-imgs/YOLO-PEFT/yolopeft_tab11_ablation.png" alt="规划器约束消融"></div>
+      <div class="figure-caption">YOLO12s 上的组件消融：无约束基线 <span class="cap-em">0.6900</span> → 加入算子有效性过滤 <span class="cap-em">0.7094</span> → 再加入检测头语义排除跃升到 <span class="cap-em">0.7307</span></div>
+    </div>
+    <div class="col-text">
+      <ul class="bullet-list">
+        <li><b>语义守卫是稳定性的主要驱动</b>，而非单纯的工程护栏</li>
+        <li>秩敏感性：<span class="fx-inline">r = 8 / 16 / 32</span> 对应 <span class="em">0.7288 / 0.7307 / 0.7363</span></li>
+        <li><span class="fx-inline">r = 32</span> 收益递减且<span class="em">参数与计算开销明显增大</span></li>
+        <li><span class="fx-inline">r = 16</span> 是实际的 <b>Pareto 默认点</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 18: 结构感知放置对比（tab3） ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Experiments · Placement</div>
+  <div class="anim"><h2>结构感知放置 vs 语言模型继承默认</h2></div>
+  <div class="anim split">
+    <div class="col-text">
+      <ul class="bullet-list">
+        <li>同一骨干与协议下，规划器方案在 YOLO11s 与 YOLO12s 上分别带来 <span class="em">+0.0659 与 +0.1195</span> 的增益</li>
+        <li>RT-DETR-L 上则从<b>灾难性的 LoRA 扫描</b>转为 <span class="em">REFUSE 回退 Full-SFT</span></li>
+        <li>补充的 MoE 压力测试：禁用专家感知规划后，<b>HRA 达到 0.7454</b> mAP50:95，超过 Full-SFT 的 0.6891；而 <span class="em">BOFT 与 OFT 未能产出指标即失败</span></li>
+      </ul>
+      <div class="anim stat-grid" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="stat"><div class="stat-num good">+0.0659</div><div class="stat-label">YOLO11s 增益</div></div>
+        <div class="stat"><div class="stat-num good">+0.1195</div><div class="stat-label">YOLO12s 增益</div></div>
+        <div class="stat"><div class="stat-num">REFUSE</div><div class="stat-label">RT-DETR-L 回退 Full-SFT</div></div>
+      </div>
+    </div>
+    <div class="col-fig">
+      <div class="figure-box"><img src="../assets/paper-imgs/YOLO-PEFT/yolopeft_tab3_placement.png" alt="结构感知放置对比"></div>
+      <div class="figure-caption">放置策略对比：结构感知规划 vs 直接沿用语言模型继承的默认目标层</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 19: 总结 · 优点与创新点 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-navy tr sm"></div>
+  <div class="anim slide-label">Summary · Strengths</div>
+  <div class="anim"><h2>优点与创新点</h2></div>
+  <div class="anim divider"></div>
+  <div class="anim card-grid cols-3">
+    <div class="card">
+      <span class="card-num">01</span>
+      <h3>可审计的约束规划</h3>
+      <p class="body-text">把 adapter 放置从隐藏的手写目标列表改造成<b>可审计的约束规划问题</b>：每次排除都有明确原因码与有序拒绝日志，能够区分<span class="em">「不支持」与「预测不准」</span>两种拒绝，工程上可追溯、可复核</p>
+    </div>
+    <div class="card">
+      <span class="card-num">02</span>
+      <h3>Refuse 是一等结果</h3>
+      <p class="body-text">把 Refuse 提升为一等的规划结果并配套<b>可靠性校准</b>：在 RT-DETR-L 七个全部灾难性的配置上避免了七次无效的完整训练；实验覆盖 <span class="em">14 个 PEFT 变体与 5 个异构检测器架构</span>，说服力强</p>
+    </div>
+    <div class="card">
+      <span class="card-num">03</span>
+      <h3>端到端契约真正落地</h3>
+      <p class="body-text">训练-保存-合并-导出的端到端契约配上<b>分组卷积合并等价性证明</b>：合并后计算图恢复基座算子开销，ONNX/TensorRT 导出校验通过，受控审计下<span class="em">峰值训练显存降低 43.9%</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 20: 局限与批判性讨论 ═══════════ -->
+<section class="slide">
+  <div class="anim slide-label">Discussion · Limitations</div>
+  <div class="anim"><h2>局限与批判性讨论</h2></div>
+  <div class="anim divider divider-accent"></div>
+  <div class="anim card-grid cols-2">
+    <div class="card">
+      <span class="card-num">01</span>
+      <h3>证据限于 VOC 协议</h3>
+      <p class="body-text">全部核心证据限于官方 VOC07+12 → VOC07 test 协议，论文明确承认<b>不支持关于 COCO、域移、少样本或方差的任何结论</b>，跨域泛化仍是待验证问题</p>
+    </div>
+    <div class="card">
+      <span class="card-num">02</span>
+      <h3>架构级误拒/误受率无法给出</h3>
+      <p class="body-text">没有任何检测器家族被留出，「基于该矩阵无法计算未见架构上的真实误拒率」；variant 级 LOVO（准确率 86.7%、F1 0.850）<b>不等于架构级验证</b></p>
+    </div>
+    <div class="card">
+      <span class="card-num">03</span>
+      <h3>校准不外推</h3>
+      <p class="body-text">可靠性校准是在标准矩阵上拟合的<b>线性预测式</b>，覆盖外只能返回 unsupported 而非外推安全保证；对全新检测器家族的拒绝验证被列为开放问题</p>
+    </div>
+    <div class="card">
+      <span class="card-num">04</span>
+      <h3>效率交换与兼容性边界</h3>
+      <p class="body-text">LoRA 省下 43.9% 峰值显存的同时<b>训练耗时变为 1.72 倍</b>；MoE 压力测试中 BOFT 与 OFT 直接失败且无指标，兼容性并不覆盖全部变体。另：主矩阵为 seed-0 结果（多种子 std ≤0.006），自述「不是配对显著性检验」，结论应理解为受控相对比较</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ Slide 21: 结尾 ═══════════ -->
+<section class="slide">
+  <div class="glow glow-blue tl"></div>
+  <div class="glow glow-navy br"></div>
+  <div class="end-card">
+    <div class="anim">
+      <h2><span class="highlight">谢谢观看</span></h2>
+    </div>
+    <div class="anim divider divider-accent"></div>
+    <div class="anim subtitle">
+      Questions &amp; Discussion
+    </div>
+    <div class="anim cover-meta">
+      <span class="cover-tag">arXiv:2608.07051</span>
+      <span class="cover-tag">github.com/Tencent/YOLO-Master</span>
+    </div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- ═══════════ CONTROLS（隐藏，仅保留键盘/触摸翻页） ═══════════ -->
+<div class="controls" style="display:none;">
+  <button id="prevBtn" title="上一页">‹</button>
+  <span class="counter" id="counter">01 / 21</span>
+  <button id="nextBtn" title="下一页">›</button>
+</div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const progress = document.getElementById('progress');
+  const dotsWrap = document.getElementById('dots');
+  const hint = document.getElementById('hint');
+
+  // Build dots
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+  }
+  const dots = dotsWrap.querySelectorAll('.dot');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total || idx === current) return;
+    const prev = slides[current];
+    const next = slides[idx];
+
+    prev.classList.remove('active');
+    prev.classList.add('exit-up');
+
+    requestAnimationFrame(() => {
+      next.classList.remove('exit-up');
+      next.classList.add('active');
+    });
+
+    setTimeout(() => {
+      prev.classList.remove('exit-up');
+    }, 700);
+
+    dots[current].classList.remove('active');
+    current = idx;
+    dots[current].classList.add('active');
+    counter.textContent = pad(current + 1) + ' / ' + pad(total);
+    progress.style.width = ((current + 1) / total * 100) + '%';
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  slides[0].classList.add('active');
+  prevBtn.disabled = true;
+  progress.style.width = (1 / total * 100) + '%';
+
+  prevBtn.addEventListener('click', prev);
+  nextBtn.addEventListener('click', next);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+  });
+
+  // Touch / swipe
+  let touchX = 0, touchY = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchX = e.changedTouches[0].screenX;
+    touchY = e.changedTouches[0].screenY;
+  }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].screenX - touchX;
+    const dy = e.changedTouches[0].screenY - touchY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      dx < 0 ? next() : prev();
+    }
+  }, { passive: true });
+
+  function hideHint() { hint.classList.add('hidden'); }
+  document.addEventListener('keydown', hideHint, { once: true });
+  document.addEventListener('click', hideHint, { once: true });
+  setTimeout(() => hideHint(), 5000);
+})();
+</script>
+
+</body>
+</html>

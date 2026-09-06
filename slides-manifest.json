@@ -64,6 +64,14 @@
       "kind": "期刊/会议",
       "accent": "rgba(57,102,162,.18)",
       "thumbnail": "assets/thumbnails/DySample_Learning_to_Upsample.png"
+    },
+    {
+      "title": "YOLO-PEFT: Parameter-Efficient Fine-Tuning on YOLO Family",
+      "file": "paper-slides/YOLO-PEFT.html",
+      "description": "arXiv 2026 论文演示，聚焦把 adapter 放置建模为可审计的约束规划问题：角色感知图解析与十维架构指纹、固定顺序硬约束过滤与预算化秩分配、校准拒绝机制（Refuse 回退 Full-SFT）与训练-保存-合并-导出端到端契约。",
+      "kind": "arXiv 预印本",
+      "accent": "rgba(57,102,162,.18)",
+      "thumbnail": "assets/thumbnails/YOLO-PEFT.png"
     }
   ]
 }
