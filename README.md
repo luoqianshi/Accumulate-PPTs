@@ -15,8 +15,8 @@
 ## 致谢
 
 - [html-presentation](https://github.com/juanjuanjie/html-presentation) —— 原始 HTML 幻灯片模板与播放引擎参考仓库
-- 博客园「乌漆WhiteMoon」Paper Reading 专栏 —— `lzk-paper-reading` 笔记范式的蒸馏来源([技能来源](https://www.cnblogs.com/linfangnan/p/17636482.html))
-- [Claude Code](https://claude.com/claude-code) · [CodeBuddy](https://www.codebuddy.ai/) · [TRAE](https://www.trae.ai/) —— AI Agent 平台
+- [博客园「乌漆WhiteMoon」Paper Reading 专栏](https://www.cnblogs.com/linfangnan/p/17636482.html) —— `lzk-paper-reading` 笔记范式的蒸馏来源
+- [Claude Code](https://claude.com/claude-code) · [TRAE](https://www.trae.cn/) · [CodeBuddy](https://www.codebuddy.cn/) —— AI Agent 平台
 - 所有开源论文作者与开源社区
 
 ---
