@@ -293,23 +293,6 @@ After that, the new HTML PPT will appear in the `index.html` gallery with its **
 
 ---
 
-## Comparison with Alternatives
-
-| Dimension | PowerPoint | Gamma | Zotero / Note | **Paper-Master** |
-|-----------|-----------|-------|---------------|---------------------|
-| Onboarding cost | Medium (need to learn layout) | Low (web drag-and-drop) | Medium (manual organizing) | **One sentence** (talk to the Agent) |
-| Automatic paper figure extraction | Not supported | Not supported | Partial (manual) | **Supported** (`pdf_extractor.py`) |
-| Structured Chinese reading note | Not supported | Not supported | Hand-written | **Supported** (`lzk-paper-reading` five-section skeleton) |
-| AI Agent workflow | Manual coordination | Semi-auto | Not supported | **Native support** |
-| Offline single file | `.pptx` | Web only | App only | **Single-file HTML** |
-| Version control / reproducibility | Average | Difficult | Average | **Git-friendly (note + deck both diff-able)** |
-| Deployment cost | Microsoft 365 | Subscription | Client | **GitHub Pages free** |
-| Commercial License | Subscription | Subscription | Free/Paid | **MIT open source** |
-
-> **Positioning tagline**: Zotero stores your papers, Gamma makes your slides, Paper-Master turns "a paper you've read" into **both a searchable note and a playable deck**, and stacks them into a long-growing, AI-native research knowledge base that embeds into your AI coding / office tools.
-
----
-
 ## Limitations
 
 We pursue an 80-point stable, usable experience rather than 100-point perfection:
