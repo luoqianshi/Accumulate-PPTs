@@ -253,7 +253,7 @@
       border-color: rgba(93,112,82,.3);
     }
 
-    /* ── Hero acknowledgements credits ── */
+    /* ── Colophon acknowledgements (home footer) ── */
     .ack-credits a {
       color: #5D7052;
       font-weight: 600;
@@ -267,6 +267,34 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: .92em;
       color: #78786C;
+    }
+    /* Hairline divider with a centered leaf ornament */
+    .colophon-rule {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: rgba(93,112,82,.5);
+    }
+    .colophon-rule::before,
+    .colophon-rule::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, transparent, rgba(222,216,207,.9), transparent);
+    }
+    /* Acknowledgement items flow inline, separated by a middot */
+    .colophon-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      column-gap: .5rem;
+      row-gap: .35rem;
+    }
+    .colophon-list > li { display: inline; }
+    .colophon-list > li + li::before {
+      content: "·";
+      margin-right: .5rem;
+      color: rgba(120,120,108,.5);
     }
 
     /* Viewer / Reader */
@@ -448,24 +476,6 @@
             <a href="#slides" class="inline-flex h-13 items-center justify-center rounded-full bg-moss px-8 text-[15px] font-bold text-mist shadow-[0_2px_16px_-4px_rgba(93,112,82,.4)] transition-all duration-300 hover:shadow-[0_6px_28px_-6px_rgba(93,112,82,.5)] hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/50 focus-visible:ring-offset-2 active:translate-y-0">
               PPT 书架
             </a>
-            <div class="ack-credits w-full max-w-[340px] self-center rounded-2xl border border-timber/50 bg-white/45 px-6 py-5 text-center backdrop-blur-sm sm:w-auto sm:max-w-[280px]">
-              <p class="mb-2.5 text-[10px] font-bold uppercase tracking-[.22em] text-moss/80">致谢 · Acknowledgements</p>
-              <ul class="space-y-1.5 text-[11px] leading-[1.75] font-light text-grass/75">
-                <li>
-                  <a href="https://github.com/juanjuanjie/html-presentation" target="_blank" rel="noopener">html-presentation</a>
-                  —— 原始 HTML 幻灯片模板与播放引擎参考仓库
-                </li>
-                <li>
-                  <a href="https://www.cnblogs.com/linfangnan/p/17636482.html" target="_blank" rel="noopener">博客园「乌漆WhiteMoon」Paper Reading 专栏</a>
-                  —— <code>lzk-paper-reading</code> 笔记范式的蒸馏来源
-                </li>
-                <li>
-                  <a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a> · <a href="https://www.trae.cn/" target="_blank" rel="noopener">TRAE</a> · <a href="https://www.codebuddy.cn/" target="_blank" rel="noopener">CodeBuddy</a>
-                  —— AI Agent 平台
-                </li>
-                <li>所有开源论文作者与开源社区</li>
-              </ul>
-            </div>
             <a href="#blogs" class="inline-flex h-13 items-center justify-center rounded-full border border-clay/70 px-8 text-[15px] font-bold text-clay transition-all duration-300 hover:bg-clay hover:text-white hover:border-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-clay/50 focus-visible:ring-offset-2 active:scale-[0.98]">
               阅读笔记
             </a>
@@ -536,6 +546,20 @@
           </article>
         </div>
       </section>
+
+      <!-- Colophon: Acknowledgements -->
+      <footer class="ack-credits relative mx-auto w-[min(56rem,calc(100%-2rem))] pb-20 pt-4 text-center">
+        <div class="colophon-rule mb-8" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        </div>
+        <p class="text-[10px] font-bold uppercase tracking-[.22em] text-moss/80">致谢 · Acknowledgements</p>
+        <ul class="colophon-list mt-4 text-[12px] leading-[1.8] font-light text-grass/70">
+          <li>幻灯片模板与播放引擎参考 <a href="https://github.com/juanjuanjie/html-presentation" target="_blank" rel="noopener">html-presentation</a></li>
+          <li>笔记范式蒸馏自博客园<a href="https://www.cnblogs.com/linfangnan/p/17636482.html" target="_blank" rel="noopener">「乌漆WhiteMoon」Paper Reading 专栏</a>（<code>lzk-paper-reading</code>）</li>
+          <li>构建于 <a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a> · <a href="https://www.trae.cn/" target="_blank" rel="noopener">TRAE</a> · <a href="https://www.codebuddy.cn/" target="_blank" rel="noopener">CodeBuddy</a> 等 AI Agent 平台</li>
+          <li>以及所有开源论文作者与开源社区</li>
+        </ul>
+      </footer>
     </section>
 
     <!-- ══ View: Slides Gallery ══ -->
